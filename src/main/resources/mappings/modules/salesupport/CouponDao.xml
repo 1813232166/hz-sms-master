@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.salesupport.dao.CouponDao">
+    
+    <sql id="tYxCouponColumns">
+        a.id AS "id",
+        a.name AS "name",
+        a.coupon_type_id AS "couponTypeId",
+        a.face_value AS "faceValue",
+        a.effective_days AS "effectiveDays",
+        a.begin_time AS "beginTime",
+        a.end_time AS "endTime",
+        a.loan_amount_min AS "loanAmountMin",
+        a.loan_amount_sum AS "loanAmountSum",
+        a.loan_term_list AS "loanTermList",
+        a.loan_channel_list AS "loanChannelList",
+        a.coupon_count AS "couponCount",
+        a.is_send AS "isSend",
+        a.createdate AS "createdate",
+        a.createby AS "createby",
+        a.updatedate AS "updatedate",
+        a.updateby AS "updateby",
+        a.remarks AS "remarks",
+        a.delflag AS "delflag",
+        a.status AS "status",
+        a.audit_time AS "auditTime"
+    </sql>
+    
+    <sql id="tYxCouponJoins">
+    </sql>
+    
+    <select id="get" resultType="TYxCoupon">
+        SELECT 
+            <include refid="tYxCouponColumns"/>
+        FROM t_yx_coupon a
+        <include refid="tYxCouponJoins"/>
+        WHERE a.id = #{id}
+    </select>
+    
+    <!-- 优惠券列表 -->
+    <select id="findCouponManageList" resultType="TYxCoupon">
+        SELECT 
+            <include refid="tYxCouponColumns"/>
+        FROM t_yx_coupon a 
+        <include refid="tYxCouponJoins"/>
+        <where>
+            a.delflag = '0'
+            <if test="couponTypeId != null and couponTypeId != ''">
+                AND a.coupon_type_id = #{couponTypeId}
+            </if>
+             <if test="startCreateDate!=null and startCreateDate!= ''">			
+			 AND DATE_FORMAT(a.`createdate`, '%Y-%m-%d')  <![CDATA[ >= ]]>  #{startCreateDate}
+		    </if>
+
+		   <if test="endCreateDate!=null  and endCreateDate!= ''">
+				AND DATE_FORMAT(a.`createdate`, '%Y-%m-%d')  <![CDATA[ <= ]]> #{endCreateDate}
+			</if>
+		
+            <if test="status != null and status != '' and  status != '5'">
+                AND a.status = #{status}
+            </if>
+             <if test="status == '5'">
+                AND a.end_time <![CDATA[ < ]]> NOW()
+            </if>
+        </where>
+         <choose>
+        
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+              ORDER BY a.createdate desc ,${page.orderBy}
+            </when>
+            <otherwise>
+             ORDER BY a.createdate desc 
+            </otherwise>
+        </choose> 
+    </select>
+
+    
+        <!-- 审核之后的优惠券列表 -->
+    <select id="authSuccessList" resultType="TYxCoupon">
+		SELECT  
+		<include refid="tYxCouponColumns"/> 
+		FROM t_yx_coupon  a
+		where  1=1
+		and    a.`status` ='4'
+		
+		ORDER BY  a.`createdate` DESC 
+
+    </select>
+    
+    
+        <!-- 优惠券列表 -->
+    <select id="getCouponListByIds" resultType="java.util.HashMap"  parameterType="java.lang.String" >
+	SELECT  
+	
+	CASE t.`coupon_type_id` 
+	WHEN 'fullDown'  THEN '满减券' 
+	WHEN 'cash'  THEN '现金券' 
+	 WHEN 'interest'  THEN '增益券' 
+	 WHEN 'cashBack'  THEN '返现券' 
+	END AS couponTypeId ,
+	
+	CONCAT(t.face_value,'元') AS faceValue ,
+	CONCAT('有效期',t.effective_days ,'天') AS effectiveDays,
+	CONCAT('出借金额限制',loan_amount_min ,'元')  AS loanAmountMin,
+	CONCAT('出借期限限制',t.loan_term_list) AS loanTermList
+	
+	
+	FROM  t_yx_coupon  t 
+	WHERE  1=1
+	and  t.id IN ( ${ids} )  
+ 
+   </select>
+    
+    
+    
+        
+        <!-- 根据活动id查询优惠券列表 -->
+    <select id="getCouponListByMainId" resultType="java.util.HashMap"  parameterType="java.lang.String" >
+SELECT   	
+CASE t.`coupon_type_id` 
+	WHEN 'fullDown'  THEN '满减券' 
+	WHEN 'cash'  THEN '现金券' 
+	 WHEN 'interest'  THEN '增益券' 
+	 WHEN 'cashBack'  THEN '返现券' 
+	END AS couponTypeId ,
+	
+	t.face_value AS faceValue ,
+	IFNULL(t.effective_days,'')  AS effectiveDays,
+	IFNULL(t.begin_time,'') AS beginTime,
+	IFNULL(t.end_time,'')  AS endTime,
+
+	t.loan_amount_min  AS loanAmountMin,
+	t.loan_term_list AS loanTermList,
+	t.loan_channel_list AS loanChannelList
+	FROM t_yx_coupon    t
+LEFT JOIN t_yx_coupon_relation  r  ON r.`coupon_id`  = t.`id`  
+LEFT JOIN   t_yx_activityinfo a ON a.`id` =r.`main_id`
+
+	WHERE  1=1
+	AND r.`main_id` =#{mainId}
+ 	AND  t.status  ='4' 
+
+   </select>
+    
+    
+    
+ <!-- 根据活动id查询优惠券列表 -->
+  <select id="getCouponInfolistByMainId" resultType="java.util.HashMap"  parameterType="java.lang.String" >
+SELECT   	
+ t.id as couponId
+FROM t_yx_coupon    t
+LEFT JOIN t_yx_coupon_relation  r  ON r.`coupon_id`  = t.`id`  
+LEFT JOIN   t_yx_activityinfo a ON a.`id` =r.`main_id`
+
+WHERE  r.`main_id` =#{mainId}
+ </select>
+    
+    
+    <select id="findAllList" resultType="TYxCoupon"></select>
+    <!-- 审核列表  -->
+    <select id="findCouponAuditList" resultType="TYxCoupon">
+
+        SELECT 
+            <include refid="tYxCouponColumns"/><!-- ,b.audit_time AS 'auditTime' -->
+        FROM t_yx_coupon a  <!-- INNER JOIN t_yx_coupon_audit_record b ON a.id=b.main_id --><!-- 数据库里加了审核时间audit_time -->
+        <include refid="tYxCouponJoins"/>
+        <where>
+            a.delflag = '0' AND a.status IN('1','2','3','4','5')
+           <if test="couponTypeId != null and couponTypeId != '' ">
+                AND a.coupon_type_id = #{couponTypeId}
+            </if>
+             <if test="startCreateDate!=null and startCreateDate!= ''">			
+			 AND DATE_FORMAT(a.`createdate`, '%Y-%m-%d')  <![CDATA[ >= ]]>  #{startCreateDate}
+		    </if>
+
+		   <if test="endCreateDate!=null  and endCreateDate!= ''">
+				AND DATE_FORMAT(a.`createdate`, '%Y-%m-%d')  <![CDATA[ <= ]]> #{endCreateDate}
+			</if>
+            <if test="status != null and status != '' and  status != '5'">
+                AND a.status = #{status}
+            </if>
+             <if test="status == '5'">
+                AND a.end_time <![CDATA[ < ]]> NOW()
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY a.createdate desc ,${page.orderBy} 
+            </when>
+            <otherwise>
+            ORDER BY a.createdate desc
+            </otherwise>
+        </choose>
+    </select>
+    <!-- 已通过审核的优惠券  -->
+    <select id="findPastAudit" resultType="TYxCoupon">
+        SELECT 
+            <include refid="tYxCouponColumns"/>
+        FROM t_yx_coupon a
+         WHERE  a.delflag = '0' AND a.status = '4'  AND DATE_ADD(a.end_time,INTERVAL a.effective_days DAY)>NOW()
+    </select>
+    <!-- 新建优惠券  -->
+    <insert id="insert">
+        INSERT INTO t_yx_coupon(id,name,coupon_type_id,face_value,effective_days,begin_time,end_time,
+         <if test="loanAmountMin!= null">
+        loan_amount_min,
+        </if>
+        <if test="loanAmountSum!= null">
+         loan_amount_sum,
+         </if>
+                            loan_term_list,loan_channel_list,
+                            <if test="couponCount!= null">
+                            coupon_count,
+                            </if>
+                            is_send,createdate,createby,
+                            updatedate,updateby,remarks,delflag,status) 
+        VALUES (#{id},#{name},#{couponTypeId},#{faceValue},#{effectiveDays},#{beginTime},#{endTime},
+                <if test="loanAmountMin!= null">
+                #{loanAmountMin},
+                   </if>
+                <if test="loanAmountSum!= null">
+                #{loanAmountSum},
+                   </if>
+                #{loanTermList},
+                #{loanChannelList},
+                <if test="couponCount!= null">
+                #{couponCount},
+                 </if>
+                #{isSend},#{createdate},#{createby},
+                #{updatedate},#{updateby},#{remarks},#{delflag},#{status})
+    </insert>
+    <!-- 修改优惠券 -->
+    <update id="update">
+        UPDATE t_yx_coupon SET  
+      
+            name = #{name},
+          
+            coupon_type_id = #{couponTypeId},
+              
+            face_value = #{faceValue},
+              
+            effective_days = #{effectiveDays},
+             
+            begin_time = #{beginTime},
+            end_time = #{endTime},
+            loan_amount_min = #{loanAmountMin},
+              <if test="loanAmountSum != null and loanAmountSum != ''">
+            loan_amount_sum = #{loanAmountSum},
+              </if>
+              
+            loan_term_list = #{loanTermList},
+              
+              
+            loan_channel_list = #{loanChannelList},
+              
+            coupon_count = #{couponCount},
+             
+            is_send = #{isSend},
+             <if test="createdate != null and  createdate != ''"> 
+            createdate = #{createdate},
+              </if> 
+                <if test="createby != null and  createby != ''"> 
+            createby = #{createby},
+               </if> 
+             <if test="updatedate != null and  updatedate != ''"> 
+            updatedate = #{updatedate},
+             </if> 
+            updateby = #{updateby},
+             
+            remarks = #{remarks},
+           
+            delflag = #{delflag},
+             
+            status = #{status}
+           
+        WHERE id = #{id}
+    </update>
+    <!-- 删除优惠券 -->
+    <update id="delete">
+        UPDATE t_yx_coupon SET updateby = #{updateby},delflag = '1' 
+        WHERE id = #{id}
+    </update>
+    <!-- 优惠券提交审核 -->
+    <update id="saveSubmitAuditCoupon">
+        UPDATE t_yx_coupon SET updateby = #{updateby},status = '1' 
+        WHERE id = #{id}
+    </update>
+    <!-- 审核  -->
+    <update id="saveAuditCoupon">
+        UPDATE t_yx_coupon SET 
+        updateby = #{updateby},
+        status = #{status},
+		audit_time =NOW(),
+		remarks=#{auditContent}
+        WHERE id = #{id}
+    </update>
+    
+      <select id="findCoupon" resultType="TYxCoupon">
+        SELECT 
+            <include refid="tYxCouponColumns"/><!-- ,b.audit_time AS 'auditTime' -->
+        FROM t_yx_coupon a
+        </select>
+     <!-- 状态 -->
+    <update id="updateCouponStatus" parameterType="java.util.List" >
+        UPDATE t_yx_coupon SET status = '5'
+        WHERE id IN
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
+   <!--  -->
+   <select id="findCouponUseTime" resultType="TYxCoupon">
+        SELECT a.id AS "id",
+        a.effective_days AS "effectiveDays",
+        a.begin_time AS "beginTime",
+        a.end_time AS "endTime",
+        a.status AS "status"
+        FROM t_yx_coupon a WHERE a.`status`!='5' AND a.end_time &lt; NOW()
+   </select>
+   <!-- 未使用已过期数据 -->
+   <select id="findCountPastData" parameterType="java.util.Map" resultType="java.util.Map">
+    SELECT COUNT(1) AS 'total' FROM t_yx_coupon_log WHERE end_time &lt; #{nowTime} AND status = '0' ;
+   </select>
+   <select id="findAllPastData" parameterType="java.util.Map" resultType="java.util.Map">
+    SELECT id,status,end_time AS 'endTime' FROM t_yx_coupon_log 
+    WHERE end_time &lt; #{nowTime} AND status = '0' LIMIT #{pageIndex},#{pageSize}
+   </select>
+   <!-- 两天后失效的已发送优惠券 -->
+   <select id="findAssignTimePast" parameterType="java.util.Map"  resultType="java.lang.String">
+        SELECT mobile FROM t_yx_coupon_log WHERE status='0' AND  DATE(end_time)=DATE_ADD(#{nowTime},INTERVAL 2 DAY) GROUP BY mobile
+   </select>
+   
+</mapper>

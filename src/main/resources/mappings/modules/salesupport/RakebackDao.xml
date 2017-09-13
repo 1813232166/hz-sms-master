@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.salesupport.dao.RakebackDao">
+	<select id="getRakebackList" resultType="com.hzdjr.hzwd.modules.salesupport.entity.Rakeback" parameterType="map">
+	 SELECT
+		a.id AS "id",
+		a.type AS "type",
+		a.refferStatus AS "refferStatus",
+		a.jsStatus AS "jsStatus",
+		a.commonMoney AS "commonMoney",
+		a.silverMoney AS "silverMoney",
+		a.goldMoney AS "goldMoney",
+		a.commonOneRate AS "commonOneRate",
+		a.commonTwoRate AS "commonTwoRate",
+		a.silverOneRate AS "silverOneRate",
+		a.silverTwoRate AS "silverTwoRate",
+		a.goldOneRate AS "goldOneRate",
+		a.goldTwoRate AS "goldTwoRate",
+		a.commonamount AS "commonamount",
+		a.sliveramount AS "sliveramount",
+		a.goldamount AS "goldamount",
+		a.status AS "status",
+		a.createDate AS "createDate",
+		a.begin_time AS "beginTime",
+		a.updateDate AS "updateDate",
+		a.createBy AS "createBy",
+		a.updateBy AS "updateBy"
+	FROM
+		t_yx_refferee AS a
+		<where>
+			<if test="type!=null and type!=''">
+				and a.type=#{type}
+			</if>
+			<if test="refferStatus!=null and refferStatus!=''">
+				and a.refferStatus=#{refferStatus}
+			</if>
+			<if test="jsStatus!=null and jsStatus!=''">
+				and a.jsStatus=#{jsStatus}
+			</if>
+			<if test="status != null and status != ''">
+			    and a.status=#{status}
+			</if>
+		</where>
+		order by a.createDate desc
+		limit 0,20000
+   
+   </select>
+	<!-- 启用禁用 0 禁用 1 启用-->
+	<update id="updateStatus" parameterType="map">
+		UPDATE t_yx_refferee SET 	
+			<if test="status == 1">
+				begin_time =NOW(),
+			</if>
+			<if test="status != null and status != ''">
+				status = #{status}
+			</if>
+			WHERE id = #{id}
+	</update>
+	<select  id="selectCount"  resultType="String">
+	SELECT sum(re.refferUserCount)
+FROM 
+    (SELECT u.staffId AS staffId ,
+        
+        (SELECT COUNT(1)
+        FROM t_user u1
+        WHERE u1.refferee = u.mobile
+                OR u1.refferee = u.staffId ) AS refferUserCount
+        FROM t_user u
+        LEFT JOIN t_yx_rel_user yu
+            ON u.id = yu.user_id )as re
+    WHERE re.staffId=""
+		 </select>
+		 <select  id="selctCount"  resultType="String">
+	SELECT sum(re.refferUserCount)
+FROM 
+    (SELECT u.staffId AS staffId ,
+        
+        (SELECT COUNT(1)
+        FROM t_user u1
+        WHERE u1.refferee = u.mobile
+                OR u1.refferee = u.staffId ) AS refferUserCount
+        FROM t_user u
+        LEFT JOIN t_yx_rel_user yu
+            ON u.id = yu.user_id )as re
+    WHERE re.staffId!=""
+		 </select> 
+	<select id="getRakebackPerview" resultType="com.hzdjr.hzwd.modules.salesupport.entity.Rakeback">
+		SELECT 
+			a.id AS "id",
+		a.type AS "type",
+		a.refferStatus AS "refferStatus",
+		a.jsStatus AS "jsStatus",
+		a.commonMoney AS "commonMoney",
+		a.silverMoney AS "silverMoney",
+		a.goldMoney AS "goldMoney",
+		a.commonOneRate AS "commonOneRate",
+		a.commonTwoRate AS "commonTwoRate",
+		a.silverOneRate AS "silverOneRate",
+		a.silverTwoRate AS "silverTwoRate",
+		a.goldOneRate AS "goldOneRate",
+		a.goldTwoRate AS "goldTwoRate",
+		a.commonamount AS "commonamount",
+		a.sliveramount AS "sliveramount",
+		a.goldamount AS "goldamount",
+		a.status AS "status",
+		a.createDate AS "createDate",
+		a.begin_time AS "beginTime",
+		a.updateDate AS "updateDate",
+		a.updateBy AS "updateBy"
+		FROM t_yx_refferee a
+		WHERE a.id = #{id}
+	</select>
+	<!-- 插入-->
+	<insert id="insert1"  >
+			INSERT INTO t_yx_refferee
+			<trim prefix="(" suffix=")" suffixOverrides="," >
+				<if test="id != null">
+				id,
+			</if>
+			<if test="type != null">
+				type,
+				</if>
+				<if test="refferStatus != null">
+			    refferStatus,
+			    </if>
+			    <if test="jsStatus != null">
+				jsStatus,
+				</if>
+				<if test="commonMoney != null">
+				commonMoney,
+				</if>
+				<if test="silverMoney != null">
+				silverMoney,
+				</if>
+				<if test="goldMoney != null">
+				goldMoney,
+				</if>
+				<if test="commonOneRate != null">
+				commonOneRate,
+				</if>
+				<if test="commonTwoRate != null">
+			    commonTwoRate,
+			    </if>
+			    <if test="silverOneRate != null">
+				silverOneRate,
+				</if>
+				<if test="silverTwoRate != null">
+			    silverTwoRate,
+			    </if>
+			    <if test="goldOneRate != null">
+				goldOneRate,
+				</if>
+				<if test="goldTwoRate != null">
+				goldTwoRate,
+				</if>
+				<if test="commonamount != null">
+				commonamount,
+				</if>
+				<if test="sliveramount != null">
+				sliveramount,
+				</if>
+				<if test="goldamount != null">
+				goldamount,
+				</if>
+				<if test="status != null">
+				status,
+				</if>
+				<if test="createDate != null">
+				createDate, 
+				</if>
+				<if test="beginTime != null">
+			begin_time,
+			</if>
+			<if test="updateDate != null">
+			updateDate,
+			</if>
+			<if test="updateBy != null">
+			updateBy 
+			</if>
+			 </trim>   
+			  <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="id != null">
+				#{id},
+				</if>
+				<if test="type != null">
+				#{type},
+				</if>
+				<if test="refferStatus != null">
+			    #{refferStatus},
+			    </if>
+			    <if test="jsStatus != null">
+				#{jsStatus},
+				</if>
+				<if test="commonMoney != null">
+				#{commonMoney},
+				</if>
+				<if test="silverMoney != null">
+				#{silverMoney},
+				</if>
+				<if test="goldMoney != null">
+				#{goldMoney},
+				</if>
+				<if test="commonOneRate != null">
+				#{commonOneRate},
+				</if>
+				<if test="commonTwoRate != null">
+			    #{commonTwoRate},
+			    </if>
+			    <if test="silverOneRate != null">
+				#{silverOneRate},
+				</if>
+				<if test="silverTwoRate != null">
+			    #{silverTwoRate},
+			    </if>
+			    <if test="goldOneRate != null">
+				#{goldOneRate},
+				</if>
+				<if test="goldTwoRate != null">
+				#{goldTwoRate},
+				</if>
+				<if test="commonamount != null">
+				#{commonamount},
+				</if>
+				<if test="sliveramount != null">
+				#{sliveramount},
+				</if>
+				<if test="goldamount != null">
+				#{goldamount},
+				</if>
+				<if test="status != null">
+				#{status},
+				</if>
+				<if test="createDate != null">
+			    #{createDate},
+			    </if>
+			    <if test="beginTime != null">
+				#{beginTime},
+				</if>
+				<if test="updateDate != null">
+				#{updateDate},
+				</if>
+				<if test="updateBy != null">
+			    #{updateBy}
+			    </if>
+			</trim>
+	</insert>
+	<!-- 修改-->
+	<update id="updateRakeback"  >
+			UPDATE t_yx_refferee
+		<set> 
+					<if test="id != null">
+					id=#{id},
+				</if>
+				<if test="type != null">
+					type=#{type},
+					</if>
+					<if test="refferStatus != null">
+				    refferStatus= #{refferStatus},
+				    </if>
+				    <if test="jsStatus != null">
+					jsStatus=#{jsStatus},
+					</if>
+					commonMoney=#{commonMoney},
+					silverMoney=#{silverMoney},
+					goldMoney=#{goldMoney},
+					commonOneRate=#{commonOneRate},
+				    commonTwoRate= #{commonTwoRate},
+					silverOneRate=#{silverOneRate},
+				    silverTwoRate=#{silverTwoRate},
+					goldOneRate=#{goldOneRate},
+					goldTwoRate=#{goldTwoRate},
+				commonamount=#{commonamount},
+				sliveramount=#{sliveramount},
+				goldamount=#{goldamount},
+					<if test="status != null">
+					status=#{status},
+					</if>
+					<if test="createDate != null">
+					createDate=#{createDate}, 
+					</if>
+					<if test="beginTime != null">
+				begin_time=#{beginTime},
+				</if>
+				<if test="updateDate != null">
+				updateDate=#{updateDate},
+				</if>
+				<if test="updateBy != null">
+				updateBy = #{updateBy}
+				</if>
+				</set>
+				WHERE id = #{id}
+			
+			</update>
+			<update id="delrakeback">
+        DELETE FROM t_yx_refferee
+        WHERE id = #{id}
+    </update>
+</mapper>

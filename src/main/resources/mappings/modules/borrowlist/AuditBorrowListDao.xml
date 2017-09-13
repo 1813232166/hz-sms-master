@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.borrowlist.dao.AuditBorrowListDao">
+    
+	<sql id="auditBorrowListColumns">
+		a.borrow_list_id AS "borrowListId",
+        a.borrow_list_title AS "borrowListTitle",
+        a.borrow_list_code AS "borrowListCode",
+        a.create_time AS "createTime",
+        a.open_time AS "openTime",
+        a.borrow_list_status AS "borrowListStatus",
+        a.borrow_list_remarks AS "borrowListRemarks",
+        sum(b.BORROWAMOUNT) as borrowListAmount,
+        b.DEADLINE AS "deadLine",
+        b.ANUALRATE AS "anualRate",
+        b.pay_method AS "payMethod",
+        b.criticalId AS criticalId
+	</sql>
+	
+	<sql id="auditBorrowListJoins">
+	</sql>
+    
+    <resultMap type="com.hzdjr.hzwd.modules.borrowlist.entity.AuditBorrowList" id="auditBorrowListMap">
+	     <id property="borrowListId" column="borrowListId"/>
+	     <result property="borrowListTitle" column="borrowListTitle"/>
+	     <result property="borrowListCode" column="borrowListCode"/>
+	     <result property="createTime" column="createTime"/>
+	     <result property="openTime" column="openTime"/>
+	     <result property="borrowListStatus" column="borrowListStatus"/>
+	     <result property="borrowListRemarks" column="borrowListRemarks"/>
+	     <result property="borrowListAmount" column="borrowListAmount"/>
+	     	<result property="deadLine" column="deadLine"/>
+	     	<result property="anualRate" column="anualRate"/>
+	     	<result property="payMethod" column="payMethod"/>
+	     	<result property="criticalId" column="criticalId"/>
+    </resultMap>
+    
+	<select id="get" resultMap="auditBorrowListMap">
+		SELECT <include refid="auditBorrowListColumns"></include>
+		FROM t_borrow_list a 
+		LEFT JOIN t_borrow b ON a.borrow_list_id=b.borrow_list_id
+        WHERE a.borrow_list_id=#{id}
+	</select>
+	
+	<!-- 查询审核未通过列表信息  -->
+	<select id="findList" resultMap="auditBorrowListMap">
+		SELECT <include refid="auditBorrowListColumns"></include>
+		FROM t_borrow_list a 
+		LEFT JOIN t_borrow b ON a.borrow_list_id=b.borrow_list_id
+		<where>
+			a.borrow_list_status in (1,2,3)
+			<if test=" null != payMethod and  '' !=payMethod">
+				AND b.pay_method = #{payMethod}
+			</if>
+			<if test="null !=borrowListCode and '' != borrowListCode">
+			     AND a.borrow_list_code  LIKE "%${borrowListCode}%"
+			</if>
+			<if test="null != borrowListTitle and '' != borrowListTitle">
+			     AND a.borrow_list_title LIKE "%${borrowListTitle}%"
+			</if>
+			<!-- <if test=" null !=borrowListStatus and '' !=borrowListStatus and (1 == borrowListStatus or 2 == borrowListStatus)">
+				AND a.borrow_list_status = #{borrowListStatus}
+			</if> -->
+			<if test="startOpenTime != null  and startOpenTime != ''">
+				AND a.create_time &gt;= #{startOpenTime}
+			</if>
+			<if test="endOpenTime != null and endOpenTime != ''">
+			    AND a.create_time &lt;=#{endOpenTime}
+			</if>
+		</where>
+		group by a.borrow_list_id
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_time
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getAuditDetail" parameterType="String" resultType="map">
+		SELECT
+		bl.borrow_list_id AS "borrowListId",
+		bl.borrow_list_code AS "borrowListCode",
+		bl.borrow_list_title AS "borrowListTitle",
+		bl.deadLine AS "deadLine",
+		bl.borrowWay AS "payMethod",
+		bl.borrowAmount AS borrowAmount,
+		bl.anualRate AS "anualRate",
+		bl.open_time AS OpenTime,
+		bl.min_tender_sum AS minTenderSum,
+		bl.borrow_list_status AS "borrowListStatus",
+		bl.risk_warning AS riskWarning,
+		bl.project_brief AS projectBrief
+		
+		FROM t_borrow_list bl
+		LEFT JOIN t_borrow b ON bl.borrow_list_id=b.borrow_list_id
+		WHERE bl.borrow_list_id=#{borrowListId}
+		LIMIT 1
+	</select>
+	
+	<select id="getSubBorrowList" parameterType="String" resultType="map">
+		SELECT
+		e.n,
+		e.BORROW_ID as borrowId,
+		e.loanNumber AS loanNumber,
+		e.borrowAliasNo AS borrowAliasNo,
+		e.DEADLINE AS "deadLine",
+		e.ANUALRATE AS "anualRate",
+		e.BORROWAMOUNT AS borrowAmount,
+		u.realName AS realName,
+		e.pay_method AS "payMethod",
+		e.criticalId AS "criticalId",
+		e.loanTime AS "loanTime",
+		e.BORROWSTATUS as borrowStatus
+		FROM 
+		(SELECT (@i:=@i+1) n,b.*
+		FROM `t_borrow` b,(SELECT @i:=0) t 
+		WHERE b.borrow_list_id=#{borrowListId}
+		ORDER BY b.`loanNumber`
+		) e
+		LEFT JOIN t_user u ON e.USERID=u.id
+		WHERE e.borrow_list_id=#{borrowListId}
+		ORDER BY e.`loanNumber`
+	</select>
+	
+	<!-- 获取审核未通过的总计   -->
+	<select id="getBorrowCounts" resultType="map">
+		SELECT 
+		COUNT(*) AS borrowCount,
+		COUNT(DISTINCT(b.USERID)) AS userCount,
+		SUM(b.BORROWAMOUNT) AS borrowAmount
+		FROM t_borrow b
+		LEFT JOIN t_borrow_list bl ON b.borrow_list_id=bl.borrow_list_id
+		WHERE bl.borrow_list_status IN(1,2,3)
+		<!-- select count(*) as counts,count(distinct userid) as userCounts,SUM(borrowamount) as amountCounts
+		FROM t_borrow a JOIN t_user u on a.USERID = u.id
+		<where>
+			a.borrowstatus in ('3','6')
+			<if test="borrowcode != null and borrowcode != ''">
+				AND a.borrowcode = #{borrowcode}
+			</if>
+			<if test="payMethod != null and payMethod != ''">
+				AND a.pay_method = #{payMethod}
+			</if>
+			<if test="borrowtype != null and borrowtype != ''">
+				AND a.borrowtype = #{borrowtype}
+			</if>
+			<if test="beginOpenborrowdate != null and endOpenborrowdate != null and beginOpenborrowdate != '' and endOpenborrowdate != ''">
+				AND a.openborrowdate BETWEEN #{beginOpenborrowdate} AND #{endOpenborrowdate}
+			</if>
+			<if test="borrowUserName != null and borrowUserName != ''">
+				AND u.userName = #{borrowUserName}
+			</if>
+			<if test="borrowalias != null and borrowalias != ''">
+				AND a.borrowalias = #{borrowalias}
+			</if>
+			<if test="loannumber != null and loannumber != ''">
+				AND a.loannumber = #{loannumber}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose> -->
+	</select>
+	
+	<select id="findAuditSuggest" parameterType="String" resultType="String">
+		SELECT audit_suggest from t_borrow_audit_record where audit_bid = #{borrowId}
+	</select>
+	
+	<insert id="writeAuditSuggest" parameterType="map">
+		INSERT INTO t_borrow_audit_record 
+			(id,auditor,audit_date,audit_suggest,audit_type,audit_list_bid) 
+		VALUES 
+			(#{id},#{auditor},#{auditDate},#{yuanyin},#{auditType},#{borrowListId});
+	</insert>
+	
+	<update id="changeBorrowListStatus">
+		UPDATE t_borrow_list
+		SET
+		borrow_list_status =#{borrowListStatus}
+		WHERE borrow_list_id=#{borrowListId}
+	</update>
+	
+	<update id="updateBorrowListRemark">
+		UPDATE t_borrow_list
+		SET
+		borrow_list_remarks =#{yuanyin}
+		WHERE borrow_list_id=#{borrowListId}
+	</update>
+	
+	<update id="updateOpenBorrowDate">
+		UPDATE t_borrow
+		SET
+		openborrowDate =#{0}
+		WHERE borrow_list_id=#{1}
+	</update>
+	
+	<update id="updateOpenBorrowListDate">
+		UPDATE t_borrow_list
+		SET
+		open_time =#{0}
+		WHERE borrow_list_id=#{1}
+	</update>
+	
+	<update id="deleteBorrow">
+		UPDATE t_borrow
+		SET
+		borrow_list_id ="",
+		borrowAliasNo="",
+		borrowAlias="",
+		BORROWTITLE="",
+		RISK_WARNING="",
+		project_brief="",
+		RAISETERM="",
+		RAISETERMUNIT="",
+		MINTENDERSUM='0.0',
+		MAXTENDERSUM='0.0',
+		BORROWSTATUS='6'
+		WHERE BORROW_ID=#{borrowId}
+	</update>
+	
+	<update id="updateBorrowListAmount">
+		UPDATE t_borrow_list bl
+		SET
+		bl.borrowAmount=bl.borrowAmount-
+		(SELECT b.BORROWAMOUNT FROM t_borrow b 
+		WHERE b.BORROW_ID=#{borrowId}
+		)
+		WHERE bl.borrow_list_id=
+		(SELECT b.borrow_list_id FROM t_borrow b 
+		WHERE b.BORROW_ID=#{borrowId}
+		)
+	</update>
+	
+	<select id="export" resultMap="auditBorrowListMap">
+		SELECT <include refid="auditBorrowListColumns"></include>
+       	FROM t_borrow_list a 
+       	LEFT JOIN t_borrow b ON a.borrow_list_id=b.borrow_list_id
+		<include refid="auditBorrowListJoins"/>
+		<where>
+			a.borrow_list_status in (1,2,3)
+			<if test=" null != payMethod and  '' !=payMethod">
+				AND b.pay_method = #{payMethod}
+			</if>
+			<if test="null !=borrowListCode and '' != borrowListCode">
+			     AND a.borrow_list_code  LIKE "%${borrowListCode}%"
+			</if>
+			<if test="null != borrowListTitle and '' != borrowListTitle">
+			     AND a.borrow_list_title LIKE "%${borrowListTitle}%"
+			</if>
+			<!-- <if test=" null !=borrowListStatus and '' !=borrowListStatus and (1 == borrowListStatus or 2 == borrowListStatus)">
+				AND a.borrow_list_status = #{borrowListStatus}
+			</if> -->
+			<if test="startOpenTime != null  and startOpenTime != ''">
+				AND a.create_time &gt;= #{startOpenTime}
+			</if>
+			<if test="endOpenTime != null and endOpenTime != ''">
+			    AND a.create_time &lt;=#{endOpenTime}
+			</if>
+		</where>
+		group by a.borrow_list_id
+		ORDER BY a.create_time
+		LIMIT 20000
+	</select>
+</mapper>

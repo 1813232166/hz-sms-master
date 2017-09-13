@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.salesupport.dao.TYxCouponRelationDao">
+    
+	<sql id="tYxCouponRelationColumns">
+		a.id AS "id",
+		a.relation_type AS "relationType",
+		a.main_id AS "mainId",
+		a.coupon_id AS "couponId",
+		a.createdate AS "createdate",
+		a.createby AS "createby",
+		a.updatedate AS "updatedate",
+		a.updateby AS "updateby",
+		a.remarks AS "remarks",
+		a.delflag AS "delflag"
+	</sql>
+	
+	<sql id="tYxCouponRelationJoins">
+	</sql>
+    
+	<select id="get" resultType="TYxCouponRelation">
+		SELECT 
+			<include refid="tYxCouponRelationColumns"/>
+		FROM t_yx_coupon_relation a
+		<include refid="tYxCouponRelationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TYxCouponRelation">
+		SELECT 
+			<include refid="tYxCouponRelationColumns"/>
+		FROM t_yx_coupon_relation a
+		<include refid="tYxCouponRelationJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TYxCouponRelation">
+		SELECT 
+			<include refid="tYxCouponRelationColumns"/>
+		FROM t_yx_coupon_relation a
+		<include refid="tYxCouponRelationJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+
+	<insert id="saveTYxCouponRelation">
+		INSERT INTO t_yx_coupon_relation(
+			id,
+			relation_type,
+			main_id,
+			coupon_id,
+			createdate,
+			createby
+		
+		) VALUES (
+			#{id},
+			#{relationType},
+			#{mainId},
+			#{couponId},
+			#{createdate},
+			#{createby}
+	
+		)
+	</insert>
+	
+	
+	<!-- 删除 -->
+	<delete id="deleteCouponRelationByMainId">
+		DELETE FROM t_yx_coupon_relation
+		WHERE main_id = #{mainId}
+	</delete>
+	
+
+	
+	<insert id="insert">
+		INSERT INTO t_yx_coupon_relation(
+			id,
+			relation_type,
+			main_id,
+			coupon_id,
+			createdate,
+			createby,
+			updatedate,
+			updateby,
+			remarks,
+			delflag
+		) VALUES (
+			#{id},
+			#{relationType},
+			#{mainId},
+			#{couponId},
+			#{createdate},
+			#{createby},
+			#{updatedate},
+			#{updateby},
+			#{remarks},
+			#{delflag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_yx_coupon_relation SET 	
+			relation_type = #{relationType},
+			main_id = #{mainId},
+			coupon_id = #{couponId},
+			createdate = #{createdate},
+			createby = #{createby},
+			updatedate = #{updatedate},
+			updateby = #{updateby},
+			remarks = #{remarks},
+			delflag = #{delflag}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_yx_coupon_relation
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

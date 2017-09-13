@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.AdvanceManageDao">
+	<sql id="sqlAdvanceList">
+		SELECT
+			tfd.create_date AS 'advanceTime',
+			tfd.amount AS 'advanceAmount',
+			tb.`loanNumber` AS borrowNo,
+			tfd.`repayment_time` AS advancePeriod,
+			tb.`DEADLINE` AS totalPeriod,
+			tfd.request_no AS 'tradeNo'
+		FROM
+			t_fd_payment AS tfd
+				LEFT JOIN t_borrow tb ON tfd.`project_no` = tb.`borrowCode`
+			<where>
+				tfd.`status` = 'S' AND tfd.`type` = '9'   <!-- 代偿【垫付】 -->
+				<if test="null != borrowNo  and borrowNo != ''">
+					AND tb.`loanNumber` like '%${borrowNo}%'
+				</if>
+				<if test="null !=tradeNo  and tradeNo != ''">
+					AND tfd.request_no like '%${tradeNo}%'
+				</if>
+				<if test="null !=beginTime  and beginTime != ''">
+					AND tfd.create_date >= #{beginTime}
+				</if>
+				<if test="null !=overTime and overTime != ''">
+					AND  #{overTime} >= tfd.create_date
+				</if>
+			</where>
+	</sql>
+    <!--垫付  -->
+	<select id="findAdvanceList"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.AdvanceVo">
+		<include refid="sqlAdvanceList" />
+		ORDER BY tfd.create_date DESC
+	</select>
+
+	<!-- 导出垫付列表 -->
+	<select id="exportAdvance"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.AdvanceVo">
+		<include refid="sqlAdvanceList" />
+		ORDER BY tfd.create_date DESC LIMIT 20000
+	</select>
+
+</mapper>

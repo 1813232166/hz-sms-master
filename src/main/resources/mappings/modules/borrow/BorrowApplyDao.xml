@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.borrow.dao.BorrowApplyDao">
+    
+	<sql id="borrowApplyColumns">
+		a.status AS "status",
+		a.borrow_id AS "borrowId",
+		a.type AS "type",
+		a.borrowtitle AS "borrowtitle",
+		a.borrowway AS "borrowway",
+		a.borrowcode AS "borrowcode",
+		a.borrowamount AS "borrowamount",
+		a.deadline AS "deadline",
+		a.borrowamount_low AS "borrowamountLow",
+		a.anualrate AS "anualrate",
+		a.borrowamount_high AS "borrowamountHigh",
+		a.mintendersum AS "mintendersum",
+		a.pay_method AS "payMethod",
+		a.maxtendersum AS "maxtendersum",
+		a.raiseterm AS "raiseterm",
+		a.borrowtype AS "borrowtype",
+		a.borrowstatus AS "borrowstatus",
+		a.raisetermunit AS "raisetermunit",
+		a.detail AS "detail",
+		a.openborrowdate AS "openborrowdate",
+		a.userid AS "userid",
+		a.repaysource AS "repaysource",
+		a.borrowaliasno AS "borrowaliasno",
+		a.borrowalias AS "borrowalias",
+		a.ip AS "ip",
+		a.loannumber AS "loannumber",
+		a.oriuserid AS "oriuserid",
+		a.name AS "name",
+		a.oriuseridcard AS "oriuseridcard",
+		a.auditdate AS "auditdate",
+		a.hasinvestamount AS "hasinvestamount",
+		a.hasinvestnum AS "hasinvestnum",
+		a.create_time AS "createTime",
+		a.servicefree AS "servicefree",
+		a.full_borrow_date AS "fullBorrowDate",
+		a.contractsigningtime AS "contractsigningtime",
+		a.contractcode AS "contractcode",
+		a.productcode AS "productcode",
+		a.repaymentdate AS "repaymentdate",
+		a.monthinterest AS "monthinterest",
+		a.monthcapital AS "monthcapital",
+		a.monthprepaymentamount AS "monthprepaymentamount",
+		a.giveamount AS "giveamount",
+		a.monthmanagementfee AS "monthmanagementfee",
+		a.servicecharge AS "servicecharge",
+		a.businesschannel AS "businesschannel",
+		a.mobile AS "mobile",
+		a.bcbizdeptid AS "bcbizdeptid",
+		a.bztype AS "bztype",
+		a.loantime AS "loantime",
+		a.borrowfid AS "borrowfid",
+		a.criticalid AS "criticalid",
+		a.warnings AS "warnings",
+		a.paidinamount AS "paidinamount",
+		a.usageofloan AS "usageofloan",
+		a.creditrating AS "creditrating",
+		a.idcardno AS "idcardno",
+		a.sex AS "sex",
+		a.age AS "age",
+		a.city AS "city",
+		a.annualincome AS "annualincome",
+		a.assetsliabilities AS "assetsliabilities",
+		a.is_edit AS "isEdit",
+		a.is_match AS "isMatch",
+		a.loan_name AS "loanName",
+		a.lendingtime AS "lendingtime",
+		a.borrow_customer_code AS "borrowCustomerCode",
+		a.borrow_acc_code AS "borrowAccCode",
+		a.open_bank_code AS "openBankCode",
+		a.cardno AS "cardno",
+		a.creditlevel AS "creditlevel",
+		a.is_finish AS "isFinish",
+		a.open_bank AS "openBank",
+		a.fill_mark AS "fillMark",
+		a.risk_warning AS "riskWarning",
+		a.remainamount AS "remainamount",
+		a.bz_info AS "bzInfo"
+	</sql>
+	
+	<sql id="borrowApplyJoins">
+	</sql>
+    
+	
+	<select id="findList" resultType="BorrowApply">
+		SELECT 
+			<include refid="borrowApplyColumns"/>
+		FROM t_borrow a
+		<include refid="borrowApplyJoins"/>
+		<where>
+			
+			<if test="borrowstatus != null and borrowstatus != ''">
+				AND a.borrowstatus = #{borrowstatus}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name = #{name}
+			</if>
+			<if test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+				AND a.create_time BETWEEN #{beginCreateTime} AND #{endCreateTime}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 借款申请列表 -->
+	<select id="selectAllList" resultType="BorrowApply" parameterType="map">
+		SELECT
+		b.BORROW_ID borrowId,
+		b.borrowCode borrowCode,
+		t.realName NAME,
+		t.mobile mobile,
+		d.accountNo accountNo,
+		CONCAT_WS('--',b.BORROWAMOUNT_LOW,b.BORROWAMOUNT_HIGH) borrowamount,
+		b.CREATE_TIME createTime,
+		b.BORROWSTATUS borrowstatus
+		FROM
+			t_borrow b
+		LEFT JOIN t_borrow_detail d ON b.BORROW_ID = d.BORROW_ID
+		LEFT JOIN t_user t ON t.id = b.USERID  
+		<where>
+		    b.BORROWSTATUS in ('0','12','13','14','15','17','18')	
+			<if test="borrowstatus != null and borrowstatus != ''">
+				AND b.borrowstatus = #{borrowstatus}
+			</if>
+			<if test="name != null and name != ''">
+				AND t.realName like CONCAT('%',trim(#{name}),'%')
+			</if>
+			<if test="beginCreateTime != null and beginCreateTime != ''">
+				<![CDATA[  AND b.create_time >= trim(#{beginCreateTime}) ]]>
+			</if>
+			<if test="endCreateTime != null and endCreateTime != ''">
+				<![CDATA[  AND b.create_time <= trim(#{endCreateTime}) ]]>
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND t.mobile like CONCAT('%',trim(#{mobile}),'%')
+			</if>
+		</where>
+		ORDER BY b.CREATE_TIME DESC
+	</select>
+	
+	<select id="findAllList" resultType="BorrowApply">
+		SELECT 
+			<include refid="borrowApplyColumns"/>
+		FROM t_borrow a
+		<include refid="borrowApplyJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!--借款列表  -->
+	<!-- <select id="findBorrowNewList" resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyNew" parameterType="map">
+	    SELECT
+			tb.BORROW_ID borrowId,
+			tb.USERID userId,
+			tb.loanNumber loanNumber,
+			tb.borrowCode borrowCode,
+			tb.BORROWSTATUS borrowStatus,
+			tu.realName name,
+			tu.mobile mobile,
+			tb.BORROWAMOUNT borrowamount,
+			tb.ANUALRATE anualrate,
+			tb.DEADLINE deadline,
+			tb.pay_method payMethod,
+			tb.borrowType borrowtype,
+			tb.loanTime lendingtime,
+			tb.is_match isMatch,
+			tb.is_edit isEdit,
+			tb.borrowAliasNo
+		FROM
+			t_borrow AS tb left join t_user AS tu on tb.USERID = tu.id
+		<where>
+		 <choose>
+		     <when test="isMatch != null and isMatch !=''">
+		          <if test="isMatch == 0">  未匹配 
+			    	 tb.BORROWSTATUS in ('0','20','19') 
+			      </if>
+				 <if test="isMatch == 1">已匹配
+				     tb.BORROWSTATUS in ('3','4','7','8','11','12')
+				 </if>
+				 <if test="isMatch == 3">已撤销
+				    ISNULL(tb.borrowAliasNo) AND tb.loanNumber IS NOT NULL 
+				 </if>
+		     </when>
+		     <otherwise>
+		         tb.BORROWSTATUS in ('0','3','4','7','8','11','10','9','19','20')  
+		         ISNULL(tb.borrowAliasNo) AND tb.loanNumber IS NOT NULL 
+		     </otherwise>
+		 </choose>
+			<if test="name !=null and name!=''">
+				and tu.realName like CONCAT('%',#{name},'%')
+			</if>
+			<if test="loanNumber != null and loanNumber!=''">
+				and tb.loanNumber like CONCAT('%',#{loanNumber},'%')
+			</if>
+			<if test="borrowCode != null and borrowCode!=''">
+				and tb.borrowCode like CONCAT('%',#{borrowCode},'%')
+			</if>
+			<if test="isEdit != null and isEdit!=''">
+				and tb.is_edit = #{isEdit}
+			</if>
+			<if test="mobile != null and mobile!=''">
+				and tu.mobile like CONCAT('%',#{mobile},'%')
+			</if>
+	
+		</where>
+		ORDER BY tb.loanTime DESC
+	</select> -->
+	
+	<!--借款列表 -->
+	<select id="findBorrowNewList" resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyNew" parameterType="map">
+	     SELECT * FROM 
+	     (
+	     select * from(
+	        SELECT
+			tb.BORROW_ID borrowId,
+      		tb.borrowAliasNo,
+			tb.USERID userId,
+			tb.loanNumber loanNumber,
+			tb.borrowCode borrowCode,
+			tb.BORROWSTATUS borrowStatus,
+			tu.realName name,
+			tu.mobile mobile,
+			tb.BORROWAMOUNT borrowamount,
+			tb.ANUALRATE anualrate,
+			tb.DEADLINE deadline,
+			tb.pay_method payMethod,
+			tb.borrowType borrowtype,
+			tb.loanTime lendingtime,
+			tb.is_match isMatch,
+			tb.is_edit isEdit
+		FROM
+			t_borrow AS tb  left join t_user AS tu on tb.USERID = tu.id 
+			WHERE
+		      tb.BORROWSTATUS in('0','3','4','7','8','11','10','9','19','20')
+			 <!--  AND (tb.borrowAliasNo) is not null  -->
+			) AS abc UNION ALL
+        select * from (
+           SELECT
+			tb.BORROW_ID borrowId,
+      		tb.borrowAliasNo,
+			tb.USERID userId,
+			tb.loanNumber loanNumber,
+			tb.borrowCode borrowCode,
+			tb.BORROWSTATUS borrowStatus,
+			tu.realName name,
+			tu.mobile mobile,
+			tb.BORROWAMOUNT borrowamount,
+			tb.ANUALRATE anualrate,
+			tb.DEADLINE deadline,
+			tb.pay_method payMethod,
+			tb.borrowType borrowtype,
+			tb.loanTime lendingtime,
+			tb.is_match isMatch,
+			tb.is_edit isEdit
+		FROM
+			t_borrow AS tb  left join t_user AS tu on tb.USERID = tu.id 
+       WHERE
+		     tb.BORROWSTATUS ='12' AND tb.borrowAliasNo IS NOT NULL 
+        ) AS efg
+	    ) AS hjk
+	   <where>
+		 <choose>
+		     <when test="isMatch != null and isMatch !=''">
+		          <if test="isMatch == 0">  
+			    	 hjk.borrowStatus in ('0','20') 
+			      </if>
+				 <if test="isMatch == 1">
+				     hjk.borrowStatus in ('3','4','7','8','11','19')
+				 </if>
+				 <if test="isMatch == 3">
+				     hjk.borrowStatus in ('9')
+				 </if>
+				<!--  <if test="isMatch == 2">
+				    hjk.borrowStatus in ('12') AND ISNULL(hjk.borrowAliasNo) AND hjk.loanNumber IS NOT NULL  
+				 </if> -->
+		     </when>
+		 </choose>
+			<if test="name !=null and name!=''">
+				and hjk.name like CONCAT('%',#{name},'%')
+			</if>
+			<if test="loanNumber != null and loanNumber!=''">
+				and hjk.loanNumber like CONCAT('%',#{loanNumber},'%')
+			</if>
+			<if test="borrowCode != null and borrowCode!=''">
+				and hjk.borrowCode like CONCAT('%',#{borrowCode},'%')
+			</if>
+			<choose>
+			    <when test="isEdit != null and isEdit!=''">
+			        <if test="isEdit == 0">
+			          and  hjk.borrowStatus in ('0')
+			        </if>
+			        <if test="isEdit == 1">
+			          and  hjk.borrowStatus in ('3','4','7','8','9','10','11','19','20')
+			        </if>
+			        <!-- <if test="isEdit == 2">
+			          and  hjk.borrowStatus in ('12') AND ISNULL(hjk.borrowAliasNo) AND hjk.loanNumber IS NOT NULL  
+			        </if> -->
+			    </when>
+			</choose>
+			<if test="mobile != null and mobile!=''">
+				and hjk.mobile like CONCAT('%',#{mobile},'%')
+			</if>
+	
+		</where>
+		ORDER BY hjk.lendingtime DESC
+	    
+	</select>
+	
+	
+	<!--借款列表  点击撤销查询 借款列表-->
+	<select id="findBorrowByCancleList" resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyNew" parameterType="map">
+        select * from (
+           SELECT
+			tb.BORROW_ID borrowId,
+      		tb.borrowAliasNo,
+			tb.USERID userId,
+			tb.loanNumber loanNumber,
+			tb.borrowCode borrowCode,
+			tb.BORROWSTATUS borrowStatus,
+			tu.realName name,
+			tu.mobile mobile,
+			tb.BORROWAMOUNT borrowamount,
+			tb.ANUALRATE anualrate,
+			tb.DEADLINE deadline,
+			tb.pay_method payMethod,
+			tb.borrowType borrowtype,
+			tb.loanTime lendingtime,
+			tb.is_match isMatch,
+			tb.is_edit isEdit
+		FROM
+			t_borrow AS tb  left join t_user AS tu on tb.USERID = tu.id 
+       WHERE
+		     tb.BORROWSTATUS ='12' AND tb.borrowAliasNo IS NOT NULL 
+        ) AS hjk
+	   <where>
+				1=1
+			<if test="name !=null and name!=''">
+				and hjk.name like CONCAT('%',#{name},'%')
+			</if>
+			<if test="loanNumber != null and loanNumber!=''">
+				and hjk.loanNumber like CONCAT('%',#{loanNumber},'%')
+			</if>
+			<if test="borrowCode != null and borrowCode!=''">
+				and hjk.borrowCode like CONCAT('%',#{borrowCode},'%')
+			</if>
+			<choose>
+			    <when test="isEdit != null and isEdit!=''">
+			        <if test="isEdit == 0">
+			          and  hjk.borrowStatus ='0'
+			        </if>
+			        <if test="isEdit == 1">
+			          and  hjk.borrowStatus in ('3','4','7','8','9','10','11','19','20')
+			        </if>
+			    </when>
+			</choose>
+			<if test="mobile != null and mobile!=''">
+				and hjk.mobile like CONCAT('%',#{mobile},'%')
+			</if>
+	
+		</where>
+		ORDER BY hjk.lendingtime DESC
+	    
+	</select>
+	
+	
+	<!-- 借款申请详情  和 借款列表详情 -->
+	<select id="selectBorrowApplyDeatilById" resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyDeatil" parameterType="String">
+		SELECT
+			b.BORROW_ID borrowId,
+			b.type type,
+			b.usageOfLoanType usageOfLoanType,
+			b.usageOfLoan usageOfLoan,
+			b.BORROWAMOUNT_LOW MINTENDERSUM,
+			b.BORROWAMOUNT_HIGH MAXTENDERSUM,
+			b.DEADLINE DEADLINE,
+			b.ANUALRATE ANUALRATE,
+			b.monthPrepaymentAmount monthPrepaymentAmount,
+			b.criticalId criticalId,
+		
+			b.name,
+			b.sex,
+			d.heducation,
+			d.birthday,
+			b.idCardNo,
+			d.validityofDocumnets,
+			d.maritalStauts,
+			d.hasChildren,
+			d.realeStateSituation,
+			d.coResident,
+		  	b.annualIncome,
+		  	d.highCredit,
+		  	d.registryProvince,
+			d.registryCity,
+			d.registryQu,
+		  	d.registryAddress,
+		  	d.registryCode,
+			d.familyAddress,
+			d.familyCode,
+			d.familyProvince,
+  			d.familyCity,
+  			d.familyQu,
+			CONCAT_WS('--',d.familyQuhao,d.familyTel) as familyTel,
+			d.companyName,
+			d.companyStyle,
+			d.companyInTime,
+			d.companyDepartment,
+			d.companyAssume,
+			d.companyCode,
+			d.companyPorvince,
+			d.companyCity,
+			d.companyQu,
+			d.companyAddress,
+			d.companyQuhao,
+			d.companyTel,
+			CONCAT_WS('--',d.companyQuhao,d.companyTel) as companyTel,
+			d.companySuffix,
+			d.queryNet,
+			d.accountType,
+			d.accountNo,
+			d.accountPassword
+		
+		FROM
+			t_borrow b
+		LEFT JOIN t_borrow_detail d ON b.BORROW_ID = d.BORROW_ID
+		where b.BORROW_ID=#{id}
+	</select>
+	
+	<!-- 查询联系人信息  -->
+	<select id="selectBorrowContactsById" parameterType="String" resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowContacts">
+		SELECT
+			relation,
+			type,
+			name,
+			mobile,
+			telAreaCode
+		FROM
+			t_borrow_contacts
+		WHERE
+			BORROW_ID = #{id}
+		ORDER BY
+			type ASC
+	</select>
+	
+	
+	<!--修改t_borrow中的borrowStatus为20  即后台新建包装前已编辑  -->
+	<update id="updateBorrowStatus">
+	    update t_borrow set BORROWSTATUS = 20 where BORROW_ID=#{borrowId}
+	</update>
+	
+	<!--保存图片信息  点击保存和关闭-->
+	<insert id="saveBorrowImage" parameterType="java.util.List">
+	      INSERT INTO t_borrow_apply (id , picdesc , bid, pictype,status,picurl,createtime,largePictype)
+          VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.id} , #{item.picdesc} , #{item.bid}, #{item.pictype},'1'  ,#{item.picurl}, NOW(),#{item.largePictype})
+        </foreach>
+	</insert>
+	
+	<!--借款详情页面 图片查询   这些图片是前台上传的 -->
+	<select id="getBorrowPic" parameterType="java.lang.String" resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowPicVo">
+		SELECT id,picdesc,bid,largePictype pictype,picurl,createtime FROM t_borrow_apply WHERE bid=#{borrowId} AND status = '0'
+	</select>
+	
+	<!--借款详情页面  查询后台的上传图片  -->
+	<select id="selectBorrowImageByFlag" resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowPicVo">
+	   select * from t_borrow_apply where bid = #{id} AND status = '1'
+	</select>
+	
+	<!--借款列表详情页面 查找户籍和家庭住址 和单位信息 -->
+	<select id="selectProvince" resultType="java.lang.String">
+	   select name from t_region_province where code = #{provinceCode}
+	</select>
+	
+	<select id="selectCity" resultType="java.lang.String">
+	   select name from t_region_city where code = #{cityCode}
+	</select>
+	
+	<select id="selectQu" resultType="java.lang.String">
+	   select name from t_region_area where code = #{quCode}
+	</select>
+	
+	<!--借款申请列表  查看原因  -->
+	<select id="findReasonById" resultType="java.lang.String">
+	   select bz_info from t_borrow where BORROW_ID = #{borrowId}
+	</select>
+	
+	<!--删除后台上传的图片  -->
+	<delete id="deleteImage">
+	   delete from t_borrow_apply where bid = #{borrowId} and picurl =#{picUrl} and status = '1'
+	</delete>
+</mapper>

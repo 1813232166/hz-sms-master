@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.borrow.dao.LoanFundDao">
+    
+	<sql id="tBorrowColumns">
+		a.status AS "status",
+		a.borrow_id AS "borrowId",
+		a.type AS "type",
+		a.borrowtitle AS "borrowtitle",
+		a.borrowway AS "borrowway",
+		a.borrowcode AS "borrowcode",
+		a.borrowamount AS "borrowamount",
+		a.deadline AS "deadline",
+		a.anualrate AS "anualrate",
+		a.mintendersum AS "mintendersum",
+		a.pay_method AS "payMethod",
+		a.maxtendersum AS "maxtendersum",
+		a.raiseterm AS "raiseterm",
+		a.borrowtype AS "borrowtype",
+		a.borrowstatus AS "borrowstatus",
+		a.raisetermunit AS "raisetermunit",
+		a.detail AS "detail",
+		a.openborrowdate AS "openborrowdate",
+		a.userid AS "userid",
+		a.repaysource AS "repaysource",
+		a.borrowaliasno AS "borrowaliasno",
+		a.borrowalias AS "borrowalias",
+		a.ip AS "ip",
+		a.loannumber AS "loannumber",
+		a.oriuserid AS "oriuserid",
+		a.name AS "name",
+		a.oriuseridcard AS "oriuseridcard",
+		a.auditdate AS "auditdate",
+		a.hasinvestamount AS "hasinvestamount",
+		a.hasinvestnum AS "hasinvestnum",
+		a.create_time AS "createTime",
+		a.servicefree AS "servicefree",
+		a.full_borrow_date AS "fullBorrowDate",
+		a.contractsigningtime AS "contractsigningtime",
+		a.contractcode AS "contractcode",
+		a.productcode AS "productcode",
+		a.repaymentdate AS "repaymentdate",
+		a.monthinterest AS "monthinterest",
+		a.monthcapital AS "monthcapital",
+		a.monthprepaymentamount AS "monthprepaymentamount",
+		a.giveamount AS "giveamount",
+		a.monthmanagementfee AS "monthmanagementfee",
+		a.servicecharge AS "servicecharge",
+		a.businesschannel AS "businesschannel",
+		a.mobile AS "mobile",
+		a.bcbizdeptid AS "bcbizdeptid",
+		a.bztype AS "bztype",
+		a.loantime AS "loantime",
+		a.borrowfid AS "borrowfid",
+		a.criticalid AS "criticalid",
+		a.warnings AS "warnings",
+		a.paidinamount AS "paidinamount",
+		a.usageofloan AS "usageofloan",
+		a.creditrating AS "creditrating",
+		a.idcardno AS "idcardno",
+		a.sex AS "sex",
+		a.age AS "age",
+		a.city AS "city",
+		a.annualincome AS "annualincome",
+		a.assetsliabilities AS "assetsliabilities",
+		a.is_edit AS "isEdit",
+		a.is_match AS "isMatch",
+		a.loan_name AS "loanName",
+		a.lendingtime AS "lendingtime",
+		a.borrow_customer_code AS "borrowCustomerCode",
+		a.borrow_acc_code AS "borrowAccCode",
+		a.open_bank_code AS "openBankCode",
+		a.cardno AS "cardno",
+		a.creditlevel AS "creditlevel",
+		a.is_finish AS "isFinish",
+		a.open_bank AS "openBank",
+		a.fill_mark AS "fillMark",
+		a.risk_warning AS "riskWarning",
+		a.remainamount AS "remainamount"
+	</sql>
+	
+	<sql id="tBorrowJoins">
+	</sql>
+    
+	<select id="get" resultType="TBorrow">
+		SELECT *
+		FROM t_borrow a
+		WHERE a.borrow_id = #{borrowId}
+	</select>
+	
+	<select id="getLoanList" resultType="TBorrow">
+		SELECT 
+			<include refid="tBorrowColumns"/>
+		FROM t_borrow a
+		<include refid="tBorrowJoins"/>
+		<where>
+			<if test="payMethod != null and payMethod != ''">
+				AND a.pay_method = #{payMethod}
+			</if>
+			<if test="borrowtype != null and borrowtype != ''">
+				AND a.borrowtype = #{borrowtype}
+			</if>
+			<if test="borrowstatus != null and borrowstatus != ''">
+				AND a.borrowstatus = #{borrowstatus}
+			</if>
+			<if test="isEdit != null and isEdit != ''">
+				AND a.is_edit = #{isEdit}
+			</if>
+			
+			<if test="bztype != null and bztype != ''">
+				AND a.bztype = #{bztype}
+			</if>
+			<if test="criticalid != null and criticalid != ''">
+				AND a.criticalid = #{criticalid}
+			</if>
+			<if test="beginLoantime != null and endLoantime != null and beginLoantime != '' and endLoantime != ''">
+				AND a.loantime BETWEEN #{beginLoantime} AND #{endLoantime}
+			</if>
+			
+			<if test="loanName != null and loanName != ''">
+				AND a.loan_name = #{loanName}
+			</if>
+			
+			<if test="loannumber != null and loannumber != ''">
+				AND a.loannumber = #{loannumber}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 标的总条数 -->
+	<select id="getLoanCountList" resultType="java.util.Map">
+		SELECT COUNT(1) as count, COUNT(DISTINCT USERID) as USERID,SUM(BORROWAMOUNT) as BORROWAMOUNT FROM t_borrow a
+		<where>
+			<if test="payMethod != null and payMethod != ''">
+				AND a.pay_method = #{payMethod}
+			</if>
+			<if test="borrowtype != null and borrowtype != ''">
+				AND a.borrowtype = #{borrowtype}
+			</if>
+			<if test="borrowstatus != null and borrowstatus != ''">
+				AND a.borrowstatus = #{borrowstatus}
+			</if>
+			<if test="isEdit != null and isEdit != ''">
+				AND a.is_edit = #{isEdit}
+			</if>
+			
+			<if test="bztype != null and bztype != ''">
+				AND a.bztype = #{bztype}
+			</if>
+			<if test="criticalid != null and criticalid != ''">
+				AND a.criticalid = #{criticalid}
+			</if>
+			<if test="beginLoantime != null and endLoantime != null and beginLoantime != '' and endLoantime != ''">
+				AND a.loantime BETWEEN #{beginLoantime} AND #{endLoantime}
+			</if>
+			
+			<if test="loanName != null and loanName != ''">
+				AND a.loan_name = #{loanName}
+			</if>
+			
+			<if test="loannumber != null and loannumber != ''">
+				AND a.loannumber = #{loannumber}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		
+	</select>
+	
+	<select id="findAllList" resultType="TBorrow">
+		SELECT 
+			<include refid="tBorrowColumns"/>
+		FROM t_borrow a
+		<include refid="tBorrowJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="saveBorrowInfo" useGeneratedKeys="true" parameterType="java.util.List">
+		INSERT INTO t_borrow(
+			status,
+			borrow_id,
+			type,
+			borrowtitle,
+			borrowway,
+			borrowcode,
+			borrowamount,
+			deadline,
+			anualrate,
+			mintendersum,
+			pay_method,
+			maxtendersum,
+			raiseterm,
+			borrowtype,
+			borrowstatus,
+			raisetermunit,
+			detail,
+			openborrowdate,
+			userid,
+			repaysource,
+			borrowaliasno,
+			borrowalias,
+			ip,
+			loannumber,
+			oriuserid,
+			name,
+			oriuseridcard,
+			auditdate,
+			hasinvestamount,
+			hasinvestnum,
+			create_time,
+			servicefree,
+			full_borrow_date,
+			contractsigningtime,
+			contractcode,
+			productcode,
+			repaymentdate,
+			monthinterest,
+			monthcapital,
+			monthprepaymentamount,
+			giveamount,
+			monthmanagementfee,
+			servicecharge,
+			businesschannel,
+			mobile,
+			bcbizdeptid,
+			bztype,
+			loantime,
+			borrowfid,
+			criticalid,
+			warnings,
+			paidinamount,
+			usageofloan,
+			creditrating,
+			idcardno,
+			sex,
+			age,
+			city,
+			annualincome,
+			assetsliabilities,
+			is_edit,
+			is_match,
+			loan_name,
+			lendingtime,
+			borrow_customer_code,
+			borrow_acc_code,
+			open_bank_code,
+			cardno,
+			creditlevel,
+			is_finish,
+			open_bank,
+			fill_mark,
+			risk_warning,
+			remainamount
+		) VALUES 
+		 <foreach collection="list" item="item" index="index" separator="," > 
+		(
+			#{item.status},
+			#{item.borrowId},
+			#{item.type},
+			#{item.borrowtitle},
+			#{item.borrowway},
+			#{item.borrowcode},
+			#{item.borrowamount},
+			#{item.deadline},
+			#{item.anualrate},
+			#{item.mintendersum},
+			#{item.payMethod},
+			#{item.maxtendersum},
+			#{item.raiseterm},
+			#{item.borrowtype},
+			#{item.borrowstatus},
+			#{item.raisetermunit},
+			#{item.detail},
+			#{item.openborrowdate},
+			#{item.userid},
+			#{item.repaysource},
+			#{item.borrowaliasno},
+			#{item.borrowalias},
+			#{item.ip},
+			#{item.loannumber},
+			#{item.oriuserid},
+			#{item.name},
+			#{item.oriuseridcard},
+			#{item.auditdate},
+			#{item.hasinvestamount},
+			#{item.hasinvestnum},
+			#{item.createTime},
+			#{item.servicefree},
+			#{item.fullBorrowDate},
+			#{item.contractsigningtime},
+			#{item.contractcode},
+			#{item.productcode},
+			#{item.repaymentdate},
+			#{item.monthinterest},
+			#{item.monthcapital},
+			#{item.monthprepaymentamount},
+			#{item.giveamount},
+			#{item.monthmanagementfee},
+			#{item.servicecharge},
+			#{item.businesschannel},
+			#{item.mobile},
+			#{item.bcbizdeptid},
+			#{item.bztype},
+			#{item.loantime},
+			#{item.borrowfid},
+			#{item.criticalid},
+			#{item.warnings},
+			#{item.paidinamount},
+			#{item.usageofloan},
+			#{item.creditrating},
+			#{item.idcardno},
+			#{item.sex},
+			#{item.age},
+			#{item.city},
+			#{item.annualincome},
+			#{item.assetsliabilities},
+			#{item.isEdit},
+			#{item.isMatch},
+			#{item.loanName},
+			#{item.lendingtime},
+			#{item.borrowCustomerCode},
+			#{item.borrowAccCode},
+			#{item.openBankCode},
+			#{item.cardno},
+			#{item.creditlevel},
+			#{item.isFinish},
+			#{item.openBank},
+			#{item.fillMark},
+			#{item.riskWarning},
+			#{item.remainamount}
+		)
+		</foreach>
+		
+	</insert>
+	<insert id="saveBillPlan"  parameterType="com.hzdjr.hzwd.modules.borrow.entity.TBorrowBillplan">
+		INSERT INTO t_borrow_billplan(apply_id, period, monthly_payment_origin,monthly_payment_actual,manage_fee,fails_charge_origin,fails_charge_actual,
+			late_charge_origin,late_charge_actual,repay_status,repay_time,plan_repay_amount,month_capital,month_interest,contract_id,noallotamount,remains_principal,
+			prepayment_amount,prepayment_FailsCharge,roll_out_id,is_overdue,late_payment_time,parking_fee
+			) VALUES
+		 	(#{applyId},#{period},#{monthlyPaymentOrigin},#{monthlyPaymentActual},#{manageFee},#{failsChargeOrigin},#{failsChargeActual},
+		 	#{lateChargeOrigin},#{lateChargeActual},#{repayStatus},#{repayTime},#{planRepayAmount},#{monthCapital},#{monthInterest},#{contractId},#{noallotamount},#{remainsPrincipal},
+		 	#{prepaymentAmount},#{prepaymentFailscharge},#{rollOutId},#{isOverdue},#{latePaymentTime},#{parkingFee}
+		 	)
+	</insert>
+	<select id="queryBilPlanByApplyId" parameterType="java.lang.String" resultType="java.util.Map">
+		SELECT count(*) count
+		FROM t_borrow_billplan 
+		WHERE apply_id = #{applyId}
+	</select>
+	<!-- 通过借款编号查询还款计划  -->
+	<select id="queryBilPlanByBorrowId" parameterType="java.util.Map" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrowBillplan">
+		SELECT *
+		FROM t_borrow_billplan 
+		WHERE apply_id = #{applyId}
+	</select>
+	<!-- 通过ID获取借款数据 -->
+	<select id="findTBorrowById" parameterType="java.util.Map" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+		SELECT * FROM t_borrow WHERE
+		borrow_id = #{borrowId}
+	</select>
+	<!-- 删除借款资料 -->
+	 <delete id="delPic" parameterType="string">
+    	DELETE FROM t_borrow_apply WHERE id = #{id}
+    </delete>
+	<!-- 修改借款信息 -->
+    <insert id="batchSaveBorrowApply" parameterType="java.util.List">
+        INSERT INTO t_borrow_apply (id , picdesc , bid, pictype,picurl,createtime)
+          VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.id} , #{item.picdesc} , #{item.bid}, #{item.pictype},#{item.picurl}, NOW())
+        </foreach>
+    </insert>
+    
+    <update id="updateIsEdit" parameterType="java.lang.String">
+    	UPDATE t_borrow SET is_edit = 1 WHERE BORROW_ID = #{bid}
+    </update>
+    
+    <update id="updateIsFinish" parameterType="java.lang.String">
+    	UPDATE t_borrow SET is_finish = 1 WHERE BORROW_ID = #{bid}
+    </update>	
+	<select id="getBorrowPic" parameterType="java.lang.String" resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowPicVo">
+		SELECT id,picdesc,bid,pictype,picurl,createtime FROM t_borrow_apply WHERE bid=#{borrowId}
+	</select>
+	
+	
+	<update id="update">
+		UPDATE t_borrow SET 	
+			status = #{status},
+			borrow_id = #{borrowId},
+			type = #{type},
+			borrowtitle = #{borrowtitle},
+			borrowway = #{borrowway},
+			borrowcode = #{borrowcode},
+			borrowamount = #{borrowamount},
+			deadline = #{deadline},
+			anualrate = #{anualrate},
+			mintendersum = #{mintendersum},
+			pay_method = #{payMethod},
+			maxtendersum = #{maxtendersum},
+			raiseterm = #{raiseterm},
+			borrowtype = #{borrowtype},
+			borrowstatus = #{borrowstatus},
+			raisetermunit = #{raisetermunit},
+			detail = #{detail},
+			openborrowdate = #{openborrowdate},
+			userid = #{userid},
+			repaysource = #{repaysource},
+			borrowaliasno = #{borrowaliasno},
+			borrowalias = #{borrowalias},
+			ip = #{ip},
+			loannumber = #{loannumber},
+			oriuserid = #{oriuserid},
+			name = #{name},
+			oriuseridcard = #{oriuseridcard},
+			auditdate = #{auditdate},
+			hasinvestamount = #{hasinvestamount},
+			hasinvestnum = #{hasinvestnum},
+			create_time = #{createTime},
+			servicefree = #{servicefree},
+			full_borrow_date = #{fullBorrowDate},
+			contractsigningtime = #{contractsigningtime},
+			contractcode = #{contractcode},
+			productcode = #{productcode},
+			repaymentdate = #{repaymentdate},
+			monthinterest = #{monthinterest},
+			monthcapital = #{monthcapital},
+			monthprepaymentamount = #{monthprepaymentamount},
+			giveamount = #{giveamount},
+			monthmanagementfee = #{monthmanagementfee},
+			servicecharge = #{servicecharge},
+			businesschannel = #{businesschannel},
+			mobile = #{mobile},
+			bcbizdeptid = #{bcbizdeptid},
+			bztype = #{bztype},
+			loantime = #{loantime},
+			borrowfid = #{borrowfid},
+			criticalid = #{criticalid},
+			warnings = #{warnings},
+			paidinamount = #{paidinamount},
+			usageofloan = #{usageofloan},
+			creditrating = #{creditrating},
+			idcardno = #{idcardno},
+			sex = #{sex},
+			age = #{age},
+			city = #{city},
+			annualincome = #{annualincome},
+			assetsliabilities = #{assetsliabilities},
+			is_edit = #{isEdit},
+			is_match = #{isMatch},
+			loan_name = #{loanName},
+			lendingtime = #{lendingtime},
+			borrow_customer_code = #{borrowCustomerCode},
+			borrow_acc_code = #{borrowAccCode},
+			open_bank_code = #{openBankCode},
+			cardno = #{cardno},
+			creditlevel = #{creditlevel},
+			is_finish = #{isFinish},
+			open_bank = #{openBank},
+			fill_mark = #{fillMark},
+			risk_warning = #{riskWarning},
+			remainamount = #{remainamount}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_borrow
+		WHERE id = #{id}
+	</update>
+	<select id = "selectBorrowCount" resultType="map">
+		SELECT COUNT(1) as count, COUNT(DISTINCT USERID) as USERID,SUM(BORROWAMOUNT) as BORROWAMOUNT FROM t_borrow
+	</select>
+	
+	
+</mapper>

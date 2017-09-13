@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.finance.dao.LendPlanManageDao">
+    
+	<sql id="lendPlanManageColumns">
+		a.id AS "id",
+		a.amount AS "amount",
+		a.invest_time AS "investTime",
+		a.projected_earnings AS "projectedEarnings",
+		a.capital_code AS "capitalCode",
+		a.user_id AS "userId",
+		a.finance_id AS "financeId"
+	</sql>
+	
+    
+	<select id="get" resultType="LendPlanManage">
+		SELECT 
+			<include refid="lendPlanManageColumns"/>
+		FROM t_capital a
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LendPlanManage">
+		SELECT 
+			<include refid="lendPlanManageColumns"/>,a.capital_source AS "capitalSource",
+			CONCAT(
+	    	SUBSTRING(u.mobile, 1, 3),
+	    	'****',
+	   		SUBSTRING(u.mobile, 8, 4)
+	  				) AS mobile,
+	  	
+	  	  CASE 
+		  WHEN a.status = '1' THEN '匹配中'
+		  WHEN a.status = '6' THEN '匹配失败'
+	    <![CDATA[ WHEN (a.`status` IN ('2','3','5') AND DATE_FORMAT(NOW(), '%Y-%m-%d') < a.back_end_date) THEN '收益中（未到期）' ]]>
+	    <![CDATA[ WHEN (a.`status` IN ('2','3','5') AND DATE_FORMAT(NOW(), '%Y-%m-%d') >= a.back_end_date) THEN '收益中（已到期）' ]]>
+		  WHEN a.status = '4' THEN '退出中'
+		  WHEN a.status = '7' THEN '已结束'
+	      ELSE ''
+	  	END AS status
+	 	
+		FROM t_capital a 
+		LEFT JOIN t_finance f ON f.id = a.finance_id
+		JOIN t_user u ON u.id = a.user_id
+		<where>
+			
+			<if test="financeId != null and financeId != ''">
+				AND a.finance_id = #{financeId}
+			</if>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="LendPlanManage">
+		SELECT 
+			<include refid="lendPlanManageColumns"/>
+		FROM t_capital a
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+	<select id="queryPrincipalInterest" resultType="map"  parameterType="map">
+	SELECT SUM(a.amount)+SUM(a.projected_earnings) AS bxCount,SUM(a.projected_earnings) as xCount from t_capital a
+		<where>
+			<if test="financeId != null and financeId != ''">
+				AND a.finance_id = #{financeId}
+			</if>
+		</where>
+	</select>
+	
+	
+	
+	<!-- 导出出借详情 -->
+	<select id="findExportList" resultType="LendPlanManage">
+		SELECT (@rowNO := @rowNo + 1) AS rowNO, fs.*
+		FROM (
+			SELECT 
+			<include refid="lendPlanManageColumns"/>,
+			CONCAT(
+	    	SUBSTRING(u.mobile, 1, 3),
+	    	'****',
+	   		SUBSTRING(u.mobile, 8, 4)
+	  				) AS mobile,
+	  	
+	  	  CASE 
+		  WHEN a.status = '1' THEN '匹配中'
+		  WHEN a.status = '6' THEN '匹配失败'
+	    <![CDATA[ WHEN (a.`status` IN ('2','3','5') AND DATE_FORMAT(NOW(), '%Y-%m-%d') < a.back_end_date) THEN '收益中（未到期）' ]]>
+	    <![CDATA[ WHEN (a.`status` IN ('2','3','5') AND DATE_FORMAT(NOW(), '%Y-%m-%d') >= a.back_end_date) THEN '收益中（已到期）' ]]>
+		  WHEN a.status = '4' THEN '退出中'
+		  WHEN a.status = '7' THEN '已结束'
+	      ELSE ''
+	  	END AS status,
+	  	
+	  	CASE 
+		  WHEN a.capital_source = '0' THEN 'PC端'
+		  WHEN a.capital_source = '1' THEN 'APP端'
+		  WHEN a.capital_source = '2' THEN 'M站'
+		  ELSE ''
+	  	END AS capitalSource
+	 	
+		FROM t_capital a 
+		LEFT JOIN t_finance f ON f.id = a.finance_id
+		JOIN t_user u ON u.id = a.user_id
+		<where>
+			
+			<if test="financeId != null and financeId != ''">
+				AND a.finance_id = #{financeId}
+			</if>
+			
+		</where>
+		ORDER BY investTime
+		) fs, (SELECT @rowNO := 0) b
+		LIMIT 500
+	</select>
+	
+</mapper>

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.operation.dao.ActivityPointDao">
+    
+	<sql id="pointColumns">
+		a.id AS "id",
+		a.activityid AS "activityid",
+		a.sendDate AS "sendDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.usedDate AS "usedDate",
+		a.del_flag AS "delFlag"
+	</sql>
+		
+	<sql id="pointJoins">
+	</sql>
+    
+	<select id="get" resultType="ActivityPoint">
+		SELECT 
+			<include refid="pointColumns"/>
+		FROM t_point a
+		<include refid="pointJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ActivityPoint">
+		SELECT 
+			<include refid="pointColumns"/>,
+			CONCAT(SUBSTRING(a.realName,1,1),'**') as realName,
+			CONCAT(SUBSTRING(a.mobile,1,3),'****',SUBSTRING(a.mobile,8)) as mobile, 
+			t.activityName as activityName,
+			REPLACE(a.amount, '-', '') as amount,
+			CASE a.consumPoint WHEN '1' THEN '虚拟物品兑换' WHEN '2' THEN '现金卷兑换' WHEN '3' THEN '体验金兑换' END as consumPoint,
+			CASE a.status WHEN '1' THEN '已发' WHEN '2' THEN '待发' WHEN '3' THEN '失败' END as status,
+			CASE a.sourcechannel WHEN '1' THEN 'web' WHEN '2' THEN '安卓' WHEN '3' THEN '苹果' WHEN '4' THEN '微信' WHEN '5' THEN '其他' END AS sourcechannel
+		FROM t_point a JOIN t_activity t on a.activityid = t.id
+		<include refid="pointJoins"/>
+		<where>
+		  <if test="pointSign != null and pointSign != ''">
+			  AND a.pointSign=#{pointSign}
+		  </if>
+			<if test="realName != null and realName != ''">
+				AND a.realName = #{realName}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="sourcechannel != null and sourcechannel != ''">
+				AND a.sourceChannel = #{sourcechannel}
+			</if>
+			<if test="consumPoint != null and consumPoint != ''">
+				AND a.consumPoint = #{consumPoint}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="beginSendDate != null and endSendDate != null and beginSendDate != '' and endSendDate != ''">
+				AND a.sendDate BETWEEN #{beginSendDate} AND #{endSendDate}
+			</if>
+			<if test="beginUsedDate != null and endUsedDate != null and beginUsedDate != '' and endUsedDate != ''">
+				AND a.usedDate BETWEEN #{beginUsedDate} AND #{endUsedDate}
+			</if>
+			<if test="activityName != null and activityName != ''">
+				AND t.activityName LIKE 
+					<if test="dbName == 'oracle'">'%'||#{activityName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{activityName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{activityName},'%')</if>
+			</if>
+			<if test="activityid != null and activityid != ''">
+        AND a.activityid = #{activityid}
+      </if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				<if test="pointSign=='1'">
+					ORDER BY a.sendDate DESC
+				</if>
+				<if test="pointSign=='2'">
+					ORDER BY a.usedDate DESC
+				</if>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 积分导出  -->
+	<select id="exportPointFile" resultType="ActivityPoint">
+		SELECT 
+			<include refid="pointColumns"/>,a.realName as realName,a.mobile as mobile,t.activityName as activityName,
+			REPLACE(a.amount, '-', '') as amount,
+			CASE a.consumPoint WHEN '1' THEN '虚拟物品兑换' WHEN '2' THEN '现金卷兑换' WHEN '3' THEN '体验金兑换' END as consumPoint,
+			CASE a.status WHEN '1' THEN '已发' WHEN '2' THEN '待发' WHEN '3' THEN '失败' END as status,
+			CASE a.sourcechannel WHEN '1' THEN 'web' WHEN '2' THEN '安卓' WHEN '3' THEN '苹果' WHEN '4' THEN '微信' WHEN '5' THEN '其他' END AS sourcechannel
+		FROM t_point a  JOIN t_activity t on a.activityid = t.id
+		<include refid="pointJoins"/>
+		<where>
+			a.pointSign=#{pointSign}
+			<if test="realName != null and realName != ''">
+				AND a.realName = #{realName}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="sourcechannel != null and sourcechannel != ''">
+				AND a.sourceChannel = #{sourcechannel}
+			</if>
+			<if test="consumPoint != null and consumPoint != ''">
+				AND a.consumPoint = #{consumPoint}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="beginSendDate != null and endSendDate != null and beginSendDate != '' and endSendDate != ''">
+				AND a.sendDate BETWEEN #{beginSendDate} AND #{endSendDate}
+			</if>
+			<if test="beginUsedDate != null and endUsedDate != null and beginUsedDate != '' and endUsedDate != ''">
+				AND a.usedDate BETWEEN #{beginUsedDate} AND #{endUsedDate}
+			</if>
+			<if test="activityName != null and activityName != ''">
+				AND t.activityName LIKE 
+					<if test="dbName == 'oracle'">'%'||#{activityName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{activityName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{activityName},'%')</if>
+			</if>
+		</where>
+				<if test="pointSign=='1'">
+					ORDER BY a.sendDate DESC
+				</if>
+				<if test="pointSign=='2'">
+					ORDER BY a.usedDate DESC
+				</if>
+	</select>
+	
+	<!--  获取积分总计  -->
+	<select id="getPointCounts" resultType="map">
+		select count(*) as counts,
+		count(distinct mobile) as userCounts,
+		SUM(REPLACE(amount,'-','')) as amounts 
+		FROM t_point a JOIN t_activity t on a.activityid = t.id
+		<where>
+			a.pointSign=#{pointSign}
+			<if test="realName != null and realName != ''">
+				AND a.realName = #{realName}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="sourcechannel != null and sourcechannel != ''">
+				AND a.sourceChannel = #{sourcechannel}
+			</if>
+			<if test="consumPoint != null and consumPoint != ''">
+				AND a.consumPoint = #{consumPoint}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="beginSendDate != null and endSendDate != null and beginSendDate != '' and endSendDate != ''">
+				AND a.sendDate BETWEEN #{beginSendDate} AND #{endSendDate}
+			</if>
+			<if test="beginUsedDate != null and endUsedDate != null and beginUsedDate != '' and endUsedDate != ''">
+				AND a.usedDate BETWEEN #{beginUsedDate} AND #{endUsedDate}
+			</if>
+			<if test="activityName != null and activityName != ''">
+				AND t.activityName LIKE 
+					<if test="dbName == 'oracle'">'%'||#{activityName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{activityName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{activityName},'%')</if>
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="ActivityPoint">
+		SELECT 
+			<include refid="pointColumns"/>
+		FROM t_point a
+		<include refid="pointJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_point(
+			id,
+			activityid,
+			realName,
+			mobile,
+			amount,
+			sourcechannel,
+			status,
+			pointSign,
+			create_by,
+			create_date
+		) VALUES (
+			#{id},
+			#{activityid},
+			#{realName},
+			#{mobile},
+			#{amount},
+			#{sourcechannel},
+			#{status},
+			#{pointSign},
+			#{createBy.id},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_point SET 	
+			activityid = #{activityid},
+			amount = #{amount},
+			sourcechannel = #{sourcechannel},
+			consumPoint = #{consumPoint},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			pointSign = #{pointSign}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE t_point SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.usermanage.dao.UserManageDao">
+   <select id="getUserInfo" resultType="com.hzdjr.hzwd.modules.usermanage.entity.TUser" parameterType="map">
+	 SELECT
+		t1.id AS id,
+		t1.mobile AS phone,
+		t1.realName AS uname,
+		t1.email AS email,
+		t1.isFuYou AS isThird,
+		t1.regDate AS regDate,
+		t1.userType AS type,
+		t1.lockStatus AS status
+	FROM
+		t_user AS t1 
+		<where>
+			<if test="phone!=null and phone!=''">
+				and t1.mobile like concat('%',#{phone},'%')
+			</if>
+			<if test="uname!=null and uname!=''">
+				and t1.realName like concat('%',#{uname},'%')
+			</if>
+			<if test="beginTimes!=null and beginTimes!='' and endTimes!=null and endTimes!=''">
+				and t1.regDate between #{beginTimes} and #{endTimes}
+			</if>
+			
+			<if test="type!=null and type!=''">
+				and t1.userType=#{type}
+			</if>
+			
+			<if test="status!=null and status!=''">
+				and t1.lockStatus=${status}
+			</if>
+			
+		</where>
+		order by t1.regDate desc
+		limit 0,20000
+   
+   </select>
+
+	<update id="lockUser" parameterType="String">
+		UPDATE t_user SET lockStatus=1 WHERE id=#{id}
+	</update>	
+	<update id="unlockUser" parameterType="String">
+		UPDATE t_user SET lockStatus=0 WHERE id=#{id}
+	</update>	
+	<update id="repwd" parameterType="map">
+		UPDATE t_user SET password=#{p} WHERE id=#{id}
+	</update>
+	
+	<!-- 查看-用户资金 -->
+	<select id="selectUserAccountById" parameterType="String" resultType="map">
+	SELECT tfa.totalAssets,tfa.ableBalanceAmt,tfa.ucapi,tfa.uinte,tfa.frozenAmt,
+(SELECT SUM(tbb.plan_repay_amount) FROM t_borrow tb1 LEFT JOIN t_borrow_billplan tbb ON tb1.loanNumber = tbb.apply_id WHERE tbb.repay_status='1' AND tfa.userId = tb1.USERID and tb1.BORROWSTATUS in(7,8)) AS 'repaymentNum',
+(SELECT SUM(monthly_payment_actual) FROM t_borrow LEFT JOIN t_borrow_billplan tbb1  ON loanNumber = apply_id WHERE repay_status='2' AND tfa.userId = USERID and BORROWSTATUS in(7,8))  AS 'repaymentNumSum'
+	,(SELECT SUM(t1.BORROWAMOUNT) FROM t_borrow WHERE BORROWSTATUS in(7,8) AND tfa.userId = USERID) AS 'NumSum'
+	FROM  
+t_fd_account tfa
+LEFT JOIN t_borrow t1 ON tfa.userId = t1.USERID
+LEFT JOIN t_borrow_billplan tb ON t1.loanNumber = tb.apply_id WHERE tfa.userId =#{id}
+GROUP BY tfa.userId
+	</select>	
+</mapper>

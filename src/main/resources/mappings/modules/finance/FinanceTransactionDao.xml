@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.finance.dao.FinanceTransactionDao">
+    
+	<sql id="capitalColumns">
+		a.id AS "id",
+		a.capital_type AS "capitalType",
+		a.capital_category AS "capitalCategory",
+		a.status AS "status",
+		a.amount AS "amount",
+		a.surplus_amount AS "surplusAmount",
+		a.matched_amount AS "matchedAmount",
+		a.rate AS "rate",
+		a.nper AS "nper",
+		a.customer AS "customer",
+		a.urgent AS "urgent",
+		a.stick_top AS "stickTop",
+		a.invest_time AS "investTime",
+		a.matched_time AS "matchedTime",
+		a.freeze_time AS "freezeTime",
+		a.thaw_time AS "thawTime",
+		a.source_capital_id AS "sourceCapitalId",
+		a.custom_weight AS "customWeight",
+		a.weight AS "weight",
+		a.capital_source AS "capitalSource",
+		a.capital_product AS "capitalProduct",
+		a.projected_earnings AS "projectedEarnings",
+		a.matching_pen_number AS "matchingPenNumber",
+		a.capital_code AS "capitalCode",
+		a.user_id AS "userId",
+		a.back_end_date AS "backEndDate",
+		a.interest_date AS "interestDate",
+		a.finance_id AS "financeId",
+		a.quit_time AS "quitTime"
+	</sql>
+	
+	<sql id="financeTransactionColumns">
+		tc.id AS 'capitalId',
+		tf.`name` AS 'financeName',
+		tf.finance_code AS 'financeCode',
+	  	CONCAT(
+	    	SUBSTRING(tu.mobile, 1, 3),
+	    	'****',
+	   		SUBSTRING(tu.mobile, 8, 4)
+	  	) AS 'mobile',
+	 	CONCAT(SUBSTRING(tu.realName, 1, 1), '**') AS 'userName',
+		tc.capital_code AS 'capitalCode',
+		tc.invest_time AS 'capitalInvestTime',
+		tc.amount AS 'capitailAmount',
+		CASE 
+		<![CDATA[ WHEN DATE_FORMAT(tc.quit_time, '%Y-%m-%d') < tc.back_end_date THEN '是' ]]>
+		  ELSE '否' 
+		END AS 'earlyExit',
+	</sql>
+	
+	<sql id="capitalStatusColumns">
+		tf.lending_method AS 'lendingMethod',
+		tc.source_capital_id AS 'capitalSource',
+		CASE 
+	    <![CDATA[ WHEN (tc.`status` IN ('2','3','5') AND DATE_FORMAT(NOW(), '%Y-%m-%d') < tc.back_end_date) THEN 'beforeBack' ]]>
+	    <![CDATA[ WHEN (tc.`status` IN ('2','3','5') AND DATE_FORMAT(NOW(), '%Y-%m-%d') >= tc.back_end_date) THEN 'afterBack' ]]>
+	      ELSE tc.`status`
+	  	END AS 'capitalStatus'
+	</sql>
+	
+	<sql id="capitalStatusExportColumns">
+		CASE 
+		  WHEN tf.`lending_method` = '1' THEN '本金复投'
+		  WHEN tf.`lending_method` = '2' THEN '本息复投'
+		  ELSE ''
+	  	END AS 'lendingMethod',
+	  	CASE 
+		  WHEN tc.`source_capital_id` = '0' THEN 'PC端'
+		  WHEN tc.`source_capital_id` = '1' THEN 'APP端'
+		  WHEN tc.`source_capital_id` = '2' THEN 'M站'
+		  ELSE ''
+	  	END AS 'capitalSource',
+		CASE 
+		  WHEN tc.`status` = '1' THEN '匹配中'
+		  WHEN tc.`status` = '6' THEN '匹配失败'
+	    <![CDATA[ WHEN (tc.`status` IN ('2','3','5') AND DATE_FORMAT(NOW(), '%Y-%m-%d') < tc.back_end_date) THEN '收益中（未到期）' ]]>
+	    <![CDATA[ WHEN (tc.`status` IN ('2','3','5') AND DATE_FORMAT(NOW(), '%Y-%m-%d') >= tc.back_end_date) THEN '收益中（已到期）' ]]>
+		  WHEN tc.`status` = '7' THEN '退出中'
+		  WHEN tc.`status` = '4' THEN '已结束'
+	      ELSE ''
+	  	END AS 'capitalStatus'
+	</sql>
+	
+	<sql id="financeTransactionJoins">
+	</sql>
+    
+	<sql id="financeTransactionQuery">
+		tc.capital_category = '1'
+		AND tc.capital_type = '1'
+		<if test="financeProductId != null and financeProductId != ''">
+			AND tf.product_id = #{financeProductId}
+		</if>
+		<if test="financeCode != null and financeCode != ''">
+			AND tf.finance_code like CONCAT('%',TRIM(#{financeCode}),'%')
+		</if>
+		<if test="capitalStatus != null and capitalStatus != ''">
+			AND 
+			<choose>
+				<when test="capitalStatus == 'beforeBack'.toString()">
+					<![CDATA[ tc.`status` IN ('2','3','5') AND DATE_FORMAT(NOW(), '%Y-%m-%d') < tc.back_end_date ]]>
+				</when>
+				<when test="capitalStatus == 'afterBack'.toString()">
+					<![CDATA[ tc.`status` IN ('2','3','5') AND DATE_FORMAT(NOW(), '%Y-%m-%d') >= tc.back_end_date ]]>
+				</when>
+				<otherwise>
+					tc.`status` = #{capitalStatus}
+				</otherwise>
+			</choose>
+		</if>
+		<if test="capitalInvestTimeBegin != null and capitalInvestTimeBegin != '' ">
+               <![CDATA[ AND tc.invest_time >= #{capitalInvestTimeBegin} ]]>
+           </if>
+           <if test="capitalInvestTimeEnd != null and capitalInvestTimeEnd != '' ">
+               <![CDATA[ AND tc.invest_time <= #{capitalInvestTimeEnd} ]]>
+           </if>
+		<if test="mobile != null and mobile != ''">
+			AND tu.mobile like CONCAT('%',TRIM(#{mobile}),'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			AND tu.realName like CONCAT('%',TRIM(#{userName}),'%')
+		</if>
+		<if test="capitalCode != null and capitalCode != ''">
+			AND tc.capital_code like CONCAT('%',TRIM(#{capitalCode}),'%')
+		</if>
+	</sql>
+	
+	<!-- 查询出借交易单详情 -->
+	<select id="get" resultType="FinanceTransaction">
+		SELECT 
+			tc.projected_earnings AS 'projectedEarnings',
+		  	tc.back_end_date AS 'endDate',
+		  	tc.quit_time AS 'quitTime',
+		  	tc.real_quit_time AS 'realQuitTime',
+		  	tc.paid_income AS 'paidIncome',
+		  	tc.returned_funds AS 'returnedFunds',
+			<include refid="financeTransactionColumns"/>
+			<include refid="capitalStatusColumns"/>
+		FROM t_capital tc
+		JOIN t_finance tf ON tf.id = tc.finance_id
+		JOIN t_user tu ON tu.id = tc.user_id
+		WHERE 
+			tc.id = #{id}
+	</select>
+	
+	<!-- 查询出借交易单列表 -->
+	<select id="findList" resultType="FinanceTransaction">
+		SELECT 
+			<include refid="financeTransactionColumns"/>
+			<include refid="capitalStatusColumns"/>
+		FROM t_capital tc
+		JOIN t_finance tf ON tf.id = tc.finance_id
+		JOIN t_user tu ON tu.id = tc.user_id
+		<where>
+			<include refid="financeTransactionQuery"/>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 导出出借交易单列表 -->
+	<select id="findExportList" resultType="FinanceTransaction">
+		SELECT (@rowNO := @rowNo + 1) AS rowNO, fs.*
+		FROM (
+			SELECT 
+				<include refid="financeTransactionColumns"/>
+				<include refid="capitalStatusExportColumns"/>
+			FROM t_capital tc
+			JOIN t_finance tf ON tf.id = tc.finance_id
+			JOIN t_user tu ON tu.id = tc.user_id
+			<where>
+				<include refid="financeTransactionQuery"/>
+			</where>
+			ORDER BY capitalInvestTime
+		) fs, (SELECT @rowNO := 0) b
+		LIMIT 20000
+	</select>
+	
+	<select id="findAllList" resultType="FinanceTransaction">
+		SELECT 
+			<include refid="capitalColumns"/>
+		FROM t_capital a
+		<include refid="financeTransactionJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_capital(
+			id,
+			capital_type,
+			capital_category,
+			status,
+			amount,
+			surplus_amount,
+			matched_amount,
+			rate,
+			nper,
+			customer,
+			urgent,
+			stick_top,
+			invest_time,
+			matched_time,
+			freeze_time,
+			thaw_time,
+			source_capital_id,
+			custom_weight,
+			weight,
+			capital_source,
+			capital_product,
+			projected_earnings,
+			matching_pen_number,
+			capital_code,
+			user_id,
+			back_end_date,
+			interest_date,
+			finance_id,
+			quit_time
+		) VALUES (
+			#{id},
+			#{capitalType},
+			#{capitalCategory},
+			#{status},
+			#{amount},
+			#{surplusAmount},
+			#{matchedAmount},
+			#{rate},
+			#{nper},
+			#{customer},
+			#{urgent},
+			#{stickTop},
+			#{investTime},
+			#{matchedTime},
+			#{freezeTime},
+			#{thawTime},
+			#{sourceCapitalId},
+			#{customWeight},
+			#{weight},
+			#{capitalSource},
+			#{capitalProduct},
+			#{projectedEarnings},
+			#{matchingPenNumber},
+			#{capitalCode},
+			#{userId},
+			#{backEndDate},
+			#{interestDate},
+			#{financeId},
+			#{quitTime}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_capital SET 	
+			capital_type = #{capitalType},
+			capital_category = #{capitalCategory},
+			status = #{status},
+			amount = #{amount},
+			surplus_amount = #{surplusAmount},
+			matched_amount = #{matchedAmount},
+			rate = #{rate},
+			nper = #{nper},
+			customer = #{customer},
+			urgent = #{urgent},
+			stick_top = #{stickTop},
+			invest_time = #{investTime},
+			matched_time = #{matchedTime},
+			freeze_time = #{freezeTime},
+			thaw_time = #{thawTime},
+			source_capital_id = #{sourceCapitalId},
+			custom_weight = #{customWeight},
+			weight = #{weight},
+			capital_source = #{capitalSource},
+			capital_product = #{capitalProduct},
+			projected_earnings = #{projectedEarnings},
+			matching_pen_number = #{matchingPenNumber},
+			capital_code = #{capitalCode},
+			user_id = #{userId},
+			back_end_date = #{backEndDate},
+			interest_date = #{interestDate},
+			finance_id = #{financeId},
+			quit_time = #{quitTime}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_capital
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 出借计划产品字典 -->
+	<select id="findFinanceProducts" resultType="Dict">
+		select 
+		  tfp.id AS 'value',
+		  tfp.name AS 'label' 
+		from
+		  t_finance_product tfp 
+		order by tfp.order_num 
+	</select>
+	
+	<sql id="financeInvestSql">
+		SELECT 
+		  ti.`id` AS 'investId',
+		  tb.`loanNumber` AS 'loanNumber',
+		  ti.`investCode` AS 'investCode',
+		  ti.`investTime` AS 'investTime',
+		  tm.`create_time` AS 'matchedTime',
+		  ti.`investAmount` AS 'investAmount',
+		  <![CDATA[ 
+		  CASE
+		   	WHEN ti.`flag` = '1' AND ti.`invest_status` = '0' 
+		    	AND DATE_FORMAT(NOW(), '%Y-%m-%d') <  DATE_FORMAT(ti.interestAccrualDate, '%Y-%m-%d') THEN '10'
+		    WHEN ti.`flag` = '1' AND ti.`invest_status` = '0' 
+		    	AND DATE_FORMAT(NOW(), '%Y-%m-%d') >=  DATE_FORMAT(ti.interestAccrualDate, '%Y-%m-%d') THEN '11'
+		    WHEN ti.`flag` = '1' AND ti.`invest_status` <> '0' THEN ti.`invest_status` 
+		    ELSE '12' 
+		  END AS 'investStatus', 
+		  ]]>
+		  ti.interestAccrualDate AS 'interestDate' 
+		FROM
+		  t_capital tc 
+		  JOIN t_matched tm 
+		    ON tm.`capital_id` = tc.`id` 
+		  JOIN t_invest ti 
+		    ON ti.`id` = tm.`invest_id` 
+		  JOIN t_borrow tb 
+		    ON tb.`BORROW_ID` = ti.`borrowId` 
+	</sql>
+	
+	<!-- 查询出借交易单投资列表 -->
+	<select id="findFinanceInvests" parameterType="map" resultType="com.hzdjr.hzwd.modules.finance.entity.FinanceInvest" >
+		SELECT * FROM (
+			<include refid="financeInvestSql"/>
+		WHERE tc.id = #{capitalId} 
+		ORDER BY investTime
+		) tmp
+		UNION
+			<include refid="financeInvestSql"/>
+		WHERE tc.source_capital_id = #{capitalId} 
+		ORDER BY investTime
+	</select>
+	
+	<!-- 查询预期回款 -->
+	<select id="findExpectedRepayBillplans" parameterType="map" resultType="com.hzdjr.hzwd.modules.repaybillplan.entity.TBorrowRepayBillplan" >
+		SELECT 
+		  tidb.`billNum` AS 'billNum',
+		  tidb.`stcapi` AS 'stcapi',
+		  tidb.`sinte` AS 'sinte',
+		  tidb.`stcapi` + tidb.`sinte` AS 'sAmount',
+		  tidb.`sDate` AS 'sDate',
+		  tidb.`payoffFlag` AS 'payoffFlag' 
+		FROM
+		  t_invest_deserve_benefits tidb 
+		WHERE tidb.`investId` = #{investId}
+		ORDER BY tidb.`billNum`  
+	</select>
+	
+</mapper>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.repaybillplan.dao.TBorrowRepayBillplanDao">
+    
+	<sql id="tBorrowRepayBillplanColumns">
+		a.investid AS "investid",
+		a.billnum AS "billnum",
+		a.capiyear AS "capiyear",
+		a.capimonth AS "capimonth",
+		a.sdate AS "sdate",
+		a.stcapi AS "stcapi",
+		a.sinte AS "sinte",
+		a.bal AS "bal",
+		a.rdate AS "rdate",
+		a.rtcapi AS "rtcapi",
+		a.rinte AS "rinte",
+		a.overflag AS "overflag",
+		a.payoffflag AS "payoffflag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="tBorrowRepayBillplanJoins">
+	</sql>
+    
+	<select id="get" resultType="TBorrowRepayBillplan">
+		SELECT 
+			<include refid="tBorrowRepayBillplanColumns"/>
+		FROM t_borrow_repay_billplan a
+		<include refid="tBorrowRepayBillplanJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TBorrowRepayBillplan">
+		SELECT 
+			<include refid="tBorrowRepayBillplanColumns"/>
+		FROM t_borrow_repay_billplan a
+		<include refid="tBorrowRepayBillplanJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TBorrowRepayBillplan">
+		SELECT 
+			<include refid="tBorrowRepayBillplanColumns"/>
+		FROM t_borrow_repay_billplan a
+		<include refid="tBorrowRepayBillplanJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_borrow_repay_billplan(
+			investid,
+			billnum,
+			capiyear,
+			capimonth,
+			sdate,
+			stcapi,
+			sinte,
+			bal,
+			rdate,
+			rtcapi,
+			rinte,
+			overflag,
+			payoffflag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{investid},
+			#{billnum},
+			#{capiyear},
+			#{capimonth},
+			#{sdate},
+			#{stcapi},
+			#{sinte},
+			#{bal},
+			#{rdate},
+			#{rtcapi},
+			#{rinte},
+			#{overflag},
+			#{payoffflag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_borrow_repay_billplan SET 	
+			investid = #{investid},
+			billnum = #{billnum},
+			capiyear = #{capiyear},
+			capimonth = #{capimonth},
+			sdate = #{sdate},
+			stcapi = #{stcapi},
+			sinte = #{sinte},
+			bal = #{bal},
+			rdate = #{rdate},
+			rtcapi = #{rtcapi},
+			rinte = #{rinte},
+			overflag = #{overflag},
+			payoffflag = #{payoffflag},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE t_borrow_repay_billplan SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

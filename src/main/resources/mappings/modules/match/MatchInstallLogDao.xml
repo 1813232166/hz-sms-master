@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.match.dao.MatchInstallLogDao">
+  <sql id="operationLog" >
+    id, 
+    type,
+    create_time as createTime, 
+    name, 
+    account_number as accountNumber,
+    asset_nper as assetNper,
+    capital_nper as capitalNper,
+    match_type as matchType,
+    status as status
+  </sql>
+	<select id="findList" resultType="com.hzdjr.hzwd.modules.match.entity.OperationLog">
+		SELECT 
+			<include refid="operationLog"/>
+		FROM t_match_install_log a
+		<where>
+			<if test="filed != null and filed != ''">
+				AND a.type = #{type}
+			</if>			
+	</where>
+		ORDER BY a.create_time DESC
+	 </select>
+
+
+		<insert id="createMatchInstallLog" parameterType="com.hzdjr.hzwd.modules.match.entity.OperationLog">
+		INSERT INTO t_match_install_log(
+			id,
+			type,
+			create_time,
+			name,
+			account_number,
+			asset_nper,
+			capital_nper,
+			match_type,
+			status
+		) VALUES (
+			#{id},
+			#{type},
+			#{createTime},
+			#{name},
+			#{accountNumber},
+			#{assetNper},
+			#{capitalNper},
+			#{matchType},
+			#{status}
+		)
+	</insert>
+
+
+
+</mapper>

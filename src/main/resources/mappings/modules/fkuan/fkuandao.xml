@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.fk.dao.FkuanDAO">
+    
+     <!-- 查询已放款列表   即状态为7 还款中;修改后 11 还款中;12 已还清-->
+    <select id="hasFkuanList" resultType="com.hzdjr.hzwd.modules.fk.entity.Fkuan" parameterType="java.util.Map">
+       SELECT
+        tb.BORROW_ID AS 'borrowerId',
+		tb.borrowAliasNo AS 'biaoid',
+		tb.BORROWTITLE AS 'biaoname',
+		tb.loanNumber AS 'borrowerNumber',
+		tu.realName AS 'borrowerName',
+		tu.mobile AS 'borrowerPhone',
+		tb.BORROWAMOUNT AS 'cash',
+		tb.ANUALRATE AS 'reate',
+		tb.DEADLINE AS 'dedaline',
+		tb.pay_method AS 'type',
+		tb.lendingTime AS 'lendingTime',
+		tb.full_borrow_date AS 'fullBorrowDate',
+		<choose>
+		    <when test="#{map}!=null and #{map}!=''">
+		          (select sum(BORROWAMOUNT) from t_borrow as tb left join t_user as tu on tb.USERID = tu.id 
+		     <where>
+		     (tb.BORROWSTATUS = 11 or tb.BORROWSTATUS = 12)
+		     
+		     <if test="time!=null and time !=''">
+		         AND  DATE_FORMAT(tb.lendingTime, '%Y-%m-%d %H:%i:%s') <![CDATA[ >= ]]> #{time}
+		     </if>
+			
+		    <if test="time2!=null and time2 !=''">
+				AND  DATE_FORMAT(tb.lendingTime, '%Y-%m-%d %H:%i:%s') <![CDATA[ <= ]]> #{time2}
+			</if>
+		     
+		      <if test="borrowerNumber!=null and borrowerNumber !=''">
+		         AND tb.borrowAliasNo like TRIM('%${borrowerNumber}%')
+		     </if>
+		      <if test="biaoname!=null and biaoname!=''">
+		         AND tb.BORROWTITLE like TRIM('%${biaoname}%')
+		     </if>
+		      <if test="borrowerName!=null and borrowerName !=''">
+		         AND tu.realName like TRIM('%${borrowerName}%')
+		     </if>
+		     <if test="borrowerPhone!=null and borrowerPhone !=''">
+		         AND tu.mobile like TRIM('%${borrowerPhone}%')
+		     </if>
+				</where>) as 'sumCount'  
+		    </when>
+		    <otherwise>
+		        (select sum(BORROWAMOUNT) from t_borrow as tb left join t_user as tu on tb.USERID = tu.id
+		        AND  (tb.BORROWSTATUS = 11 or tb.BORROWSTATUS = 12)) as 'sumCount'
+		    </otherwise>
+		</choose>
+		FROM
+			t_borrow AS tb
+		LEFT JOIN t_user AS tu ON tb.USERID = tu.id
+		<where>
+		     (tb.BORROWSTATUS = 11 or tb.BORROWSTATUS = 12)
+		     
+		     <if test="time!=null and time !=''">
+		         AND  DATE_FORMAT(tb.lendingTime, '%Y-%m-%d %H:%i:%s') <![CDATA[ >= ]]> #{time}
+		     </if>
+			
+		    <if test="time2!=null and time2 !=''">
+				AND  DATE_FORMAT(tb.lendingTime, '%Y-%m-%d %H:%i:%s') <![CDATA[ <= ]]> #{time2}
+			</if>
+		     
+		      <if test="borrowerNumber!=null and borrowerNumber !=''">
+		         AND tb.borrowAliasNo like TRIM('%${borrowerNumber}%')
+		     </if>
+		      <if test="biaoname!=null and biaoname!=''">
+		         AND tb.BORROWTITLE like TRIM('%${biaoname}%')
+		     </if>
+		      <if test="borrowerName!=null and borrowerName !=''">
+		         AND tu.realName like TRIM('%${borrowerName}%')
+		     </if>
+		     <if test="borrowerPhone!=null and borrowerPhone !=''">
+		         AND tu.mobile like TRIM('%${borrowerPhone}%')
+		     </if>
+		</where>
+	    ORDER BY tb.lendingTime DESC
+    </select>
+    <!-- 查询未放款列表   即状态为11 满标；修改后 10 已满标-->
+    <select id="noFkuanList" resultType="com.hzdjr.hzwd.modules.fk.entity.Fkuan" parameterType="java.util.Map">
+       SELECT
+        tb.BORROW_ID AS 'borrowerId',
+		tb.borrowAliasNo AS 'biaoid',
+		tb.BORROWTITLE AS 'biaoname',
+		tb.loanNumber AS 'borrowerNumber',
+		tu.realName AS 'borrowerName',
+		tu.mobile AS 'borrowerPhone',
+		tb.BORROWAMOUNT AS 'cash',
+		tb.ANUALRATE AS 'reate',
+		tb.DEADLINE AS 'dedaline',
+		tb.pay_method AS 'type',
+		tb.lendingTime AS 'time',
+		tb.full_borrow_date AS 'fullBorrowDate',
+		tb.borrowCode AS 'borrowCode',
+		<choose>
+		    <when test="#{map}!=null and #{map}!=''">
+		          (select sum(BORROWAMOUNT) from t_borrow as tb left join t_user as tu on tb.USERID = tu.id 
+				     <where>
+				     tb.BORROWSTATUS = 10
+				     
+				    <if test="time!=null and time !=''">
+				         AND  DATE_FORMAT(tb.full_borrow_date, '%Y-%m-%d %H:%i:%s') <![CDATA[ >= ]]> #{time}
+				     </if>
+					
+				    <if test="time2!=null and time2 !=''">
+						AND  DATE_FORMAT(tb.full_borrow_date, '%Y-%m-%d %H:%i:%s') <![CDATA[ <= ]]> #{time2}
+					</if>
+				     
+				      <if test="borrowerNumber!=null and borrowerNumber !=''">
+				         AND tb.borrowAliasNo like TRIM('%${borrowerNumber}%')
+				     </if>
+				      <if test="biaoname!=null and biaoname!=''">
+				         AND tb.BORROWTITLE like TRIM('%${biaoname}%')
+				     </if>
+				      <if test="borrowerName!=null and borrowerName !=''">
+				         AND tu.realName like TRIM('%${borrowerName}%')
+				     </if>
+				     <if test="borrowerPhone!=null and borrowerPhone !=''">
+				         AND tu.mobile like TRIM('%${borrowerPhone}%')
+				     </if>
+						</where>) as 'sumCount'  
+		    </when>
+		    <otherwise>
+		        (select sum(BORROWAMOUNT) from t_borrow as tb left join t_user as tu on tb.USERID = tu.id
+		        AND  tb.BORROWSTATUS = 10) as 'sumCount'
+		    </otherwise>
+		</choose>
+		FROM
+			t_borrow AS tb
+		LEFT JOIN t_user AS tu ON tb.USERID = tu.id
+		<where>
+		     tb.BORROWSTATUS = 10
+		     
+		     	   <if test="time!=null and time !=''">
+				         AND  DATE_FORMAT(tb.full_borrow_date, '%Y-%m-%d %H:%i:%s') <![CDATA[ >= ]]> #{time}
+				     </if>
+					
+				    <if test="time2!=null and time2 !=''">
+						AND  DATE_FORMAT(tb.full_borrow_date, '%Y-%m-%d %H:%i:%s') <![CDATA[ <= ]]> #{time2}
+					</if>
+		     
+		      <if test="borrowerNumber!=null and borrowerNumber !=''">
+		         AND tb.borrowAliasNo like TRIM('%${borrowerNumber}%')
+		     </if>
+		      <if test="biaoname!=null and biaoname!=''">
+		         AND tb.BORROWTITLE like TRIM('%${biaoname}%')
+		     </if>
+		      <if test="borrowerName!=null and borrowerName !=''">
+		         AND tu.realName like TRIM('%${borrowerName}%')
+		     </if>
+		     <if test="borrowerPhone!=null and borrowerPhone !=''">
+		         AND tu.mobile like TRIM('%${borrowerPhone}%')
+		     </if>
+		</where>
+	    ORDER BY tb.full_borrow_date DESC
+    </select>
+    
+     <!-- 查询拒绝放款列表 -->
+    <select id="queryRefuseFkuanList" resultType="com.hzdjr.hzwd.modules.fk.entity.Fkuan">
+        SELECT
+    	tb.BORROW_ID AS 'borrowerId',
+		tb.borrowAliasNo AS 'biaoid',
+		tb.BORROWTITLE AS 'biaoname',
+		tb.loanNumber AS 'borrowerNumber',
+		tu.realName AS 'borrowerName',
+		tu.mobile AS 'borrowerPhone',
+		tb.BORROWAMOUNT AS 'cash',
+		tb.ANUALRATE AS 'reate',
+		tb.DEADLINE AS 'dedaline',
+		tb.pay_method AS 'type',
+		tb.lendingTime AS 'time'
+	FROM t_borrow_audit_record tbar LEFT JOIN t_borrow tb ON tbar.audit_bid = tb.BORROW_ID
+	LEFT JOIN t_user AS tu ON tb.BORROW_ID = tu.id
+       <where>
+		     tbar.audit_type='check'
+	
+		   	     <if test="time!=null and time !=''">
+				         AND  DATE_FORMAT(tb.lendingTime, '%Y-%m-%d %H:%i:%s') <![CDATA[ >= ]]> #{time}
+				   </if>
+					
+				    <if test="time2!=null and time2 !=''">
+						AND  DATE_FORMAT(tb.lendingTime, '%Y-%m-%d %H:%i:%s') <![CDATA[ <= ]]> #{time2}
+			   </if>  
+		     
+		      <if test="borrowerNumber!=null and borrowerNumber !=''">
+		         AND tb.borrowAliasNo like TRIM('%${borrowerNumber}%')
+		     </if>
+		      <if test="biaoname!=null and biaoname!=''">
+		         AND tb.BORROWTITLE like TRIM('%${biaoname}%')
+		     </if>
+		      <if test="borrowerName!=null and borrowerName !=''">
+		         AND tu.realName like TRIM('%${borrowerName}%')
+		     </if>
+		     <if test="borrowerPhone!=null and borrowerPhone !=''">
+		         AND tu.mobile like TRIM('%${borrowerPhone}%')
+		     </if>
+		</where>
+	    ORDER BY tb.lendingTime DESC 
+    </select>
+    
+      <!-- 异常放款列表 -->
+    <select id="errorFkuanList" resultType="com.hzdjr.hzwd.modules.fk.entity.Fkuan">
+        SELECT
+    tb.BORROW_ID AS 'borrowerId',
+		tb.borrowAliasNo AS 'biaoid',
+		tb.BORROWTITLE AS 'biaoname',
+		tb.loanNumber AS 'borrowerNumber',
+		tu.realName AS 'borrowerName',
+		tu.mobile AS 'borrowerPhone',
+		tb.BORROWAMOUNT AS 'cash',
+		tb.ANUALRATE AS 'reate',
+		tb.DEADLINE AS 'dedaline',
+		tb.pay_method AS 'type',
+		tbf.createtime AS 'lendingTime',
+		tbf.`operator_user` AS 'operatorUser',
+		<!-- tbf.borrow_season AS 'failelend' -->
+		<choose>
+		    <when test="#{map}!=null and #{map}!=''">
+		          (select sum(BORROWAMOUNT) from t_borrow as tb left join t_user as tu on tb.USERID = tu.id 
+		     <where>
+		     tb.BORROWSTATUS = 10 AND tb.BORROW_ID = tbf.borrow_id
+	
+		     	 <if test="time!=null and time !=''">
+				         AND  DATE_FORMAT(tbf.createtime, '%Y-%m-%d %H:%i:%s') <![CDATA[ >= ]]> #{time}
+				     </if>
+					
+				    <if test="time2!=null and time2 !=''">
+						AND  DATE_FORMAT(tbf.createtime, '%Y-%m-%d %H:%i:%s') <![CDATA[ <= ]]> #{time2}
+					</if>
+		    
+		      <if test="borrowerNumber!=null and borrowerNumber !=''">
+		         AND tb.borrowAliasNo like TRIM('%${borrowerNumber}%')
+		     </if>
+		      <if test="biaoname!=null and biaoname!=''">
+		         AND tb.BORROWTITLE like TRIM('%${biaoname}%')
+		     </if>
+		      <if test="borrowerName!=null and borrowerName !=''">
+		         AND tu.realName like TRIM('%${borrowerName}%')
+		     </if>
+		     <if test="borrowerPhone!=null and borrowerPhone !=''">
+		         AND tu.mobile like TRIM('%${borrowerPhone}%')
+		     </if>
+				</where>) as 'sumCount'  
+		    </when>
+		    <otherwise>
+		        (select sum(BORROWAMOUNT) from t_borrow as tb left join t_user as tu on tb.USERID = tu.id
+		        AND  tb.BORROWSTATUS = 10 AND tb.BORROW_ID = tbf.borrow_id) as 'sumCount'
+		    </otherwise>
+		</choose>
+			FROM
+				t_borrow_failelend tbf		
+		 LEFT JOIN t_borrow AS tb ON tb.BORROW_ID = tbf.borrow_id
+		<!-- from t_borrow AS tb -->
+	LEFT JOIN t_user AS tu ON tb.USERID = tu.id
+	<where>  
+		       tb.BORROWSTATUS='10' and  <!-- borrow_id in
+		     (
+			SELECT 
+			CASE borrow_id WHEN NULL THEN 0 ELSE borrow_id END  'borrow_id'
+			FROM (select borrow_id from t_borrow_failelend GROUP BY borrow_id HAVING MAX(createtime)) as borrow
+			)  -->
+			tbf.borrow_id=NULLIF(tbf.borrow_id,"")
+			
+		     	 <if test="time!=null and time !=''">
+				         AND  DATE_FORMAT(tbf.createtime, '%Y-%m-%d %H:%i:%s') <![CDATA[ >= ]]> #{time}
+				     </if>
+					
+				    <if test="time2!=null and time2 !=''">
+						AND  DATE_FORMAT(tbf.createtime, '%Y-%m-%d %H:%i:%s') <![CDATA[ <= ]]> #{time2}
+					</if>
+		      <if test="borrowerNumber!=null and borrowerNumber !=''">
+		         AND tb.borrowAliasNo like TRIM('%${borrowerNumber}%')
+		     </if>
+		      <if test="biaoname!=null and biaoname!=''">
+		         AND tb.BORROWTITLE like TRIM('%${biaoname}%')
+		     </if>
+		      <if test="borrowerName!=null and borrowerName !=''">
+		         AND tu.realName like TRIM('%${borrowerName}%')
+		     </if>
+		     <if test="borrowerPhone!=null and borrowerPhone !=''">
+		         AND tu.mobile like TRIM('%${borrowerPhone}%')
+		     </if>
+		</where>
+		<!--  GROUP BY tbf.borrow_id HAVING MAX(tbf.createtime) -->
+		 GROUP BY  borrowerId ORDER BY tbf.createtime  DESC
+	   <!--  ORDER BY tb.lendingTime DESC limit 1 -->
+        
+    </select>
+    
+    
+    
+    <select id="getBorrowTimeAndAnount" parameterType="String" resultType="com.hzdjr.hzwd.modules.fk.entity.Borrow1">
+    	SELECT
+			b.BORROW_ID borrowId,
+			b.DEADLINE deadline,
+			b.lendingTime lendingTime,
+			b.monthPrepaymentAmount monthPrepaymentAmount,
+			b.loanNumber
+		FROM
+			t_borrow b where b.BORROW_ID=#{borrowId}
+    </select>
+    
+    <update id="updateBorrowTime" parameterType="map">
+    	UPDATE t_borrow b 
+    		SET b.lendingTime=#{dateStr} 
+    		WHERE b.BORROW_ID=#{borrowId}
+    </update>
+    
+    <update id="updateFinishInvestTime" parameterType="java.lang.String">
+    	UPDATE t_invest b 
+    		SET b.finishTime=#{1} 
+    		WHERE b.borrowId=#{0} and b.flag=1
+    </update>
+    
+     <insert id="insertFkSeason" parameterType="String">
+    	insert into  t_borrow_failelend(id,borrow_id,borrow_season,operator_user) values( #{0}, #{1}, #{2},#{3});
+    </insert>
+    
+    <insert id="deleteFkQuery" parameterType="String">
+       <!--  delete from hx_operation_record where code=#{2} and userId=#{0} and requestNo=#{1} and borrowCode=#{3} -->
+        update hx_operation_record set status=-1 where code=#{2} and userId=#{0} and requestNo=#{1} and borrowCode=#{3}
+    </insert>
+    
+    <insert id="insertFkQuery" parameterType="String">
+        insert into hx_operation_record(code,userId,requestNo,status,create_date,borrowCode) 
+        values(#{code},#{userId},#{requestNo},#{status},#{create_date},#{borrowCode})
+    </insert>
+    
+    <select id="isExistBorrow" parameterType="String"  resultType="Integer">
+        select count(1)  from   hx_operation_record where borrowCode=#{0} and code='R2039' and status=0
+    </select>
+    
+    <insert id="updateFkQuery" parameterType="String">
+        update  hx_operation_record set status=1 where  code=#{2} and userId=#{0} and requestNo=#{1} and borrowCode=#{3}
+    </insert>
+    
+    <!-- 异常放款原因  -->
+    <select id="finderror" parameterType="String" resultType="String">
+        SELECT
+    
+		tbf.borrow_season
+			FROM
+				t_borrow_failelend tbf		
+		 where  tbf.borrow_id = #{borrowId}
+	    ORDER BY tbf.createtime DESC limit 0,1
+    </select>
+    
+    <!--   投资同步数据 wzb  -->
+    <select id="getInvestInfo" parameterType="String" resultType="Map">
+        SELECT   u.`mobile` as userMobile,u.`realName`  as userName,v.`investTime` as investTime,v.`investAmount` as investAmount,
+        w.`DEADLINE` as deadline, w.`borrowCode` as projectNo,w.`BORROWTITLE` as projectName,'3' as orderType,'2' as resource,v.`investCode` as orderId  
+        FROM    t_invest   v  LEFT JOIN   t_borrow w  ON  v.borrowid = w.`BORROW_ID` 
+        LEFT JOIN  t_user  u  ON u.id = v.`investor`
+        WHERE  v.`flag`=1  AND (w.`BORROWSTATUS` = 10 OR w.`BORROWSTATUS`=11) AND  w.`borrowCode`=#{0}
+        GROUP BY  v.investor    
+    </select>
+    
+    
+     <!-- 放款定时器查询 -->
+    <select id="selectFkQuery"  parameterType="String" resultType="Map">
+        SELECT code,userId,requestNo,borrowCode,status from hx_operation_record 		
+		 where  status=0 and code=#{code}
+    </select>
+    
+</mapper>

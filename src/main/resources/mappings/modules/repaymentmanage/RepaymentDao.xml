@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.repaymentmanage.dao.RePaymentDao">
+   
+   <!--出借计划  - 还款列表  -->
+   <select id="findLendList" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.LendPlan">
+     select 
+		t1.id,
+		t1.product_name,
+		t1.amount,
+		t1.rate,
+		t2.deadline,
+		t2.id as primaryId,
+		t1.repay_style as repayStyle,
+		t1.status
+		 from 
+		t_finance_product as t1 
+		left join 
+		t_invest as t2 
+		on 
+		t1.id = t2.borrowId
+		where 1 = 1
+		<if test="id!=null and id!=''">
+		    and t1.id = #{id} 
+		</if>
+		<if test="productName!=null and productName!=''">
+		    and t1.product_name = #{productName} 
+		</if>
+		
+   </select>
+   
+   <!-- 还款详情页面 -->
+   <select id="toLendDetail" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.LendPlan" parameterType="String">
+     SELECT
+		t1.id ,
+		t1.name,
+		t1.repay_style as repayStyle,
+		t1.amount,
+		t1.rate,
+		t2.deadline,
+		t1.min_invest_amount as minInvestAmount,
+		t1.status,
+		t1.start_time as startTime,
+		t1.end_time as endTime,
+		'满标时间',
+		'结束时间'
+		FROM
+		t_finance_product t1 
+		left join 
+		t_invest t2 
+		on 
+		t1.id = t2.borrowId
+		where t1.id = #{id};
+   </select>
+   
+   <!--查询   t_invest_billplan   获取还款金额  还款期数  还款日期-->
+   <select id="queryInvestBillPlan" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.InvestBillPlan">
+    SELECT 
+    (stcapi+sinte) as count,
+    max(capiMonth) as capiMonth,
+    rDate
+    FROM `t_invest_billplan` 
+	WHERE investid=#{investorId}
+    ORDER BY  sDate  DESC LIMIT 0,1;
+   </select>
+   
+</mapper>

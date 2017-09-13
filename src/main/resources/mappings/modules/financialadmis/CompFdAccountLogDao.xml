@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.CompFdAccountLogDao">
+    
+	<sql id="compFdAccountLogColumns">
+		a.id AS "id",
+		a.create_date AS "acdate",
+		a.request_no AS "tradeNo",
+		a.type AS "biztype",
+		a.remarks AS "remark",
+		a.amount AS "amount",
+		a.commission AS "commission",
+		a.guarant_amt AS "guarantAmt"
+	</sql>
+	
+	<sql id="compFdAccountLogJoins">
+	</sql>
+    
+	<select id="get" resultType="CompFdAccountLog">
+		SELECT * FROM (
+            SELECT <include refid="compFdAccountLogColumns"/>,b.userId AS "userId", 
+                  b.transactionAmt AS debit, 0.00 AS credit 
+            FROM t_fd_payment  a,t_fd_account_log b  
+            WHERE a.request_no = b.relateRequestNo AND a.type IN('8','10') AND a.`status`='S'  
+        UNION ALL 
+            SELECT <include refid="compFdAccountLogColumns"/>,a.user_id AS "userId",  0.00 AS debit,a.amount AS credit 
+            FROM t_fd_payment  a WHERE a.type ='9' AND a.`status`='S' 
+        ) aa
+		WHERE aa.id = #{id}
+	</select>
+	<!--  平台账户列表         交易类型[1:网银充值,5:提现,6:出借,7:还款,8:放款,9:代偿【垫付】,10:还代偿款,12:流标,13:收益明细提交,14:回款] -->
+	<select id="findList" resultType="CompFdAccountLog">
+		SELECT * FROM (
+            SELECT <include refid="compFdAccountLogColumns"/>,b.userId AS "userId", 
+                  b.transactionAmt AS debit, 0.00 AS credit 
+             FROM t_fd_payment  a,t_fd_account_log b  
+            WHERE a.request_no = b.relateRequestNo AND a.type IN('8','10') AND a.`status`='S'  
+        UNION ALL 
+            SELECT <include refid="compFdAccountLogColumns"/>,a.user_id AS "userId",  0.00 AS debit,a.amount AS credit 
+            FROM t_fd_payment  a WHERE a.type ='9' AND a.`status`='S' 
+        ) aa
+		<include refid="compFdAccountLogJoins"/>
+		<where>
+		      aa.userId  IN('SYS_GENERATE_001','SYS_GENERATE_002','SYS_GENERATE_003','SYS_GENERATE_004')
+			<if test="userId=='平台垫付账户'">
+				 AND aa.userId  IN('SYS_GENERATE_001','SYS_GENERATE_002')
+			</if>
+			<if test="userId=='服务费账户'">
+				 AND aa.userId   IN('SYS_GENERATE_003','SYS_GENERATE_004')
+			</if>
+			<if test="tradeNo != null and tradeNo != ''">
+                AND aa.tradeNo like "%${tradeNo}%"
+            </if>
+			<if test="null !=beginTime  and beginTime != ''">
+					<![CDATA[  AND aa.acdate >= #{beginTime}  ]]>
+			</if>
+			<if test="null !=overTime  and overTime != ''">
+					<![CDATA[ AND aa.acdate <= #{overTime}  ]]>
+			</if>
+		</where>
+		ORDER BY aa.acdate DESC
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<when test=" null != endLimit and '' != endLimit ">  LIMIT #{endLimit}</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CompFdAccountLog">
+		SELECT * FROM (
+            SELECT <include refid="compFdAccountLogColumns"/>,b.userId AS "userId", 
+                  b.transactionAmt AS debit, 0.00 AS credit 
+            FROM t_fd_payment  a,t_fd_account_log b  
+            WHERE a.request_no = b.relateRequestNo AND a.type IN('8','10') AND a.`status`='S'  
+        UNION ALL 
+            SELECT <include refid="compFdAccountLogColumns"/>,a.user_id AS "userId",  0.00 AS debit,a.amount AS credit 
+            FROM t_fd_payment  a WHERE a.type ='9' AND a.`status`='S' 
+        ) aa
+        WHERE aa.userId  IN('SYS_GENERATE_001','SYS_GENERATE_002','SYS_GENERATE_003','SYS_GENERATE_004')
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

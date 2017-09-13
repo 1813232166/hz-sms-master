@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.rebate.dao.InvestRebateDao">
+   <!-- 没有统计返佣综合 -->
+	<!-- 每月的应返金额 -->
+	<select id="queryRebateAmount" resultType="BigDecimal">
+	    select IFNULL(sum(t.rebate_amount),0.00) from t_yx_rel_invest_rebate t inner join  t_yx_rel_invest a on a.id=t.yx_rel_invest_id 
+	    <where>
+	        <if test="startInvestTime != null">
+				AND a.invest_time <![CDATA[>=]]> #{startInvestTime} 
+			</if>
+			<if test="endInvestTime != null">
+				AND a.invest_time <![CDATA[<=]]> #{endInvestTime}
+			</if>
+	    </where>
+	</select>
+	<!-- 每月返佣笔数 -->
+	<select id="queryRebateAccount" resultType="int">
+	    select IFNULL(count(1),0) from t_yx_rel_invest_rebate t inner join  t_yx_rel_invest a on a.id=t.yx_rel_invest_id
+	    <where>
+	        <if test="startInvestTime != null">
+				AND a.invest_time <![CDATA[>=]]> #{startInvestTime} 
+			</if>
+			<if test="endInvestTime != null">
+				AND a.invest_time <![CDATA[<=]]> #{endInvestTime}
+			</if>
+	    </where>
+	</select>
+	<!-- 每月返佣人数 -->
+	<select id="queryRebateUserAccount" resultType="int">
+	    select IFNULL(count(1),0) from (
+	    select t.invite_user_mobile from t_yx_rel_invest_rebate t inner join  t_yx_rel_invest a on a.id=t.yx_rel_invest_id
+	    <where>
+	        <if test="startInvestTime != null">
+				AND a.invest_time <![CDATA[>=]]> #{startInvestTime} 
+			</if>
+			<if test="endInvestTime != null">
+				AND a.invest_time <![CDATA[<=]]> #{endInvestTime}
+			</if>
+	    </where>
+	    group by t.invite_user_mobile
+	    ) um
+	</select>
+	<!-- 统计后更新 -->
+	<update id="updateInvestRebateForRecordId">
+	    UPDATE t_yx_rel_invest_rebate t
+			SET t.record_id = #{rebateRecord.id},
+				update_date=#{updateDate}
+			WHERE
+				EXISTS (
+					SELECT
+						id
+					FROM
+						t_yx_rel_invest a
+					WHERE
+						a.id = t.yx_rel_invest_id
+					AND a.invest_time <![CDATA[>=]]> #{investRecord.startInvestTime} 
+					and a.invest_time <![CDATA[<=]]> #{investRecord.endInvestTime}
+				)
+	</update>
+	
+	<!-- 统计返佣结束 -->
+	
+	<!-- 保存 -->
+    <insert id="insert">
+        insert into t_yx_rel_invest_rebate(
+		  id,
+		  yx_rel_invest_id,
+		  invest_user_id,
+		  invest_user_mobile,
+		  invite_user_id,
+		  invite_user_mobile,
+		  invite_grade,
+		  invite_type,
+		  rebate_type,
+		  rebate_rate,
+		  settlement_type,
+		  rebate_amount,
+		  create_date,
+		  update_date)
+		 values(
+		   #{id},#{investRecord.id},#{investRecord.userId},#{investRecord.userMobile},
+		   #{userId},#{userMobile},#{inviteGrade},#{inviteType},#{rebateType},#{rebateRate},
+		   #{settlementType},#{rebateAmount},#{createDate},#{updateDate}
+		 )
+    </insert>
+</mapper>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.match.dao.AssetDao">
+    
+ <select id="findList" resultType="com.hzdjr.hzwd.modules.match.entity.Asset" parameterType="map">
+	select 
+	       t1.id,
+	       asset_code,
+	       realname,
+	       amount,
+	       residue_amount,
+	       raise_term,
+	       nper,
+	       rate,
+	       entry_time,
+	       product_id as "productId",
+	       original_asset_id as "originalAssetId" ,
+	       t1.status,
+	       custom_weight as "customWeight",
+	       weight,
+	       stick_top as "stickTop",
+	       source_asset_id as "sourceAssetId",
+	       matching_pen_number as "matchingPenNumber",
+	       idcard,
+	       t4.borrowCode as "borrowcode",
+	       t1.asset_category as "assetCategory"
+	 from  t_asset   t1 left join t_user   t2 on t2.id=t1.user_id
+	 left join t_user_detail t3 on t3.userid=t1.user_id
+	 left join t_borrow t4 on t4.borrow_id=t1.borrow_id
+	 	<where>
+	 	    <!-- 标的编号 -->
+			<if test="borrowcode!=null and borrowcode!=''">
+				and t4.borrowCode  =#{borrowcode}
+			</if>
+			<!-- 借款编号 -->
+			<if test="assetCode!=null and assetCode!=''">
+				and asset_code =#{assetCode}
+			</if>
+			<!-- 借款人姓名 -->
+			<if test="realName!=null and realName!=''">
+				and realName like concat('%',#{realName},'%')
+			</if>
+			<!-- 身份证号 -->
+			<if test="idCard!=null and idCard!=''">
+				and idCard =#{idCard}
+			</if>
+			 <!-- 产品类型 -->
+			<if test="productId!=null and productId!=''">
+				and product_id =#{productId}
+			</if>
+			<!-- 债权类型 -->
+			<if test="originalAssetId!=null and originalAssetId!=''">
+				and original_asset_id =#{originalAssetId}
+			</if>
+			<!-- 撮合状态 -->
+			<if test="status!=null and status!=''">
+				and status=#{status}
+			</if>
+			<!-- 资产来源-->
+			<if test="sourceAssetId!=null and sourceAssetId!=''">
+				and source_asset_id=#{sourceAssetId}
+			</if>
+			<!-- 资产类别-->
+			<if test="assetCategory!=null and assetCategory!=''">
+				and t1.asset_category=#{assetCategory}
+			</if>
+			<!-- 加入资产队列时间-->
+			<if test="beginTimes!=null and beginTimes!='' and endTimes!=null and endTimes!=''">
+				and entry_time between #{beginTimes} and #{endTimes}
+			</if>
+			<!-- 权重-->
+			<if test="beginWeight!=null and beginWeight!='' and endWeight!=null and endWeight!=''">
+				and weight between #{beginWeight} and #{endWeight}
+			</if>
+			<!-- 是否置顶-->
+			<if test="stickTop!=null and stickTop!=''">
+				and stick_top=#{stickTop}
+			</if>
+		</where>
+		ORDER BY weight DESC
+   </select>
+    <select id="getOriAsset" resultType="java.util.HashMap" parameterType="map">
+       select sum(amount) oriasset  from t_asset tt where tt.asset_type='1'
+    </select>
+    
+    <select id="getAssetByborrow" resultType="java.util.HashMap" parameterType="map">
+       select  id from t_asset tt where tt.borrow_id=#{borrowId}
+    </select>
+    
+    <select id="getOrigWaitAsset" resultType="java.util.HashMap" parameterType="map">
+       select sum(residue_amount) origwaitasset   from t_asset tt where tt.asset_type='1'  and tt.status='2'
+    </select>
+    <select id="getOrigResiAsset" resultType="java.util.HashMap" parameterType="map">
+       select sum(residue_amount) origresiasset   from t_asset tt where tt.asset_type='1'
+    </select>
+    <select id="getTranAsset" resultType="java.util.HashMap" parameterType="map">
+       select sum(residue_amount)  tranasset   from t_asset tt where tt.asset_type='2'
+    </select>
+    <select id="getTranWaitMatcAsset" resultType="java.util.HashMap" parameterType="map">
+       select sum(residue_amount)  tranwaitmatcasset   from t_asset tt where tt.asset_type='2'
+    </select>
+    <select id="getOrigPortMatcAsset" resultType="java.util.HashMap" parameterType="map">
+      select sum(residue_amount)  origportmatcasset     from t_asset tt where tt.asset_type='1'
+    </select>
+    <select id="getTranPortMatcAsset" resultType="java.util.HashMap" parameterType="map">
+      select (
+		(select sum(amount) from t_asset tt where tt.asset_type='2')- 
+		(select sum(residue_amount) from t_asset tt where tt.asset_type='2')) as tranportmatcasset
+    </select>
+    <select id="getTranResiAsset" resultType="java.util.HashMap" parameterType="map">
+		select sum(residue_amount) tranresiasset from t_asset tt where tt.asset_type='2'
+    </select>
+    <update id="updateWeight" parameterType="map">
+		update t_asset SET 	
+			<if test="isStickTop!=null and isStickTop!=''">
+				stick_top =#{isStickTop},
+			</if>
+			<if test="addWeight != null and addWeight != ''">
+				custom_weight = #{addWeight},
+			</if>
+			<if test="cus != null and cus != ''">
+				weight = #{cus}
+			</if>
+			WHERE id = #{id}
+	</update>
+	
+	
+		<select id="get" resultType="Asset">
+		SELECT 
+		   asset_code,
+	       amount,
+	       residue_amount,
+	       raise_term,
+	       entry_time,
+	       product_id,
+	       original_asset_id,
+	       status,
+	       custom_weight,
+	       weight,
+	       stick_top,
+	       source_asset_id,
+	       matching_pen_number
+		FROM t_asset
+		WHERE id = #{id}
+	</select>
+</mapper>

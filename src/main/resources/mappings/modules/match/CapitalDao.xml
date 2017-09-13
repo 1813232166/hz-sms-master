@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.match.dao.CapitalDao">
+    
+	<sql id="capitalColumns">
+		a.id AS "id",
+		a.capital_type AS "capitalType",
+		a.capital_category AS "capitalCategory",
+		a.status AS "status",
+		a.amount AS "amount",
+		a.surplus_amount AS "surplusAmount",
+		a.matched_amount AS "matchedAmount",
+		a.rate AS "rate",
+		a.nper AS "nper",
+		a.customer AS "customer",
+		a.urgent AS "urgent",
+		a.stick_top AS "stickTop",
+		a.invest_time AS "investTime",
+		a.matched_time AS "matchedTime",
+		a.freeze_time AS "freezeTime",
+		a.thaw_time AS "thawTime",
+		a.source_capital_id AS "sourceCapitalId",
+		a.custom_weight AS "customWeight",
+		a.weight AS "weight",
+		a.capital_source AS "capitalSource",
+		a.capital_product AS "capitalProduct",
+		a.projected_earnings AS "projectedEarnings",
+		a.matching_pen_number AS "matchingPenNumber",
+		a.capital_code AS "capitalCode"
+	</sql>
+    
+	<select id="get" resultType="Capital">
+		SELECT 
+			<include refid="capitalColumns"/>
+		FROM t_capital a
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Capital">
+		SELECT 
+			<include refid="capitalColumns"/>,b.realName  AS "realName",c.idcard AS "idCard"
+		FROM t_capital a
+		INNER JOIN  t_user b  on a.user_id=b.id
+		INNER JOIN t_user_detail c on b.id=c.userId
+		<where>
+			<if test="capitalCode != null and capitalCode != ''">
+				AND a.capital_code = #{capitalCode}
+			</if>
+			
+			<if test="realName != null and realName != ''">
+			AND b.realName like CONCAT('%',#{realName},'%')
+			</if>
+			
+			<if test="idCard != null and idCard != ''">
+				AND c.idcard = #{idCard}
+			</if>
+			
+			<if test="capitalType != null and capitalType != ''">
+				AND a.capital_type = #{capitalType}
+			</if>
+			
+			<if test="capitalCategory != null and capitalCategory != ''">
+				AND a.capital_category = #{capitalCategory}
+			</if>
+			
+			<if test="weightLow != null and weightLow != ''">
+                AND a.weight &gt;= #{weightLow}
+            </if>
+            <if test="weightHigh != null and weightHigh != ''">
+                AND a.weight &lt;= #{weightHigh}
+            </if>
+            <if test="beginInvestTime != null and beginInvestTime != '' ">
+                AND a.invest_time &gt;= #{beginInvestTime}
+            </if>
+            <if test="endInvestTime != null and endInvestTime != '' ">
+                AND a.invest_time &lt;= #{endInvestTime}
+            </if>
+			
+			<if test="capitalSource != null and capitalSource != ''">
+				AND a.capital_source = #{capitalSource}
+			</if>
+			
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			
+			<if test="stickTop != null and stickTop != ''">
+				AND a.stick_top = #{stickTop}
+			</if>
+			
+		</where>
+		ORDER BY a.weight DESC
+	</select>
+	
+	
+	<select id="findOriginalCount" resultType="map"  parameterType="Capital">
+		SELECT 
+		sum(a.amount) AS amountCount, sum(a.matched_amount) AS matchedAmountCount,sum(a.surplus_amount) AS surplusAmountCount
+		FROM t_capital a
+		INNER JOIN  t_user b  on a.user_id=b.id
+		INNER JOIN t_user_detail c on b.id=c.userId
+		<where>
+			<if test="capitalCode != null and capitalCode != ''">
+				AND a.capital_code = #{capitalCode}
+			</if>
+			
+			<if test="realName != null and realName != ''">
+				AND b.realName = #{realName}
+			</if>
+			
+			<if test="idCard != null and idCard != ''">
+				AND c.idcard = #{idCard}
+			</if>
+			AND a.capital_type = '1'
+			
+			<if test="capitalCategory != null and capitalCategory != ''">
+				AND a.capital_category = #{capitalCategory}
+			</if>
+			
+			<if test="weightLow != null and weightLow != ''">
+                AND a.weight &gt;= #{weightLow}
+            </if>
+            <if test="weightHigh != null and weightHigh != ''">
+                AND a.weight &lt;= #{weightHigh}
+            </if>
+            <if test="beginInvestTime != null and beginInvestTime != '' ">
+                AND a.invest_time &gt;= #{beginInvestTime}
+            </if>
+            <if test="endInvestTime != null and endInvestTime != '' ">
+                AND a.invest_time &lt;= #{endInvestTime}
+            </if>
+			
+			<if test="capitalSource != null and capitalSource != ''">
+				AND a.capital_source = #{capitalSource}
+			</if>
+			
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			
+			<if test="stickTop != null and stickTop != ''">
+				AND a.stick_top = #{stickTop}
+			</if>
+			
+		</where>
+	</select>
+	
+	<select id="findReturnCount" resultType="map"  parameterType="Capital">
+		SELECT 
+		sum(a.amount) AS amountCount, sum(a.matched_amount) AS matchedAmountCount,sum(a.surplus_amount) AS surplusAmountCount
+		FROM t_capital a
+		INNER JOIN  t_user b  on a.user_id=b.id
+		INNER JOIN t_user_detail c on b.id=c.userId
+		<where>
+			<if test="capitalCode != null and capitalCode != ''">
+				AND a.capital_code = #{capitalCode}
+			</if>
+			
+			<if test="realName != null and realName != ''">
+				AND b.realName = #{realName}
+			</if>
+			
+			<if test="idCard != null and idCard != ''">
+				AND c.idcard = #{idCard}
+			</if>
+			
+			<if test="capitalCategory != null and capitalCategory != ''">
+				AND a.capital_category = #{capitalCategory}
+			</if>
+			
+			AND a.capital_type = '999'
+			
+			<if test="weightLow != null and weightLow != ''">
+                AND a.weight &gt;= #{weightLow}
+            </if>
+            <if test="weightHigh != null and weightHigh != ''">
+                AND a.weight &lt;= #{weightHigh}
+            </if>
+            <if test="beginInvestTime != null and beginInvestTime != '' ">
+                AND a.invest_time &gt;= #{beginInvestTime}
+            </if>
+            <if test="endInvestTime != null and endInvestTime != '' ">
+                AND a.invest_time &lt;= #{endInvestTime}
+            </if>
+			
+			<if test="capitalSource != null and capitalSource != ''">
+				AND a.capital_source = #{capitalSource}
+			</if>
+			
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			
+			<if test="stickTop != null and stickTop != ''">
+				AND a.stick_top = #{stickTop}
+			</if>
+			
+		</where>
+	</select>
+	
+	
+	<update id="singleResetWeight">
+	    update t_capital set weight = #{weight},custom_weight = #{customWeight},stick_top = #{stickTop} where id = #{id}
+	</update>
+	
+</mapper>

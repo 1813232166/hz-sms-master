@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.match.dao.MatchedDao">
+    
+	<sql id="matchedColumns">
+		t1.capitalCode AS "capitalCode" ,
+		t1.capitalProduct AS "capitalProduct",
+		t1.capitalCategory AS "capitalCategory",
+		t1.realName AS "capitalRealName",
+		t1.idCard AS "capitalIdCard",
+		t1.amount AS "capitalAmount",
+		m.match_amount  AS "capitalMatchAmount",
+		t1.nper AS "capitalNper",
+		t1.rate AS "capitalRate",	
+		t1.projectedEarnings  AS "projectedEarnings",
+		m.capital_match_status AS "capitalMatchStatus",
+		t1.capitalType  AS "capitalType",
+		t1.investTime  AS "investTime",
+		t2.assetCode AS "assetCode",
+		t2.assetCategory AS "assetCategory",
+		t2.productId AS "productId",
+		t2.realName AS "assetRealName",
+		t2.idCard AS "assetIdCard",
+		t2.amount  AS "assetAmount",
+		m.match_amount AS "assetMatchAmount",
+		t2.nper AS "assetNper",
+		t2.rate AS "assetRate",
+		m.asset_match_status AS "assetMatchStatus",
+		t2.assetType AS "assetType",
+		m.create_time AS "createTime"
+	</sql>
+    
+	<select id="get" resultType="Matched">
+		SELECT 
+			<include refid="matchedColumns"/>
+		FROM t_matched a
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Matched">
+		SELECT 
+			<include refid="matchedColumns"/>
+		FROM 
+		(
+			SELECT
+			c.id AS "capitalId",
+			c.capital_type AS "capitalType",
+			c.capital_category AS "capitalCategory",
+			c.amount AS "amount",
+			c.rate AS "rate",
+			c.nper AS "nper",
+			c.invest_time AS "investTime",
+			c.capital_product AS "capitalProduct",
+			c.projected_earnings AS "projectedEarnings",
+			c.capital_code AS "capitalCode",
+			u.realName AS "realName",
+			ud.idcard AS "idCard"
+			FROM
+			t_capital c,
+			t_user u,
+			t_user_detail ud
+			WHERE
+			c.user_id = u.id
+			AND u.id = ud.userId
+		) t1,
+		(
+			SELECT
+			a.id AS "assetId",
+			a.asset_category AS "assetCategory",
+			a.asset_type AS "assetType",
+			a.asset_code AS "assetCode",
+			a.product_id AS "productId",
+			a.amount AS "amount",
+			a.rate AS "rate",
+			a.nper AS "nper",
+			u.realName AS "realName",
+			ud.idcard AS "idCard"
+			FROM
+			t_asset a,
+			t_user u,
+			t_user_detail ud
+			WHERE
+			a.user_id = u.id
+			AND u.id = ud.userId
+		) t2,
+		t_matched m
+		<where>
+			t1.capitalId = m.capital_id
+			AND t2.assetId = m.asset_id
+			
+			<if test="capitalCode != null and capitalCode != ''">
+				AND t1.capitalCode = #{capitalCode}
+			</if>
+			
+			<if test="capitalRealName != null and capitalRealName != ''">
+				AND t1.realName like CONCAT('%',#{capitalRealName},'%')
+			</if>
+			
+			<if test="capitalIdCard != null and capitalIdCard != ''">
+				AND t1.idCard = #{capitalIdCard}
+			</if>
+			
+			<if test="capitalMatchStatus != null and capitalMatchStatus != ''">
+				AND m.capital_match_status = #{capitalMatchStatus}
+			</if>
+			
+			<if test="capitalAmountLow != null and capitalAmountLow != ''">
+                AND t1.amount &gt;= #{capitalAmountLow}
+            </if>
+            <if test="capitalAmountHigh != null and capitalAmountHigh != ''">
+                AND t1.amount &lt;= #{capitalAmountHigh}
+            </if>
+			
+			<if test="beginInvestTime != null and beginInvestTime != '' ">
+                AND t1.investTime &gt;= #{beginInvestTime}
+            </if>
+            <if test="endInvestTime != null and endInvestTime != '' ">
+                AND t1.investTime &lt;= #{endInvestTime}
+            </if>
+            <if test="capitalType != null and capitalType != ''">
+				AND t1.capitalType = #{capitalType}
+			</if>
+          	<if test="capitalCategory != null and capitalCategory != ''">
+				AND t1.capitalCategory = #{capitalCategory}
+			</if>
+            <if test="assetType != null and assetType != ''">
+				AND t2.assetType = #{assetType}
+			</if>
+          	<if test="assetCategory != null and assetCategory != ''">
+				AND t2.assetCategory = #{assetCategory}
+			</if>
+            <if test="assetCode != null and assetCode != ''">
+				AND t2.assetCode = #{assetCode}
+			</if>
+			
+			<if test="assetRealName != null and assetRealName != ''">
+				AND t2.realName like CONCAT('%',#{assetRealName},'%')
+			</if>
+			
+			<if test="assetIdCard != null and assetIdCard != ''">
+				AND t2.idCard = #{assetIdCard}
+			</if>
+			<if test="assetMatchStatus != null and assetMatchStatus != ''">
+				AND m.asset_match_status = #{assetMatchStatus}
+			</if>
+			<if test="assetAmountLow != null and assetAmountLow != ''">
+                AND t2.amount &gt;= #{assetAmountLow}
+            </if>
+            <if test="assetAmountHigh != null and assetAmountHigh != ''">
+                AND t2.amount &lt;= #{assetAmountHigh}
+            </if>
+			
+			<if test="beginCreateTime != null and beginCreateTime != '' ">
+                AND m.create_time &gt;= #{beginCreateTime}
+            </if>
+            <if test="endCreateTime != null and endCreateTime != '' ">
+                AND m.create_time &lt;= #{endCreateTime}
+            </if>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+	
+	<select id="findCapitalCount" resultType="map"  parameterType="Matched">
+		SELECT 
+			sum(m.match_amount) AS matchMountCount,t1.capitalType AS capitalType
+		FROM 
+		(
+			SELECT
+			c.id AS "capitalId",
+			c.capital_type AS "capitalType",
+			c.capital_category AS "capitalCategory",
+			c.amount AS "amount",
+			c.rate AS "rate",
+			c.nper AS "nper",
+			c.invest_time AS "investTime",
+			c.capital_product AS "capitalProduct",
+			c.projected_earnings AS "projectedEarnings",
+			c.capital_code AS "capitalCode",
+			u.realName AS "realName",
+			ud.idcard AS "idCard"
+			FROM
+			t_capital c,
+			t_user u,
+			t_user_detail ud
+			WHERE
+			c.user_id = u.id
+			AND u.id = ud.userId
+		) t1,
+		(
+			SELECT
+			a.id AS "assetId",
+			a.asset_category AS "assetCategory",
+			a.asset_type AS "assetType",
+			a.asset_code AS "assetCode",
+			a.product_id AS "productId",
+			a.amount AS "amount",
+			a.rate AS "rate",
+			a.nper AS "nper",
+			u.realName AS "realName",
+			ud.idcard AS "idCard"
+			FROM
+			t_asset a,
+			t_user u,
+			t_user_detail ud
+			WHERE
+			a.user_id = u.id
+			AND u.id = ud.userId
+		) t2,
+		t_matched m
+		<where>
+			t1.capitalId = m.capital_id
+			AND t2.assetId = m.asset_id
+			
+			<if test="capitalCode != null and capitalCode != ''">
+				AND t1.capitalCode = #{capitalCode}
+			</if>
+			
+			<if test="capitalRealName != null and capitalRealName != ''">
+				AND t1.realName like CONCAT('%',#{capitalRealName},'%')
+			</if>
+			
+			<if test="capitalIdCard != null and capitalIdCard != ''">
+				AND t1.idCard = #{capitalIdCard}
+			</if>
+			
+			<if test="capitalMatchStatus != null and capitalMatchStatus != ''">
+				AND m.capital_match_status = #{capitalMatchStatus}
+			</if>
+			
+			<if test="capitalAmountLow != null and capitalAmountLow != ''">
+                AND t1.amount &gt;= #{capitalAmountLow}
+            </if>
+            <if test="capitalAmountHigh != null and capitalAmountHigh != ''">
+                AND t1.amount &lt;= #{capitalAmountHigh}
+            </if>
+			
+			<if test="beginInvestTime != null and beginInvestTime != '' ">
+                AND t1.investTime &gt;= #{beginInvestTime}
+            </if>
+            <if test="endInvestTime != null and endInvestTime != '' ">
+                AND t1.investTime &lt;= #{endInvestTime}
+            </if>
+            <if test="capitalType != null and capitalType != ''">
+				AND t1.capitalType = #{capitalType}
+			</if>
+          	<if test="capitalCategory != null and capitalCategory != ''">
+				AND t1.capitalCategory = #{capitalCategory}
+			</if>
+            <if test="assetType != null and assetType != ''">
+				AND t2.assetType = #{assetType}
+			</if>
+          	<if test="assetCategory != null and assetCategory != ''">
+				AND t2.assetCategory = #{assetCategory}
+			</if>
+            <if test="assetCode != null and assetCode != ''">
+				AND t2.assetCode = #{assetCode}
+			</if>
+			
+			<if test="assetRealName != null and assetRealName != ''">
+				AND t2.realName like CONCAT('%',#{assetRealName},'%')
+			</if>
+			
+			<if test="assetIdCard != null and assetIdCard != ''">
+				AND t2.idCard = #{assetIdCard}
+			</if>
+			<if test="assetMatchStatus != null and assetMatchStatus != ''">
+				AND m.asset_match_status = #{assetMatchStatus}
+			</if>
+			<if test="assetAmountLow != null and assetAmountLow != ''">
+                AND t2.amount &gt;= #{assetAmountLow}
+            </if>
+            <if test="assetAmountHigh != null and assetAmountHigh != ''">
+                AND t2.amount &lt;= #{assetAmountHigh}
+            </if>
+			
+			<if test="beginCreateTime != null and beginCreateTime != '' ">
+                AND m.create_time &gt;= #{beginCreateTime}
+            </if>
+            <if test="endCreateTime != null and endCreateTime != '' ">
+                AND m.create_time &lt;= #{endCreateTime}
+            </if>
+            
+			AND t1.capitalType = #{capitalTypeShow}
+		</where>
+	
+	</select>
+	
+	
+	
+	<select id="findAssetCount" resultType="map"  parameterType="Matched">
+		SELECT 
+			sum(m.match_amount) AS matchMountCount,t2.assetType AS assetType
+		FROM 
+		(
+			SELECT
+			c.id AS "capitalId",
+			c.capital_type AS "capitalType",
+			c.capital_category AS "capitalCategory",
+			c.amount AS "amount",
+			c.rate AS "rate",
+			c.nper AS "nper",
+			c.invest_time AS "investTime",
+			c.capital_product AS "capitalProduct",
+			c.projected_earnings AS "projectedEarnings",
+			c.capital_code AS "capitalCode",
+			u.realName AS "realName",
+			ud.idcard AS "idCard"
+			FROM
+			t_capital c,
+			t_user u,
+			t_user_detail ud
+			WHERE
+			c.user_id = u.id
+			AND u.id = ud.userId
+		) t1,
+		(
+			SELECT
+			a.id AS "assetId",
+			a.asset_category AS "assetCategory",
+			a.asset_type AS "assetType",
+			a.asset_code AS "assetCode",
+			a.product_id AS "productId",
+			a.amount AS "amount",
+			a.rate AS "rate",
+			a.nper AS "nper",
+			u.realName AS "realName",
+			ud.idcard AS "idCard"
+			FROM
+			t_asset a,
+			t_user u,
+			t_user_detail ud
+			WHERE
+			a.user_id = u.id
+			AND u.id = ud.userId
+		) t2,
+		t_matched m
+		<where>
+			t1.capitalId = m.capital_id
+			AND t2.assetId = m.asset_id
+			
+			<if test="capitalCode != null and capitalCode != ''">
+				AND t1.capitalCode = #{capitalCode}
+			</if>
+			
+			<if test="capitalRealName != null and capitalRealName != ''">
+				AND t1.realName like CONCAT('%',#{capitalRealName},'%')
+			</if>
+			
+			<if test="capitalIdCard != null and capitalIdCard != ''">
+				AND t1.idCard = #{capitalIdCard}
+			</if>
+			
+			<if test="capitalMatchStatus != null and capitalMatchStatus != ''">
+				AND m.capital_match_status = #{capitalMatchStatus}
+			</if>
+			
+			<if test="capitalAmountLow != null and capitalAmountLow != ''">
+                AND t1.amount &gt;= #{capitalAmountLow}
+            </if>
+            <if test="capitalAmountHigh != null and capitalAmountHigh != ''">
+                AND t1.amount &lt;= #{capitalAmountHigh}
+            </if>
+			
+			<if test="beginInvestTime != null and beginInvestTime != '' ">
+                AND t1.investTime &gt;= #{beginInvestTime}
+            </if>
+            <if test="endInvestTime != null and endInvestTime != '' ">
+                AND t1.investTime &lt;= #{endInvestTime}
+            </if>
+            <if test="capitalType != null and capitalType != ''">
+				AND t1.capitalType = #{capitalType}
+			</if>
+          	<if test="capitalCategory != null and capitalCategory != ''">
+				AND t1.capitalCategory = #{capitalCategory}
+			</if>
+            <if test="assetType != null and assetType != ''">
+				AND t2.assetType = #{assetType}
+			</if>
+          	<if test="assetCategory != null and assetCategory != ''">
+				AND t2.assetCategory = #{assetCategory}
+			</if>
+            <if test="assetCode != null and assetCode != ''">
+				AND t2.assetCode = #{assetCode}
+			</if>
+			
+			<if test="assetRealName != null and assetRealName != ''">
+				AND t2.realName like CONCAT('%',#{assetRealName},'%')
+			</if>
+			
+			<if test="assetIdCard != null and assetIdCard != ''">
+				AND t2.idCard = #{assetIdCard}
+			</if>
+			<if test="assetMatchStatus != null and assetMatchStatus != ''">
+				AND m.asset_match_status = #{assetMatchStatus}
+			</if>
+			<if test="assetAmountLow != null and assetAmountLow != ''">
+                AND t2.amount &gt;= #{assetAmountLow}
+            </if>
+            <if test="assetAmountHigh != null and assetAmountHigh != ''">
+                AND t2.amount &lt;= #{assetAmountHigh}
+            </if>
+			
+			<if test="beginCreateTime != null and beginCreateTime != '' ">
+                AND m.create_time &gt;= #{beginCreateTime}
+            </if>
+            <if test="endCreateTime != null and endCreateTime != '' ">
+                AND m.create_time &lt;= #{endCreateTime}
+            </if>
+            
+			AND t2.assetType = #{assetTypeShow}
+		</where>
+	</select>
+	
+	
+</mapper>

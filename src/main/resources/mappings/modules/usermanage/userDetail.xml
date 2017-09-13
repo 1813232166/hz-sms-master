@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.usermanage.dao.UserManageDao">
+   
+   <select id="selectUserById" resultType="com.hzdjr.hzwd.modules.usermanage.entity.TUserALL">
+  SELECT
+		t1.id AS id,
+		t1.mobile AS mobile,
+		t1.userName AS userName,
+		t1.realName AS realName,
+		t1.regDate AS regDate,
+		t1.userType AS userType,
+		t1.email AS email,
+		t1.lockStatus AS lockStatus,
+		t3.qq AS qq,
+		t3.contractUser AS contractUser,
+		t3.contractPhone AS contractPhone,
+		t3.address_detail AS address_detail,
+		t3.address AS address,
+		t3.company AS company,
+		t3.companyNature AS  companyNature,
+		t3.workLevel AS workLevel,
+		t3.workYear AS workYear,
+		t3.mothIncome AS mothIncome,
+		t3.marriageState AS marriageState,
+		t3.marryName AS marryName,
+		t3.marryMothIncome AS marryMothIncome,
+		t3.educationLevel AS educationLevel,
+		t3.school AS school,
+		t3.mASter AS mASter,
+	  CONCAT_WS('至',substring(t3.masterStartDate,1,10),substring(t3.masterEndDate,1,10)) AS time,
+		t3.isPurchASe AS isPurchASe,
+		t3.isBuyCar AS isBuyCar,
+		t3.idcardStatus AS idcardStatus,
+		t3.idcard AS idcard,
+		ta.risk risk,
+		t3.emailStatus AS emailStatus
+
+	FROM
+		t_user t1 left join
+		t_user_detail t3 
+	on t1.id=t3.userId LEFT JOIN t_authentication ta
+	on ta.userId=t1.id
+		where t1.id = #{id};
+		
+   </select>
+		
+</mapper>

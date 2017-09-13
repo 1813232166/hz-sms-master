@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.datastatistics.dao.BorrowStatisticsDao">
+
+	<select id="findSumBorrowAmount" resultType="BigDecimal">
+		SELECT IFNULL(SUM(b.`BORROWAMOUNT`),'0.0') FROM `t_borrow` b;
+	</select>
+	
+	<select id="findTotalPublishedBorrow" resultType="Long">
+		SELECT IFNULL(COUNT(*),'0') FROM `t_borrow`;
+	</select>
+	
+	<select id="findSumOverdueAmount" resultType="BigDecimal">
+		SELECT IFNULL(SUM(bp.monthly_payment_origin),'0.0') FROM `t_borrow_billplan` bp WHERE bp.is_overdue='1';
+	</select>
+	
+	<select id="findTotalNormalRefund" resultType="Long">
+		SELECT IFNULL(COUNT(*),'0') FROM `t_borrow_billplan` bp WHERE bp.is_overdue='0';
+	</select>
+	
+	<select id="findTotalSuccessFulBorrow" resultType="Long">
+		SELECT IFNULL(COUNT(*),'0') FROM `t_borrow` b WHERE b.BORROWSTATUS IN (7,8);
+	</select>
+	
+	
+	
+	<select id="findSumAdvancesAmount" resultType="BigDecimal">
+		SELECT IFNULL(SUM(bp.monthly_payment_origin) ,'0.0')FROM `t_borrow_billplan` bp WHERE bp.is_advances='4';
+	</select>
+	
+	<select id="findSumRefundAmount" resultType="BigDecimal">
+		SELECT IFNULL(SUM(bp.monthly_payment_origin) ,'0.0')FROM `t_borrow_billplan` bp WHERE bp.repay_status='2';
+	</select>
+	
+	<select id="findTotalNormalRefundBorrow" resultType="Long">
+		SELECT IFNULL(COUNT(*),'0') FROM `t_borrow_billplan` bp WHERE bp.is_overdue='0';
+	</select>
+	
+	<select id="findSumToAdvancesAmount" resultType="BigDecimal">
+		SELECT IFNULL(SUM(bp.monthly_payment_origin) ,'0.0')FROM `t_borrow_billplan` bp WHERE bp.is_advances!='4';
+	</select>
+	
+	<select id="findSumToRefundAmount" resultType="BigDecimal">
+		SELECT IFNULL(SUM(bp.monthly_payment_origin) ,'0.0')FROM `t_borrow_billplan` bp WHERE bp.repay_status!='2';
+	</select>
+	
+	
+	
+	<select id="findTotalOverdueRefund" resultType="Long">
+		SELECT IFNULL(COUNT(*),'0') FROM `t_borrow_billplan` bp WHERE bp.is_overdue='1' AND bp.`repay_status`='2';
+	</select>
+	
+	<select id="findTotalOverdue" resultType="Long">
+		SELECT IFNULL(COUNT(*),'0') FROM `t_borrow_billplan` bp WHERE bp.is_overdue='1';
+	</select>
+	
+	<select id="findSumServiceCharge" resultType="BigDecimal">
+		SELECT IFNULL(SUM(b.serviceCharge),'0.0') FROM `t_borrow` b;
+	</select>
+	
+	<select id="findTotalToRefund" resultType="Long">
+		SELECT IFNULL(COUNT(*),'0') FROM `t_borrow_billplan` bp WHERE bp.`repay_status`!='2';
+	</select>
+	
+	<select id="findTotalSeriousOverdue" resultType="Long">
+		SELECT IFNULL(COUNT(*),'0') FROM `t_borrow_billplan` bp WHERE bp.`is_overdue`='1' AND TIMESTAMPDIFF(MONTH,bp.repay_time,bp.late_payment_time)>3;
+	</select>
+	
+	
+	
+	<select id="findSumCollectingBorrowAmount" resultType="BigDecimal">
+		SELECT IFNULL(SUM(b.`BORROWAMOUNT`),'0.0') FROM `t_borrow` b WHERE b.`BORROWSTATUS`='4';
+	</select>
+	
+	<insert id="recordBorrowStatistics" parameterType="map">
+	INSERT INTO
+	`t_statistics_borrow`(`sumBorrowAmount`,`totalPublishedBorrow`,`sumOverdueAmount`,`totalNormalRefund`,
+	`totalSuccessFulBorrow`,`sumAdvancesAmount`,`sumRefundAmount`,`totalNormalRefundBorrow`,`sumToAdvancesAmount`,
+	`sumToRefundAmount`,`totalOverdueRefund`,`totalOverdue`,`sumServiceCharge`,`totalToRefund`,`totalSeriousOverdue`,
+	`sumCollectingBorrowAmount`,`from`,`to`)
+	VALUES
+	(#{b.sumBorrowAmount},#{b.totalPublishedBorrow},#{b.sumOverdueAmount},#{b.totalNormalRefund},
+		#{b.totalSuccessFulBorrow},#{b.sumAdvancesAmount},#{b.sumRefundAmount},#{b.totalNormalRefundBorrow},#{b.sumToAdvancesAmount},
+		#{b.sumToRefundAmount},#{b.totalOverdueRefund},#{b.totalOverdue},#{b.sumServiceCharge},#{b.totalToRefund},#{b.totalSeriousOverdue},
+		#{b.sumCollectingBorrowAmount},#{from},#{to});
+	</insert>
+	
+	<select id="findBorrowStatisticsRecord" resultType="com.hzdjr.hzwd.modules.datastatistics.entity.BorrowStatistics">
+		SELECT * FROM `t_statistics_borrow` b 
+		WHERE DATE_FORMAT(b.`to`,'%Y%m%d')=DATE_FORMAT(NOW(),'%Y%m%d')
+		LIMIT 1
+	</select>
+	
+</mapper>

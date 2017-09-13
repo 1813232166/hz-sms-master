@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.banner.dao.AppBannerDao">
+    
+	<sql id="appBannerColumns">
+		a.id AS "id",
+		a.bannerName AS "bannerName",
+		a.creator AS "creator",
+		a.picurl AS "picurl",
+		a.createtime AS "createtime",
+		a.link AS "link",
+		a.orders AS "orders",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="appBannerJoins">
+	</sql>
+    
+	<select id="get" resultType="AppBanner">
+		SELECT 
+			<include refid="appBannerColumns"/>,a.type AS type,a.status AS status
+		FROM app_banner_pic a
+		<include refid="appBannerJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="AppBanner">
+		SELECT 
+			<include refid="appBannerColumns"/>,
+			CASE a.type WHEN 0 THEN 'APP' WHEN 1 THEN 'PC' WHEN 2 THEN '微信' WHEN 3 THEN 'APP1.0'  END AS type,
+			CASE a.status WHEN 0 THEN '禁用' WHEN 1 THEN '启用' END AS status
+		FROM app_banner_pic a
+		<include refid="appBannerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="picurl != null and picurl != ''">
+				AND a.picurl = #{picurl}
+			</if>
+			<if test="bannerName != null and bannerName != ''">
+				AND a.bannerName like concat('%',trim(#{bannerName}),'%') 
+			</if>
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.status DESC, a.orders ASC , a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="AppBanner">
+		SELECT 
+			<include refid="appBannerColumns"/>
+		FROM app_banner_pic a
+		<include refid="appBannerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.orders ASC , a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO app_banner_pic(
+			id,
+			bannerName,
+			creator,
+			type,
+			picurl,
+			status,
+			createtime,
+			link,
+			orders,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{bannerName},
+			#{creator},
+			#{type},
+			#{picurl},
+			#{status},
+			#{createDate},
+			#{link},
+			#{orders},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE app_banner_pic SET 	
+			bannerName = #{bannerName},
+			creator = #{creator},
+			type = #{type},
+			picurl = #{picurl},
+			status = #{status},
+			createtime = #{createtime},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			link=#{link},
+			orders=#{orders},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE app_banner_pic SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.salesupport.dao.CouponSendDao">
+    
+    <sql id="tYxCouponGroupColumns">
+        a.coupon_group_id AS "couponGroupId",
+        a.coupon_group_name AS "couponGroupName",
+        a.holder_type AS "holderType",
+        a.is_send_message AS "isSendMessage",
+        a.message_content AS "messageContent",
+        a.coupon_group_status AS "couponGroupStatus",
+        a.mobilse_list AS "mobilseList",
+        a.userCount AS "userCount",
+        a.createdate AS "createdate",
+        a.createby AS "createby",
+        a.updatedate AS "updatedate",
+        a.updateby AS "updateby",
+        a.remarks AS "remarks",
+        a.delflag AS "delflag",
+        a.sendTime as "sendTime",
+        a.authTime as "auditTime"
+    </sql>
+    
+    <sql id="tYxCouponGroupJoins">
+    </sql>
+    
+    <select id="get" resultType="TYxCouponGroup">
+        SELECT 
+            <include refid="tYxCouponGroupColumns"/>
+        FROM t_yx_coupon_group a
+        <include refid="tYxCouponGroupJoins"/>
+        WHERE a.coupon_group_id = #{couponGroupId}
+    </select>
+    <!-- 发放列表 -->
+    <select id="findCouponSendList" resultType="TYxCouponGroup">
+        SELECT 
+            <include refid="tYxCouponGroupColumns"/>
+        FROM t_yx_coupon_group a
+        <include refid="tYxCouponGroupJoins"/>
+  	    where  1=1 
+			
+			<if test="couponGroupName != null and couponGroupName!= ''">
+				AND a.coupon_group_name like concat('%',#{couponGroupName},'%')
+			</if>
+			<if test="couponGroupStatus != null and couponGroupStatus != ''">
+				AND    a.coupon_group_status = #{couponGroupStatus}
+			</if>
+	
+			<if test="startSendDate != null and startSendDate != ''">
+				AND DATE_FORMAT(a.`sendTime`, '%Y-%m-%d') <![CDATA[ >= ]]>  #{startSendDate}
+			</if>
+			
+		    <if test="endSendDate != null and endSendDate != ''">
+				AND DATE_FORMAT(a.`sendTime`, '%Y-%m-%d')  <![CDATA[ <= ]]> #{endSendDate}
+			</if>
+  
+         ORDER BY a.createdate   desc
+
+    </select>
+    <!-- 发放审核列表  -->
+    <select id="findCouponSendAuditList" resultType="TYxCouponGroup">
+        SELECT 
+            <include refid="tYxCouponGroupColumns"/>
+        FROM t_yx_coupon_group a
+        <include refid="tYxCouponGroupJoins"/>
+        <where>
+            a.coupon_group_status IN('1','2','3')
+            <if test="couponGroupName != null and couponGroupName!= ''">
+                AND a.coupon_group_name like concat('%',#{couponGroupName},'%')
+            </if>
+            <if test="couponGroupStatus != null and couponGroupStatus != ''">
+                AND    a.coupon_group_status = #{couponGroupStatus}
+            </if>
+    
+            <if test="startSendDate != null and startSendDate != ''">
+                AND DATE_FORMAT(a.`sendTime`, '%Y-%m-%d') <![CDATA[ >= ]]>  #{startSendDate}
+            </if>
+            
+            <if test="endSendDate != null and endSendDate != ''">
+                AND DATE_FORMAT(a.`sendTime`, '%Y-%m-%d')  <![CDATA[ <= ]]> #{endSendDate}
+            </if>
+        </where>
+         ORDER BY a.createdate   desc
+    </select>
+    
+     <delete id="deleteTYxCouponGroupInfo">
+        DELETE FROM t_yx_coupon_group
+        WHERE coupon_group_id = #{couponGroupId}
+   	 </delete>
+    
+     <insert id="saveTYxCouponGroupInfo">
+        INSERT INTO t_yx_coupon_group(
+            coupon_group_id,
+            coupon_group_name,
+            holder_type,
+            is_send_message,
+            message_content,
+            coupon_group_status,
+            mobilse_list,
+            createdate,
+            createby,
+            updatedate,
+            updateby,
+            remarks,
+            delflag,
+            userCount
+        ) VALUES (
+            #{couponGroupId},
+            #{couponGroupName},
+            #{holderType},
+            #{isSendMessage},
+            #{messageContent},
+            #{couponGroupStatus},
+            #{mobilseList},
+            #{createdate},
+            #{createby},
+            #{updatedate},
+            #{updateby},
+            #{remarks},
+            #{delflag},
+             #{userCount}
+        )
+    </insert>
+    
+    <insert id="insert">
+        INSERT INTO t_yx_coupon_group(
+            coupon_group_id,
+            coupon_group_name,
+            holder_type,
+            is_send_message,
+            message_content,
+            coupon_group_status,
+            mobilse_list,
+            createdate,
+            createby,
+            updatedate,
+            updateby,
+            remarks,
+            delflag
+        ) VALUES (
+            #{couponGroupId},
+            #{couponGroupName},
+            #{holderType},
+            #{isSendMessage},
+            #{messageContent},
+            #{couponGroupStatus},
+            #{mobilseList},
+            #{createdate},
+            #{createby},
+            #{updatedate},
+            #{updateby},
+            #{remarks},
+            #{delflag}
+        )
+    </insert>
+    
+    <update id="update">
+        UPDATE t_yx_coupon_group SET    
+            coupon_group_name = #{couponGroupName},
+            holder_type = #{holderType},
+            is_send_message = #{isSendMessage},
+            message_content = #{messageContent},
+            mobilse_list = #{mobilseList},
+            updatedate = #{updatedate},
+            updateby = #{updateby},
+            remarks = #{remarks},
+            userCount=#{userCount}
+        WHERE coupon_group_id = #{couponGroupId}
+    </update>
+    
+    <update id="delete">
+        DELETE FROM t_yx_coupon_group
+        WHERE id = #{id}
+    </update>
+    <select id="couponStatistics"   resultType="CouponStatistics">
+           SELECT 
+                 mobile AS 'allMobile',
+                 CONCAT(SUBSTRING(mobile,1,3),'****',SUBSTRING(mobile,8,4)) AS 'userMobile',
+           		COUNT(mobile) AS 'sentCouponSum',createDate,	
+				COUNT(CASE WHEN `status`='0' THEN 'wy' ELSE NULL END)  AS 'unusedCouponSum',
+				COUNT(CASE WHEN `status`='1' THEN 'sy' ELSE NULL END)  AS 'usedCouponSum',
+				COUNT(CASE WHEN `status`='2' THEN 'sx' ELSE NULL END) AS 'expiredCouponSum' 
+				FROM t_yx_coupon_log WHERE 1=1
+				 <if test="null!=couponGroupId and ''!=couponGroupId">
+				    AND coupon_group_id=#{couponGroupId}
+				 </if>
+				 <if test="null!=activityId and ''!=activityId">
+				    AND activity_id=#{activityId}
+				 </if>
+                GROUP BY mobile
+				<if test="null!=endLimit and ''!=endLimit">
+				    LIMIT 0,#{endLimit}
+				</if>
+    </select>
+    
+    
+     <select id="getAllCouponStatistics"   resultType="ExcelCouponStatistics">
+           SELECT 
+                 CONCAT(SUBSTRING(mobile,1,3),'****',SUBSTRING(mobile,8,4)) AS 'userMobile',
+           		COUNT(mobile) AS 'sentCouponSum',
+           		DATE_FORMAT(createDate, '%Y-%m-%d %H:%i:%s') AS sentdTime,
+				COUNT(CASE WHEN `status`='0' THEN 'wy' ELSE NULL END)  AS 'unusedCouponSum',
+				COUNT(CASE WHEN `status`='1' THEN 'sy' ELSE NULL END)  AS 'usedCouponSum',
+				COUNT(CASE WHEN `status`='2' THEN 'sx' ELSE NULL END) AS 'expiredCouponSum' 
+		
+				FROM t_yx_coupon_log WHERE 1=1
+                 <if test="null!=couponGroupId and ''!=couponGroupId">
+                    AND coupon_group_id=#{couponGroupId}
+                 </if>
+                 <if test="null!=activityId and ''!=activityId">
+                    AND activity_id=#{activityId}
+                 </if>
+            GROUP BY mobile
+            	<if test="null!=endLimit and ''!=endLimit">
+				    LIMIT 0,#{endLimit}
+				</if>
+    </select>
+    
+    
+    
+    
+    
+    <!-- 提交审核 -->
+    <update id="saveSubmitAuditCouponSend">
+        UPDATE t_yx_coupon_group SET coupon_group_status='1',
+        authTime=NOW(),
+        updateDate=NOW(),
+        updateBy=#{updateby}
+        WHERE coupon_group_id=#{couponGroupId}
+    </update>
+    <!-- 审核 -->
+    <update id="updateAuditCouponSend">
+        UPDATE t_yx_coupon_group 
+        <set>
+	        coupon_group_status=#{couponGroupStatus},updateBy=#{updateby} 
+            <if test=" 0 == auditStatus ">
+                ,authTime=NOW(),remarks=#{remarks}
+            </if>
+	        <if test=" 1 == auditStatus ">
+	           ,authTime=NOW(),sendTime=NOW(),remarks=#{remarks}
+	        </if>
+        </set> 
+        WHERE coupon_group_id=#{couponGroupId}
+    </update>
+    <!-- 查找用户手机号 -->
+    <select id="findUserMobile"  parameterType="java.util.Map"  resultType="java.lang.String">
+        SELECT mobile FROM t_user LIMIT #{pageIndex},#{pageSize}
+    </select>
+    <select id="findUserCount" resultType="java.util.Map">
+        SELECT COUNT(1) AS "totalUser" FROM t_user
+    </select>
+    
+    <sql id="tYxCouponColumns">
+        b.id AS "id",
+        b.name AS "name",
+        b.coupon_type_id AS "couponTypeId",
+        b.face_value AS "faceValue",
+        b.effective_days AS "effectiveDays",
+        b.begin_time AS "beginTime",
+        b.end_time AS "endTime",
+        b.loan_amount_min AS "loanAmountMin",
+        b.loan_amount_sum AS "loanAmountSum",
+        b.loan_term_list AS "loanTermList",
+        b.loan_channel_list AS "loanChannelList",
+        b.coupon_count AS "couponCount",
+        b.is_send AS "isSend",
+        b.createdate AS "createdate",
+        b.createby AS "createby",
+        b.updatedate AS "updatedate",
+        b.updateby AS "updateby",
+        b.remarks AS "remarks",
+        b.delflag AS "delflag",
+        b.status AS "status"
+    </sql>
+    <!-- 根据组ID获取优惠券 -->
+    <select id="getRelCoupon"  parameterType="java.lang.String"  resultType="TYxCoupon">
+        SELECT <include refid="tYxCouponColumns"></include> 
+        FROM t_yx_coupon_relation a INNER JOIN t_yx_coupon b ON a.coupon_id=b.id
+            WHERE a.relation_type='group' AND a.main_id=#{couponGroupId}
+    </select>
+    <!-- 已使用的优惠券 -->
+    <select id="getUsedCoupon" parameterType="CouponStatistics" resultType="java.util.Map">
+        SELECT b.id AS "id",
+		        b.coupon_type_id AS "couponTypeId",
+		        b.face_value AS "faceValue",
+		        b.effective_days AS "effectiveDays",
+		        DATE_FORMAT(b.begin_time,"%Y-%m-%d %T") AS "beginTime",
+		        DATE_FORMAT(b.end_time,"%Y-%m-%d %T") AS "endTime",
+		        b.loan_amount_min AS "loanAmountMin",
+		        b.loan_amount_sum AS "loanAmountSum",
+		        b.loan_term_list AS "loanTermList",
+		        b.loan_channel_list AS "loanChannelList",
+		        b.createdate AS "createdate",
+		        DATE_FORMAT(a.use_time,"%Y-%m-%d %T")  AS 'useTime'
+        FROM t_yx_coupon_log a INNER JOIN t_yx_coupon b ON a.coupon_id=b.id
+            WHERE  a.status='1' AND a.mobile =#{userMobile}
+                <if test="null!=couponGroupId and ''!=couponGroupId">
+                    AND a.coupon_group_id=#{couponGroupId}
+                 </if>
+                 <if test="null!=activityId and ''!=activityId">
+                    AND a.activity_id=#{activityId}
+                 </if>
+    </select>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.moneystatistics.dao.RechargeStatisticsDao">
+	<select id="findRechargeStatisticsList" resultType="com.hzdjr.hzwd.modules.moneystatistics.entity.RechargeStatistics">
+		SELECT
+			 fu.date_fu rechargeTime,
+			 fu.sum_fu totalAmount,
+			 fu.count_fu count,
+			 zong.count_zong userCount,
+			 fu_new.count_new newUserCount,
+			 fpc.pc pc,
+			 fapp.app app
+			FROM
+			
+			(SELECT
+			 SUBSTRING(f.createDate, 1, 10) date_fu,SUM(f.amount) sum_fu,COUNT(*) count_fu
+			FROM
+			 t_fd_user_fund f
+			WHERE f.rechargeType='2'
+			GROUP BY
+			 SUBSTRING(f.createDate, 1, 10)) fu
+			
+			LEFT JOIN
+			
+			(SELECT
+			 SUBSTRING(f.createDate, 1, 10) date_pc,SUM(f.amount) pc
+			FROM
+			 t_fd_user_fund f
+			WHERE f.rechargeType='2' AND f.source='pc'
+			GROUP BY
+			 SUBSTRING(f.createDate, 1, 10)) fpc
+			ON fu.date_fu=fpc.date_pc
+			
+			LEFT JOIN
+			
+			(SELECT
+			 SUBSTRING(f.createDate, 1, 10) date_app,SUM(f.amount) app
+			FROM
+			 t_fd_user_fund f
+			WHERE f.rechargeType='2' AND f.source='app'
+			GROUP BY
+			 SUBSTRING(f.createDate, 1, 10)) fapp
+			ON fu.date_fu=fapp.date_app
+			
+			LEFT JOIN 
+			
+			(SELECT
+			 SUBSTRING(f.createDate, 1, 10) date_zong,COUNT(*) count_zong
+			FROM
+			 t_fd_user_fund f
+			GROUP BY
+			 SUBSTRING(f.createDate, 1, 10)) zong
+			ON fu.date_fu=zong.date_zong
+			
+			LEFT JOIN
+			
+			(SELECT
+			 SUBSTRING(f.createDate, 1, 10) date_new,COUNT(*) count_new
+			FROM
+			 t_fd_user_fund f
+			WHERE f.rechargeType='2' AND f.status='1'
+			GROUP BY
+			 SUBSTRING(f.createDate, 1, 10)) fu_new
+		ON fu.date_fu=fu_new.date_new
+	</select>
+</mapper>

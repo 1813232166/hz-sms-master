@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.salesupport.dao.ActivityInfoDao">
+    
+	<sql id="activityInfoColumns">
+		a.id AS "id",
+		a.activityname AS "activityname",
+		a.activitytype AS "activitytype",
+		a.introduction AS "introduction",
+		a.begintime AS "begintime",
+		a.endtime AS "endtime",
+		a.createdate AS "createdate",
+		a.updatedate AS "updatedate",
+		a.publishtime AS "publishtime",
+		a.authtime AS "authtime",
+		a.createby AS "createby",
+		a.updateby AS "updateby",
+		a.lastchangedtime AS "lastchangedtime",
+		a.activitystatus AS "activitystatus",
+		a.activityhref AS "activityhref",
+		a.imageurl AS "imageurl",
+		a.couponid AS "couponid",
+		a.remark1 AS "remark1",
+		a.remark2 AS "remark2",
+		a.remarks AS "remarks",
+		a.delflag AS "delflag"
+	</sql>
+	
+	<sql id="activityInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="ActivityInfo">
+		SELECT 
+			<include refid="activityInfoColumns"/>
+		FROM t_yx_activityinfo a
+		<include refid="activityInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ActivityInfo">
+		SELECT 
+			<include refid="activityInfoColumns"/>
+		FROM t_yx_activityinfo a
+		<include refid="activityInfoJoins"/>
+	    where  1=1 
+			
+			<if test="activityname != null and activityname != ''">
+				AND a.activityname like concat('%',#{activityname},'%')
+			</if>
+			<if test="activitytype != null and activitytype != ''">
+				AND a.activitytype = #{activitytype}
+			</if>
+	
+			<if test="publishtBeginTime != null and publishtBeginTime != ''">
+				AND DATE_FORMAT(a.`publishTime`, '%Y-%m-%d') <![CDATA[ >= ]]>  #{publishtBeginTime}
+			</if>
+			
+		    <if test="publishtEndTime != null and publishtEndTime != ''">
+				AND DATE_FORMAT(a.`publishTime`, '%Y-%m-%d')  <![CDATA[ <= ]]> #{publishtEndTime}
+			</if>
+		
+		
+			<if test="activitystatus != null and activitystatus != ''">
+				AND a.activitystatus = #{activitystatus}
+			</if>
+
+			ORDER BY   a.createDate desc
+	</select>
+	
+	        <!-- 根据活动id查询优惠券列表 -->
+    <select id="getCouponListByHuoDongId" resultType="java.util.HashMap"  parameterType="java.lang.String" >
+	SELECT  
+	 t.id, 	
+	CASE t.`coupon_type_id` 
+		WHEN 'fullDown'  THEN '满减券' 
+		WHEN 'cash'  THEN '现金券' 
+		 WHEN 'interest'  THEN '增益券' 
+		 WHEN 'cashBack'  THEN '返现券' 
+		END AS couponTypeId ,
+		
+	IFNULL(t.face_value,0) AS faceValue ,
+
+	IFNULL(t.effective_days,'')  AS effectiveDays,
+	IFNULL(t.begin_time,'') AS begintime,
+	IFNULL(t.end_time,'') AS endtime,
+
+	IFNULL(t.loan_amount_min,0)  AS loanAmountMin,
+	
+	IFNULL(t.loan_term_list,'无') AS loanTermList,
+
+	IFNULL(t.loan_channel_list,'无') AS loanChannelList,
+
+	IFNULL(t.loan_amount_sum,0) AS loanAmountSum
+		
+		FROM t_yx_coupon    t
+	LEFT JOIN t_yx_coupon_relation  r  ON r.`coupon_id`  = t.`id`  
+	LEFT JOIN   t_yx_activityinfo a ON a.`id` =r.`main_id`
+	
+	WHERE  1=1
+	AND r.`main_id` =#{mainId}
+ 	AND  t.status  ='4' 
+   </select>
+	
+	
+	
+		<select id="excelFindList" resultType="ExcelActivityInfo">
+		SELECT 
+				a.id AS "id",
+		a.activityname AS "activityname",
+		a.activitytype AS "activitytype",
+		a.introduction AS "introduction",
+		a.begintime AS "begintime",
+		a.endtime AS "endtime",
+		a.createdate AS "createTime",
+		a.updatedate AS "updatedate",
+		a.publishtime AS "publishtime",
+		a.authtime AS "authtime",
+		a.createby AS "createby",
+		a.updateby AS "updateby",
+		a.lastchangedtime AS "lastchangedtime",
+		a.activitystatus AS "activitystatus",
+		a.activityhref AS "activityhref",
+		a.imageurl AS "imageurl",
+		a.couponid AS "couponid",
+		a.remark1 AS "remark1",
+		a.remark2 AS "remark2",
+		a.remarks AS "remarks",
+		a.delflag AS "delflag"
+		FROM t_yx_activityinfo a
+
+	    where  1=1 
+			
+			<if test="activityname != null and activityname != ''">
+				AND a.activityname like concat('%',#{activityname},'%')
+			</if>
+			<if test="activitytype != null and activitytype != ''">
+				AND a.activitytype = #{activitytype}
+			</if>
+	
+			<if test="publishtBeginTime != null and publishtBeginTime != ''">
+				AND DATE_FORMAT(a.`publishTime`, '%Y-%m-%d') <![CDATA[ >= ]]>  #{publishtBeginTime}
+			</if>
+			
+		    <if test="publishtEndTime != null and publishtEndTime != ''">
+				AND DATE_FORMAT(a.`publishTime`, '%Y-%m-%d')  <![CDATA[ <= ]]> #{publishtEndTime}
+			</if>
+		
+		
+			<if test="activitystatus != null and activitystatus != ''">
+				AND a.activitystatus = #{activitystatus}
+			</if>
+
+			ORDER BY   a.createDate desc
+	</select>
+	
+	
+	<select id="authActivityInfoList" resultType="ActivityInfo">
+		SELECT 
+			<include refid="activityInfoColumns"/>
+		FROM t_yx_activityinfo a
+		<include refid="activityInfoJoins"/>
+	    where  1=1 
+		and  a.activitystatus IN  (1,2,3,4,5)
+			<if test="activityname != null and activityname != ''">
+				AND a.activityname like concat('%',#{activityname},'%')
+			</if>
+			<if test="activitytype != null and activitytype != ''">
+				AND a.activitytype = #{activitytype}
+			</if>
+	
+			<if test="publishtBeginTime != null and publishtBeginTime != ''">
+				AND DATE_FORMAT(a.`publishTime`, '%Y-%m-%d') <![CDATA[ >= ]]>  #{publishtBeginTime}
+			</if>
+			
+		    <if test="publishtEndTime != null and publishtEndTime != ''">
+				AND DATE_FORMAT(a.`publishTime`, '%Y-%m-%d')  <![CDATA[ <= ]]> #{publishtEndTime}
+			</if>
+		
+		
+			<if test="activitystatus != null and activitystatus != ''">
+				AND a.activitystatus = #{activitystatus}
+			</if>
+
+			ORDER BY   a.createDate desc
+	</select>
+	
+
+   <select id="isExtisHuoDong" resultType="java.lang.Integer">
+		SELECT 
+		COUNT(1)
+		FROM t_yx_activityinfo a
+ 
+		 WHERE 1=1
+		 AND a.`activityName`  =#{activityname} 
+		  AND  a.`activityType` =#{activitytype}
+	</select>
+	
+	
+	   <select id="isExtisSystHuoDong" resultType="java.lang.Integer">
+		SELECT 
+		COUNT(1)
+		FROM t_yx_activityinfo a
+ 
+		 WHERE 1=1
+		  AND  a.`activityType` =#{activitytype}
+	</select>
+	
+	<!-- 发布的把状态更新为审核中  -->
+	<update id="publishHuoDong" parameterType="String">
+			UPDATE t_yx_activityinfo t SET t.activityStatus  ='1' ,  t.`publishTime` = NOW()
+		    WHERE id=#{id}
+	</update>
+	
+	
+		<!-- 发布的把状态更新为已撤销  -->
+	<update id="revokeHuoDong" parameterType="String">
+		UPDATE t_yx_activityinfo t SET t.activityStatus  =5   WHERE id=#{id}
+	</update>
+	
+	
+	
+		<!-- 发布的把状态更新为进行中  -->
+	<update id="authSuccessHuoDong" parameterType="String">
+		UPDATE t_yx_activityinfo t SET t.activityStatus  = '3',  t.`authTime` =NOW()
+		   WHERE id=#{id}
+	</update>
+	
+	
+	
+	<!-- 发布的把状态更新为审核不通过  -->
+	<update id="authNoFailHuoDong" parameterType="String">
+		UPDATE t_yx_activityinfo  t SET t.activityStatus  ='2',  t.`authTime` =NOW()
+		'   WHERE id=#{id}
+	</update>
+	
+	
+	
+	<select id="findAllList" resultType="ActivityInfo">
+		SELECT 
+			<include refid="activityInfoColumns"/>
+		FROM t_yx_activityinfo a
+		<include refid="activityInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<update id="updateActivityInfo">
+		UPDATE t_yx_activityinfo SET 	
+			activitystatus = #{activitystatus},
+			authTime  =#{authtime},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<insert id="saveActivityInfo">
+		INSERT INTO t_yx_activityinfo(
+			id,
+			activityname,
+			activitytype,
+			introduction,
+			begintime,
+			endtime,
+			createdate,
+			createby,
+			activityhref,
+			imageurl,
+			lastchangedtime,
+			activitystatus
+		) VALUES (
+			#{id},
+			#{activityname},
+			#{activitytype},
+			#{introduction},
+			#{begintime},
+			#{endtime},
+			#{createdate},
+			#{createby},
+			#{activityhref},
+			#{imageurl},
+			#{lastchangedtime},
+			#{activitystatus}
+		)
+	</insert>
+	
+	<insert id="insert">
+		INSERT INTO t_yx_activityinfo(
+			id,
+			activityname,
+			activitytype,
+			introduction,
+			begintime,
+			endtime,
+			createdate,
+			updatedate,
+			publishtime,
+			authtime,
+			createby,
+			updateby,
+			lastchangedtime,
+			activitystatus,
+			activityhref,
+			imageurl,
+			couponid,
+			remark1,
+			remark2,
+			remarks,
+			delflag
+		) VALUES (
+			#{id},
+			#{activityname},
+			#{activitytype},
+			#{introduction},
+			#{begintime},
+			#{endtime},
+			#{createdate},
+			#{updatedate},
+			#{publishtime},
+			#{authtime},
+			#{createby},
+			#{updateby},
+			#{lastchangedtime},
+			#{activitystatus},
+			#{activityhref},
+			#{imageurl},
+			#{couponid},
+			#{remark1},
+			#{remark2},
+			#{remarks},
+			#{delflag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_yx_activityinfo SET 	
+			activityname = #{activityname},
+			activitytype = #{activitytype},
+			introduction = #{introduction},
+			begintime = #{begintime},
+			endtime = #{endtime},
+			createdate = #{createdate},
+			updatedate = #{updatedate},
+			publishtime = #{publishtime},
+			authtime = #{authtime},
+			createby = #{createby},
+			updateby = #{updateby},
+			lastchangedtime = #{lastchangedtime},
+			activitystatus = #{activitystatus},
+			activityhref = #{activityhref},
+			imageurl = #{imageurl},
+			couponid = #{couponid},
+			remark1 = #{remark1},
+			remark2 = #{remark2},
+			remarks = #{remarks},
+			delflag = #{delflag}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_yx_activityinfo
+		WHERE id = #{id}
+	</update>
+	<!-- 定时更新活动结束状态 -->
+	<select id="findAllActivity" parameterType="java.util.Map"  resultType="java.util.Map">
+	   SELECT id,endTime,activityStatus FROM t_yx_activityinfo WHERE endTime &lt; #{nowTime}  AND activityStatus !='4'
+	</select>
+	<update id="updateActivityStatus" parameterType="java.util.List" >
+        UPDATE t_yx_activityinfo SET activitystatus = '4'
+        WHERE id IN
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

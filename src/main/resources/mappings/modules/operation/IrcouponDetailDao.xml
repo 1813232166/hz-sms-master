@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.operation.dao.IrcouponDetailDao">
+
+	<sql id="ircouponDetailColumns">
+		a.id AS "id",
+		a.ircouponid AS "ircouponid",
+		a.activityid AS
+		"activityid",
+		a.investname AS "investname",
+		a.investmoney AS
+		"investmoney",
+		a.senddate AS "senddate",
+		a.useddate AS "useddate",
+		a.profit AS "profit",
+		a.create_by AS "createBy.id",
+		a.create_date AS
+		"createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS
+		"updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+
+	<sql id="ircouponDetailJoins">
+	</sql>
+
+	<select id="get" resultType="IrcouponDetail">
+		SELECT
+		<include refid="ircouponDetailColumns" />
+		FROM t_ircoupon_detail a
+		<include refid="ircouponDetailJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="IrcouponDetail">
+		SELECT
+		<include refid="ircouponDetailColumns" />,
+		CONCAT(SUBSTRING(a.realName,1,1),'**') as realName,
+		CONCAT(SUBSTRING(a.mobile,1,3),'****',SUBSTRING(a.mobile,8)) as mobile,
+		t.activityName AS activityName,i.name as ircouponName,i.scale as scale,
+		CASE i.profitTime WHEN -1 THEN '永久' else i.profitTime END as profitTime,
+		CASE a.uesdStatus WHEN '1' THEN '收益中' WHEN '2' THEN '未使用' WHEN '3'
+		THEN '已使用' WHEN '4' THEN '已过期' END as uesdStatus,
+		CASE a.sendStatus WHEN '1' THEN '已发' WHEN '2' THEN '待发' WHEN '3' THEN '失败'
+		END as sendStatus,
+		CASE a.investType WHEN '1' THEN '普享标' WHEN '2' THEN '出借计划' WHEN '3' THEN
+		'其他' END as investType,
+		CASE a.consumChannel WHEN '1' THEN 'web' WHEN '2' THEN '安卓' WHEN '3' THEN
+		'苹果' WHEN '4' THEN '微信' WHEN '5' THEN '其他' END AS consumChannel,
+		CASE a.sourceChannel WHEN '1' THEN 'web' WHEN '2' THEN '安卓' WHEN '3' THEN
+		'苹果' WHEN '4' THEN '微信' WHEN '5' THEN '其他' END AS sourceChannel
+		FROM
+		t_ircoupon_detail a JOIN t_ircoupon i on a.ircouponId = i.id JOIN
+		t_activity t on a.activityId = t.id
+		<include refid="ircouponDetailJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="myStatus == 1">
+				AND a.uesdStatus IN ('1','3')
+			</if>
+			<if test="realname != null and realname != ''">
+				AND a.realname = #{realname}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="profitTime != null and profitTime != ''">
+				<if test="profitTime == '-1'">
+					AND i.profitTime ='-1'
+				</if>
+				<if test="profitTime != '-1'">
+					AND i.profitTime !='-1'
+				</if>
+			</if>
+			<if test="ircouponName != null and ircouponName != ''">
+				AND i.name = #{ircouponName}
+			</if>
+			<if test="investtype != null and investtype != ''">
+				AND a.investtype = #{investtype}
+			</if>
+			<if test="uesdstatus != null and uesdstatus != ''">
+				AND a.uesdstatus = #{uesdstatus}
+			</if>
+			<if test="sendstatus != null and sendstatus != ''">
+				AND a.sendStatus = #{sendstatus}
+			</if>
+			<if test="consumchannel != null and consumchannel != ''">
+				AND a.consumchannel = #{consumchannel}
+			</if>
+			<if
+				test="beginUseddate != null and endUseddate != null and beginUseddate != '' and endUseddate != ''">
+				AND a.useddate BETWEEN #{beginUseddate} AND #{endUseddate}
+			</if>
+			<if test="activityName != null and activityName != ''">
+				AND t.activityName LIKE
+				<if test="dbName == 'oracle'">'%'||#{activityName}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{activityName}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{activityName},'%')</if>
+			</if>
+			<if
+				test="beginSenddate != null and endSenddate != null and beginSenddate != '' and endSenddate != ''">
+				AND a.senddate BETWEEN #{beginSenddate} AND #{endSenddate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				<if test="myStatus == 1">
+					ORDER BY a.uesdStatus
+				</if>
+				<if test="myStatus != 1">
+					ORDER BY a.sendStatus DESC,sendDate
+				</if>
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 导出使用列表 -->
+	<select id="exportIrcouponFile" resultType="IrcouponDetail">
+		SELECT
+		<include refid="ircouponDetailColumns" />,
+		a.realName as realName,
+		a.mobile as mobile,
+		t.activityName AS activityName,i.name as ircouponName,i.scale as scale,
+		CASE i.profitTime WHEN -1 THEN '永久' else i.profitTime END as profitTime,
+		CASE a.uesdStatus WHEN '1' THEN '收益中' WHEN '2' THEN '未使用' WHEN '3'
+		THEN '已使用' WHEN '4' THEN '已过期' END as uesdStatus,
+		CASE a.sendStatus WHEN '1' THEN '已发' WHEN '2' THEN '待发' WHEN '3' THEN '失败'
+		END as sendStatus,
+		CASE a.investType WHEN '1' THEN '普享标' WHEN '2' THEN '出借计划' WHEN '3' THEN
+		'其他' END as investType,
+		CASE a.consumChannel WHEN '1' THEN 'web' WHEN '2' THEN '安卓' WHEN '3' THEN
+		'苹果' WHEN '4' THEN '微信' WHEN '5' THEN '其他' END AS consumChannel,
+		CASE a.sourceChannel WHEN '1' THEN 'web' WHEN '2' THEN '安卓' WHEN '3' THEN
+		'苹果' WHEN '4' THEN '微信' WHEN '5' THEN '其他' END AS sourceChannel
+		FROM
+		t_ircoupon_detail a JOIN t_ircoupon i on a.ircouponId = i.id JOIN
+		t_activity t on a.activityId = t.id
+		<include refid="ircouponDetailJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="myStatus == 1">
+				AND a.uesdStatus IN ('1','3')
+			</if>
+			<if test="realname != null and realname != ''">
+				AND a.realname = #{realname}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="profitTime != null and profitTime != ''">
+				<if test="profitTime == '-1'">
+					AND i.profitTime ='-1'
+				</if>
+				<if test="profitTime != '-1'">
+					AND i.profitTime !='-1'
+				</if>
+			</if>
+			<if test="ircouponName != null and ircouponName != ''">
+				AND i.name = #{ircouponName}
+			</if>
+			<if test="investtype != null and investtype != ''">
+				AND a.investtype = #{investtype}
+			</if>
+			<if test="uesdstatus != null and uesdstatus != ''">
+				AND a.uesdstatus = #{uesdstatus}
+			</if>
+			<if test="sendstatus != null and sendstatus != ''">
+				AND a.sendStatus = #{sendstatus}
+			</if>
+			<if test="consumchannel != null and consumchannel != ''">
+				AND a.consumchannel = #{consumchannel}
+			</if>
+			<if
+				test="beginUseddate != null and endUseddate != null and beginUseddate != '' and endUseddate != ''">
+				AND a.useddate BETWEEN #{beginUseddate} AND #{endUseddate}
+			</if>
+			<if test="activityName != null and activityName != ''">
+				AND t.activityName LIKE
+				<if test="dbName == 'oracle'">'%'||#{activityName}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{activityName}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{activityName},'%')</if>
+			</if>
+			<if
+				test="beginSenddate != null and endSenddate != null and beginSenddate != '' and endSenddate != ''">
+				AND a.senddate BETWEEN #{beginSenddate} AND #{endSenddate}
+			</if>
+		</where>
+		<if test="myStatus == 1">
+			ORDER BY a.uesdStatus
+		</if>
+		<if test="myStatus != 1">
+			ORDER BY a.sendStatus DESC,sendDate
+		</if>
+	</select>
+
+	<!-- 获得加息券总计 -->
+	<select id="getIrcouponCounts" resultType="map">
+		SELECT
+		count(*) as counts,
+		count(distinct a.mobile) as userCounts,
+		SUM(REPLACE(a.investMoney,'-','')) as amounts
+		FROM t_ircoupon_detail a JOIN t_ircoupon i on a.ircouponId = i.id JOIN
+		t_activity t on a.activityId = t.id
+		<include refid="ircouponDetailJoins" />
+		<where>
+			<if test="myStatus == 1">
+				a.uesdStatus IN ('1','3')
+			</if>
+			<if test="realname != null and realname != ''">
+				AND a.realname = #{realname}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="profitTime != null and profitTime != ''">
+				<if test="profitTime == '-1'">
+					AND i.profitTime ='-1'
+				</if>
+				<if test="profitTime != '-1'">
+					AND i.profitTime !='-1'
+				</if>
+			</if>
+			<if test="ircouponName != null and ircouponName != ''">
+				AND i.name = #{ircouponName}
+			</if>
+			<if test="investtype != null and investtype != ''">
+				AND a.investtype = #{investtype}
+			</if>
+			<if test="uesdstatus != null and uesdstatus != ''">
+				AND a.uesdstatus = #{uesdstatus}
+			</if>
+			<if test="consumchannel != null and consumchannel != ''">
+				AND a.consumchannel = #{consumchannel}
+			</if>
+			<if
+				test="beginUseddate != null and endUseddate != null and beginUseddate != '' and endUseddate != ''">
+				AND a.useddate BETWEEN #{beginUseddate} AND #{endUseddate}
+			</if>
+			<if test="activityName != null and activityName != ''">
+				AND t.activityName LIKE
+				<if test="dbName == 'oracle'">'%'||#{activityName}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{activityName}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{activityName},'%')</if>
+			</if>
+			<if test="beginSenddate != null and endSenddate != null and beginSenddate != '' and endSenddate != ''">
+				AND a.senddate BETWEEN #{beginSenddate} AND #{endSenddate}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="IrcouponDetail">
+		SELECT
+		<include refid="ircouponDetailColumns" />
+		FROM t_ircoupon_detail a
+		<include refid="ircouponDetailJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO t_ircoupon_detail(
+		id,
+		realname,
+		mobile,
+		ircouponid,
+		activityid,
+		investname,
+		investtype,
+		investmoney,
+		sendstatus,
+		sourcechannel,
+		senddate,
+		uesdstatus,
+		consumchannel,
+		useddate,
+		profit,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		remarks,
+		del_flag
+		) VALUES (
+		#{id},
+		#{realname},
+		#{mobile},
+		#{ircouponid},
+		#{activityid},
+		#{investname},
+		#{investtype},
+		#{investmoney},
+		#{sendstatus},
+		#{sourcechannel},
+		#{senddate},
+		#{uesdstatus},
+		#{consumchannel},
+		#{useddate},
+		#{profit},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{remarks},
+		#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE t_ircoupon_detail SET
+		realname = #{realname},
+		mobile = #{mobile},
+		ircouponid = #{ircouponid},
+		activityid = #{activityid},
+		investname = #{investname},
+		investtype = #{investtype},
+		investmoney = #{investmoney},
+		sendstatus = #{sendstatus},
+		sourcechannel = #{sourcechannel},
+		senddate = #{senddate},
+		uesdstatus = #{uesdstatus},
+		consumchannel = #{consumchannel},
+		useddate = #{useddate},
+		profit = #{profit},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate},
+		remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE t_ircoupon_detail SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

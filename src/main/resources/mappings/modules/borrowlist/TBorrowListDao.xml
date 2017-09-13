@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.borrowlist.dao.TBorrowListDao">
+    
+	<sql id="tBorrowListColumns">
+		a.borrow_list_id AS "borrowListId",
+        a.borrow_list_title AS "borrowListTitle",
+        a.borrow_list_code AS "borrowListCode",
+        a.create_time AS "createTime",
+        a.open_time AS "openTime",
+        a.borrow_list_status AS "borrowListStatus",
+        a.borrow_list_remarks AS "borrowListRemarks",
+        a.borrowAmount AS "borrowListAmount",
+        a.project_brief AS "projectBrief",
+        a.risk_warning AS "riskWarning",
+        a.raise_day AS "raiseDay",
+        a.min_tender_sum AS "minTenderSum",
+        b.DEADLINE AS "deadLine",
+        b.ANUALRATE AS "anualRate",
+        b.pay_method AS "payMethod",
+        b.BORROWWAY AS "borrowWay",
+        b.borrowCode,
+        b.loanNumber,
+        b.BORROWSTATUS
+	</sql>
+	<sql id="tBorrowListJoins">
+	</sql>
+	<resultMap type="com.hzdjr.hzwd.modules.borrowlist.entity.TBorrowList" id="tBorrowListMap">
+	     <id property="borrowListId" column="borrowListId"/>
+	     <result property="borrowListTitle" column="borrowListTitle"/>
+	     <result property="borrowListCode" column="borrowListCode"/>
+	     <result property="createTime" column="createTime"/>
+	     <result property="openTime" column="openTime"/>
+	     <result property="borrowListStatus" column="borrowListStatus"/>
+	     <result property="borrowListRemarks" column="borrowListRemarks"/>
+	     <result property="deadLine" column="deadLine"/>
+	     <result property="anualRate" column="anualRate"/>
+	     <result property="payMethod" column="payMethod"/>
+	     <result property="borrowWay" column="borrowWay"/>
+	     <result property="borrowListAmount" column="borrowListAmount"/>
+	     <result property="projectBrief" column="projectBrief"/>
+	     <result property="riskWarning" column="riskWarning"/>
+	     <result property="raiseDay" column="raiseDay"/>
+	     <result property="minTenderSum" column="minTenderSum"/>
+         <!-- ofType指定集合中的对象类型 -->
+        <collection property="tBorrow" ofType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+            <id property="borrowId" column="BORROW_ID"/>
+            <result property="type" column="type"/>
+            <result property="borrowstatus" column="BORROWSTATUS"/>
+            <result property="borrowcode" column="borrowCode"/>
+            <result property="loannumber" column="loanNumber"/>
+         </collection>
+    </resultMap>
+    
+	<select id="get" resultMap="tBorrowListMap">
+		SELECT <include refid="tBorrowListColumns"></include>,b.BORROW_ID
+		FROM t_borrow_list a LEFT JOIN t_borrow  b ON a.borrow_list_id=b.borrow_list_id
+        WHERE a.borrow_list_id=#{id}
+	</select>
+    <!-- 散标集借款总额，集合数量，借款数量 -->
+    <select id="findBorrowListSum" resultType="java.util.Map">
+        SELECT COUNT(a.borrow_list_id) AS lendNum,COUNT(b.borrow_list_id) AS lendUserNum,SUM(b.borrowAmount) AS lendSum
+       FROM t_borrow_list a LEFT JOIN t_borrow  b ON a.borrow_list_id=b.borrow_list_id
+        <where>
+            <if test=" null != payMethod and  '' !=payMethod">
+                AND b.pay_method = #{payMethod}
+            </if>
+            <if test="null !=borrowListCode and '' != borrowListCode">
+                 AND a.borrow_list_code  LIKE "%${borrowListCode}%"
+            </if>
+            <if test="null != borrowListTitle and '' != borrowListTitle">
+                 AND a.borrow_list_title LIKE "%${borrowListTitle}%"
+            </if>
+            <if test=" null != borrowListStatus and '' != borrowListStatus and (1 == borrowListStatus or 2 == borrowListStatus)">
+                AND a.borrow_list_status = #{borrowListStatus}
+            </if>
+            
+            <if test="startOpenTime != null  and startOpenTime != ''">
+                AND a.open_time &gt;= #{startOpenTime}
+            </if>
+            <if test="endOpenTime != null and endOpenTime != ''">
+                AND a.open_time &lt;=#{endOpenTime}
+            </if>
+        </where>
+    </select>
+    <!-- 关联总数据 -->
+	<select id="findRelateList" resultMap="tBorrowListMap">
+		SELECT <include refid="tBorrowListColumns"></include>,b.BORROW_ID
+       FROM t_borrow_list a LEFT JOIN t_borrow  b ON a.borrow_list_id=b.borrow_list_id
+		<include refid="tBorrowListJoins"/>
+		<if test=" null != list and list.size() > 0 ">
+			WHERE a.borrow_list_id IN
+			<foreach collection="list" index="index" item="item" open="(" separator="," close=")">  
+                    #{item}
+            </foreach>
+        </if>
+	</select>
+	<!-- 散标集列表 -->
+	<select id="findList" resultMap="tBorrowListMap">
+        SELECT <include refid="tBorrowListColumns"></include>,b.BORROW_ID
+       FROM t_borrow_list a LEFT JOIN t_borrow  b ON a.borrow_list_id=b.borrow_list_id
+        <include refid="tBorrowListJoins"/>
+        <where>
+            <if test=" null != payMethod and  '' !=payMethod">
+                AND b.pay_method = #{payMethod}
+            </if>
+            <if test="null !=borrowListCode and '' != borrowListCode">
+                 AND a.borrow_list_code  LIKE "%${borrowListCode}%"
+            </if>
+            <if test="null != borrowListTitle and '' != borrowListTitle">
+                 AND a.borrow_list_title LIKE "%${borrowListTitle}%"
+            </if>
+            <if test=" null !=borrowListStatus and '' !=borrowListStatus and (1 == borrowListStatus or 2 == borrowListStatus or 12 == borrowListStatus )">
+                AND a.borrow_list_status = #{borrowListStatus}
+            </if>
+            
+            <if test="startOpenTime != null  and startOpenTime != ''">
+                AND a.open_time &gt;= #{startOpenTime}
+            </if>
+            <if test="endOpenTime != null and endOpenTime != ''">
+                AND a.open_time &lt;=#{endOpenTime}
+            </if>
+        </where>
+        GROUP BY a.borrow_list_id  ORDER BY a.create_time DESC
+    </select>
+	
+	<select id="findAllList" resultMap="tBorrowListMap">
+		SELECT <include refid="tBorrowListColumns"></include>
+       FROM t_borrow_list a LEFT JOIN t_borrow  b ON a.borrow_list_id=b.borrow_list_id
+        <include refid="tBorrowListJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 撤销散标集 -->
+	<update id="delete">
+	   UPDATE t_borrow_list SET borrow_list_status='12' WHERE borrow_list_id = #{borrowListId}
+	</update>
+	<update id="updatePerBorrowStatus">
+	   UPDATE t_borrow
+        SET
+        borrowAliasNo="",
+        borrowAlias="",
+        borrow_list_id ="",
+        BORROWTITLE="",
+        RISK_WARNING="",
+        project_brief="",
+        RAISETERM="",
+        RAISETERMUNIT="",
+        MINTENDERSUM='0.0',
+        MAXTENDERSUM='0.0',
+        BORROWSTATUS='6'
+        WHERE BORROW_ID IN
+        <foreach collection="set" item="tBorrow" open="(" separator="," close=")">
+            #{tBorrow.borrowId}
+        </foreach>
+        
+	</update>
+	<!-- 查询单个标的的还款计划 -->
+	<select id="findTBorrowBillplans" parameterType="java.util.Set"  resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrowBillplan">
+	   SELECT apply_id,period,is_advances AS "isAdvances",is_offset AS "isOffset",is_overdue AS "isOverdue" 
+	   FROM t_borrow_billplan WHERE  is_overdue='1'
+	       AND apply_id  IN 
+	       <foreach collection="set" item="tBorrow" open="(" separator="," close=")">
+            #{tBorrow.loannumber}
+        </foreach>
+	</select>
+	
+	<select id="exportBorrowList" resultMap="tBorrowListMap">
+	   SELECT <include refid="tBorrowListColumns"></include>
+       FROM t_borrow_list a LEFT JOIN t_borrow  b ON a.borrow_list_id=b.borrow_list_id
+        <include refid="tBorrowListJoins"/>
+        <where>
+            <if test=" null != payMethod and  '' !=payMethod">
+                AND b.pay_method = #{payMethod}
+            </if>
+            <if test="null !=borrowListCode and '' != borrowListCode">
+                 AND a.borrow_list_code  LIKE "%${borrowListCode}%"
+            </if>
+            <if test="null != borrowListTitle and '' != borrowListTitle">
+                 AND a.borrow_list_title LIKE "%${borrowListTitle}%"
+            </if>
+            <if test=" null !=borrowListStatus and '' !=borrowListStatus and (1 == borrowListStatus or 2 == borrowListStatus or 12 == borrowListStatus )">
+                AND a.borrow_list_status = #{borrowListStatus}
+            </if>
+            
+            <if test="startOpenTime != null  and startOpenTime != ''">
+                AND a.open_time &gt;= #{startOpenTime}
+            </if>
+            <if test="endOpenTime != null and endOpenTime != ''">
+                AND a.open_time &lt;=#{endOpenTime}
+            </if>
+        </where>
+        LIMIT 20000
+	</select>
+  
+  <sql id="tBorrowColumns">
+    tb.status AS "status",
+    tb.borrow_id AS "borrowId",
+    tb.type AS "type",
+    tb.borrowtitle AS "borrowtitle",
+    tb.borrowway AS "borrowway",
+    tb.borrowcode AS "borrowcode",
+    tb.borrowamount AS "borrowamount",
+    tb.deadline AS "deadline",
+    tb.anualrate AS "anualrate",
+    tb.mintendersum AS "mintendersum",
+    tb.pay_method AS "payMethod",
+    tb.maxtendersum AS "maxtendersum",
+    tb.raiseterm AS "raiseterm",
+    tb.borrowtype AS "borrowtype",
+    tb.borrowstatus AS "borrowstatus",
+    tb.raisetermunit AS "raisetermunit",
+    tb.detail AS "detail",
+    tb.openborrowdate AS "openborrowdate",
+    tb.userid AS "userid",
+    tb.repaysource AS "repaysource",
+    tb.borrowaliasno AS "borrowaliasno",
+    tb.borrowalias AS "borrowalias",
+    tb.ip AS "ip",
+    tb.loannumber AS "loannumber",
+    tb.oriuserid AS "oriuserid",
+    tb.name AS "name",
+    tb.oriuseridcard AS "oriuseridcard",
+    tb.auditdate AS "auditdate",
+    tb.hasinvestamount AS "hasinvestamount",
+    tb.hasinvestnum AS "hasinvestnum",
+    tb.create_time AS "createTime",
+    tb.servicefree AS "servicefree",
+    tb.full_borrow_date AS "fullBorrowDate",
+    tb.contractsigningtime AS "contractsigningtime",
+    tb.contractcode AS "contractcode",
+    tb.productcode AS "productcode",
+    tb.repaymentdate AS "repaymentdate",
+    tb.monthinterest AS "monthinterest",
+    tb.monthcapital AS "monthcapital",
+    tb.monthprepaymentamount AS "monthprepaymentamount",
+    tb.giveamount AS "giveamount",
+    tb.monthmanagementfee AS "monthmanagementfee",
+    tb.servicecharge AS "servicecharge",
+    tb.businesschannel AS "businesschannel",
+    tb.mobile AS "mobile",
+    tb.bcbizdeptid AS "bcbizdeptid",
+    tb.bztype AS "bztype",
+    tb.loantime AS "loantime",
+    tb.borrowfid AS "borrowfid",
+    tb.criticalid AS "criticalid",
+    tb.warnings AS "warnings",
+    tb.paidinamount AS "paidinamount",
+    tb.usageofloan AS "usageofloan",
+    tb.creditrating AS "creditrating",
+    tb.idcardno AS "idcardno",
+    tb.sex AS "sex",
+    tb.age AS "age",
+    tb.city AS "city",
+    tb.annualincome AS "annualincome",
+    tb.assetsliabilities AS "assetsliabilities",
+    tb.is_edit AS "isEdit",
+    tb.is_match AS "isMatch",
+    tb.loan_name AS "loanName",
+    tb.lendingtime AS "lendingtime",
+    tb.borrow_customer_code AS "borrowCustomerCode",
+    tb.borrow_acc_code AS "borrowAccCode",
+    tb.open_bank_code AS "openBankCode",
+    tb.cardno AS "cardno",
+    tb.creditlevel AS "creditlevel",
+    tb.is_finish AS "isFinish",
+    tb.open_bank AS "openBank",
+    tb.fill_mark AS "fillMark",
+    tb.risk_warning AS "riskWarning",
+    tb.remainamount AS "remainamount",
+    tu.realName AS "userName",
+    tb.project_brief AS "projectBrief",
+    tb.credit_status AS creditStatus
+  </sql>
+  
+  <!-- 债权匹配  -->
+  <select id="getTBorrow" parameterType="String" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+    SELECT <include refid="tBorrowColumns"/> FROM t_borrow_list tbl 
+    LEFT JOIN t_borrow tb ON tbl.borrow_list_id = tb.borrow_list_id 
+    LEFT JOIN t_user tu ON tu.id = tb.USERID
+    WHERE tbl.borrow_list_id = #{borrowId}
+  </select>
+
+  <!-- 通过borrowId查询相应得出借记录 -->
+  <select id="getInvRecByBid" parameterType="String" resultType="com.hzdjr.hzwd.modules.invest.entity.Invest">
+    SELECT ti.investCode,tu.realName,ti.investAmount,ti.investTime
+    FROM t_borrow_list tbl 
+    LEFT JOIN t_borrow tb ON tbl.borrow_list_id = tb.borrow_list_id
+    LEFT JOIN t_invest ti ON tb.BORROW_ID = ti.borrowId
+    LEFT JOIN t_user tu ON ti.investor = tu.id
+    WHERE ti.investType='1' AND ti.flag=1 AND tbl.borrow_list_id = #{borrowId}
+  </select>
+  
+  <!-- 新建普享标查询 borrowstatus=6终审成功，8 发标审核失败-->
+  <select id="findNewBorrowList" resultType="TBorrow">
+		select b.*,u.realName as userName from t_borrow b,t_user u
+		<where>
+		b.BORROWSTATUS='6' and b.USERID = u.id 
+		<if test="userName !=null and userName !=''">
+			AND u.realName like  "%${userName}%"
+		</if>
+		
+		<if test="loannumber !=null and loannumber !=''">
+			AND b.loannumber like  "%${loannumber}%"
+		</if>
+		<if test="bztype !=null and bztype !=''">
+			AND b.bztype = #{bztype}
+		</if>
+		<if test="borrowtype !=null and borrowtype !=''">
+			AND b.borrowtype = #{borrowtype}
+		</if>
+		<if test="beginLoantime !=null and beginLoantime !='' and endLoantime != null and endLoantime != ''">
+			AND UNIX_TIMESTAMP(b.loantime)&gt;=UNIX_TIMESTAMP(#{beginLoantime})  AND UNIX_TIMESTAMP(b.loantime)&lt;=UNIX_TIMESTAMP(#{endLoantime})
+		</if>
+		<if test="beginDeadline !=null and beginDeadline !='' and endDeadline != null and endDeadline != ''">
+			AND b.deadline&gt;=#{beginDeadline} AND  b.deadline&lt;=#{endDeadline}
+		</if>
+		<if test="repaymentdate !=null and repaymentdate !=''">
+			AND b.repaymentdate = #{repaymentdate}
+		</if>
+		<if test="payMethod !=null and payMethod !=''">
+			AND b.pay_method = #{payMethod}
+		</if>
+		<if test="criticalid !=null and criticalid !=''">
+			AND b.criticalid = #{criticalid}
+		</if>
+		<if test="beginBorrowamount !=null and beginBorrowamount !='' and endBorrowamount != null and endBorrowamount != ''">
+			<!-- AND b.borrowamount > #{beginBorrowamount} AND b.borrowamount &lt; #{endBorrowamount}
+			OR  b.borrowamount = #{beginBorrowamount} OR  b.borrowamount = #{endBorrowamount} -->
+			and	b.borrowamount&gt;=#{beginBorrowamount} AND b.borrowamount&lt;=#{endBorrowamount}
+		</if>
+		<if test="(beginAnualrate !=null and beginAnualrate !='') or (endAnualrate != null and endAnualrate != '')">
+			<!-- AND b.anualrate >= #{beginAnualrate} AND b.anualrate &lt; #{endAnualrate}
+			OR	b.anualrate = #{beginAnualrate} OR  b.anualrate = #{endAnualrate} -->
+			and	b.anualrate&gt;=#{beginAnualrate} AND b.anualrate&lt;=#{endAnualrate}
+		</if>
+		</where>
+		  ORDER BY b.criticalId DESC
+	</select>
+	
+  <select id="findcountMount" resultType="BigDecimal" parameterType="TBorrow">
+		SELECT SUM(b.borrowamount) from t_borrow b where 
+			b.BORROWSTATUS='6' 
+		<if test="loannumber !=null and loannumber !=''">
+			AND b.loannumber = #{loannumber}
+		</if>
+		<if test="bztype !=null and bztype !=''">
+			AND b.bztype = #{bztype}
+		</if>
+		<if test="borrowtype !=null and borrowtype !=''">
+			AND b.borrowtype = #{borrowtype}
+		</if>
+		<if test="beginLoantime !=null and beginLoantime !='' and endLoantime != null and endLoantime != ''">
+			AND UNIX_TIMESTAMP(b.loantime)&gt;=UNIX_TIMESTAMP(#{beginLoantime})  AND UNIX_TIMESTAMP(b.loantime)&lt;=UNIX_TIMESTAMP(#{endLoantime})
+		</if>
+		<if test="beginDeadline !=null and beginDeadline !='' and endDeadline != null and endDeadline != ''">
+			AND b.deadline&gt;=#{beginDeadline} AND  b.deadline&lt;=#{endDeadline}
+		</if>
+		<if test="repaymentdate !=null and repaymentdate !=''">
+			AND b.repaymentdate = #{repaymentdate}
+		</if>
+		<if test="payMethod !=null and payMethod !=''">
+			AND b.pay_method = #{payMethod}
+		</if>
+		<if test="criticalid !=null and criticalid !=''">
+			AND b.criticalid = #{criticalid}
+		</if>
+		<if test="beginBorrowamount !=null and beginBorrowamount !='' and endBorrowamount != null and endBorrowamount != ''">
+			and	b.borrowamount&gt;=#{beginBorrowamount} AND b.borrowamount&lt;=#{endBorrowamount}
+		</if>
+		<if test="beginAnualrate !=null and beginAnualrate !='' and endAnualrate != null and endAnualrate != ''">
+			and	b.anualrate&gt;=#{beginAnualrate} AND b.anualrate&lt;=#{endAnualrate}
+		</if>
+
+	</select>
+	<sql id="borrowColumns">
+		a.status AS "status",
+		a.borrow_id AS "borrowId",
+		a.type AS "type",
+		a.borrowtitle AS "borrowtitle",
+		a.borrowway AS "borrowway",
+		a.borrowcode AS "borrowcode",
+		a.borrowamount AS "borrowamount",
+		a.deadline AS "deadline",
+		a.anualrate AS "anualrate",
+		a.mintendersum AS "mintendersum",
+		a.pay_method AS "payMethod",
+		a.maxtendersum AS "maxtendersum",
+		a.raiseterm AS "raiseterm",
+		a.borrowtype AS "borrowtype",
+		a.borrowstatus AS "borrowstatus",
+		a.raisetermunit AS "raisetermunit",
+		a.detail AS "detail",
+		a.openborrowdate AS "openborrowdate",
+		a.userid AS "userid",
+		a.repaysource AS "repaysource",
+		a.borrowaliasno AS "borrowaliasno",
+		a.borrowalias AS "borrowalias",
+		a.ip AS "ip",
+		a.loannumber AS "loannumber",
+		a.oriuserid AS "oriuserid",
+		a.name AS "name",
+		a.oriuseridcard AS "oriuseridcard",
+		a.auditdate AS "auditdate",
+		a.hasinvestamount AS "hasinvestamount",
+		a.hasinvestnum AS "hasinvestnum",
+		a.create_time AS "createTime",
+		a.servicefree AS "servicefree",
+		a.full_borrow_date AS "fullBorrowDate",
+		a.contractsigningtime AS "contractsigningtime",
+		a.contractcode AS "contractcode",
+		a.productcode AS "productcode",
+		a.repaymentdate AS "repaymentdate",
+		a.monthinterest AS "monthinterest",
+		a.monthcapital AS "monthcapital",
+		a.monthprepaymentamount AS "monthprepaymentamount",
+		a.giveamount AS "giveamount",
+		a.monthmanagementfee AS "monthmanagementfee",
+		a.servicecharge AS "servicecharge",
+		a.businesschannel AS "businesschannel",
+		a.mobile AS "mobile",
+		a.bcbizdeptid AS "bcbizdeptid",
+		a.bztype AS "bztype",
+		a.loantime AS "loantime",
+		a.borrowfid AS "borrowfid",
+		a.criticalid AS "criticalid",
+		a.warnings AS "warnings",
+		a.paidinamount AS "paidinamount",
+		a.usageofloan AS "usageofloan",
+		a.creditrating AS "creditrating",
+		a.idcardno AS "idcardno",
+		a.sex AS "sex",
+		a.age AS "age",
+		a.city AS "city",
+		a.annualincome AS "annualincome",
+		a.assetsliabilities AS "assetsliabilities",
+		a.is_edit AS "isEdit",
+		a.is_match AS "isMatch",
+		a.loan_name AS "loanName",
+		a.lendingtime AS "lendingtime",
+		a.borrow_customer_code AS "borrowCustomerCode",
+		a.borrow_acc_code AS "borrowAccCode",
+		a.open_bank_code AS "openBankCode",
+		a.cardno AS "cardno",
+		a.creditlevel AS "creditlevel",
+		a.is_finish AS "isFinish",
+		a.open_bank AS "openBank",
+		a.fill_mark AS "fillMark",
+		a.risk_warning AS "riskWarning",
+		a.remainamount AS "remainamount",
+		a.project_brief AS "projectBrief"
+	</sql>
+	
+	<!-- 通过标的编号查询借款  -->
+	<select id="findLoanByBorrowsCodes" parameterType="java.util.Map" resultType="com.hzdjr.hzwd.modules.borrow.entity.Borrow">
+		SELECT 
+			<include refid="borrowColumns"/>
+		FROM t_borrow a 
+		<where>
+			<if test="borrowCodeList != null">
+				a.borrowCode IN 
+				<foreach collection="borrowCodeList" item="borrowCode" separator="," open="(" close=")" > 
+					#{borrowCode}
+				</foreach>
+			</if>
+			<if test="borrowStatusList != null">
+				and a.BORROWSTATUS in 
+				<foreach collection="borrowStatusList" item="borrowStatus" separator="," open="(" close=")">
+					#{borrowStatus}
+				</foreach>
+			</if>
+		</where> 
+		ORDER BY a.create_time
+	</select>
+	
+	<update id="releaseBorrows" parameterType="java.util.List" >
+		<foreach collection="list" item="item" separator=";">
+			UPDATE t_borrow tb
+			<set>
+				<if test="item.borrowaliasno != null and item.borrowaliasno != ''">
+					tb.borrowAliasNo = #{item.borrowaliasno},
+				</if>
+				<if test="item.borrowalias != null and item.borrowalias != ''">
+					tb.borrowAlias = #{item.borrowalias},
+				</if>
+				<if test="item.borrowtitle != null and item.borrowtitle != ''">
+					tb.BORROWTITLE = #{item.borrowtitle},
+				</if>
+				<if test="item.riskWarning != null and item.riskWarning != ''">
+					tb.RISK_WARNING = #{item.riskWarning},
+				</if>
+				<if test="item.projectBrief != null and item.projectBrief != ''">
+					tb.project_brief = #{item.projectBrief},
+				</if>
+				<if test="item.raiseterm != null and item.raiseterm != ''">
+					tb.RAISETERM = #{item.raiseterm},
+				</if>
+				<if test="item.raisetermunit != null and item.raisetermunit != ''">
+					tb.RAISETERMUNIT = #{item.raisetermunit},
+				</if>
+				<if test="item.mintendersum != null and item.mintendersum != ''">
+					tb.MINTENDERSUM = #{item.mintendersum},
+				</if>
+				<if test="item.maxtendersum != null and item.maxtendersum != '' ">
+					tb.MAXTENDERSUM = #{item.maxtendersum},
+				</if>
+				<if test="item.borrowstatus != null and item.borrowstatus != '' ">
+					tb.BORROWSTATUS = #{item.borrowstatus},
+				</if>
+				<if test="item.borrowListId != null and item.borrowListId != '' ">
+					tb.borrow_list_id = #{item.borrowListId}
+				</if>
+			</set>
+			WHERE tb.BORROW_ID = #{item.borrowId}
+		</foreach>
+	</update>
+	
+	<insert id="releaseBorrowList" parameterType="com.hzdjr.hzwd.modules.borrowlist.entity.TBorrowList" >
+		INSERT INTO t_borrow_list (
+			borrow_list_id,
+			borrow_list_code,
+			borrow_list_title,
+			borrowAmount,
+			anualRate,
+			deadLine,
+			borrowWay,
+			risk_warning,
+			project_brief,
+			raise_day,
+			min_tender_sum,
+			create_time,
+			borrow_list_status
+		)
+		VALUES (
+			#{borrowListId},
+			#{borrowListCode},
+			#{borrowListTitle},
+			#{borrowListAmount},
+			#{anualRate},
+			#{deadLine},
+			#{payMethod},
+			#{riskWarning},
+			#{projectBrief},
+			#{raiseDay},
+			#{minTenderSum},
+			#{createTime},
+			#{borrowListStatus}
+		)
+	</insert>
+</mapper>

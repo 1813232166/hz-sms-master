@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.borrow.dao.BbTBorrowDao">
+    
+	<sql id="tBorrowColumns">
+		a.status AS "status",
+		a.borrow_id AS "borrowId",
+		a.type AS "type",
+		a.borrowtitle AS "borrowtitle",
+		a.borrowway AS "borrowway",
+		a.borrowcode AS "borrowcode",
+		a.borrowamount AS "borrowamount",
+		a.deadline AS "deadline",
+		a.anualrate AS "anualrate",
+		a.mintendersum AS "mintendersum",
+		a.pay_method AS "payMethod",
+		a.maxtendersum AS "maxtendersum",
+		a.raiseterm AS "raiseterm",
+		a.borrowtype AS "borrowtype",
+		a.borrowstatus AS "borrowstatus",
+		a.raisetermunit AS "raisetermunit",
+		a.detail AS "detail",
+		a.openborrowdate AS "openborrowdate",
+		a.userid AS "userid",
+		a.repaysource AS "repaysource",
+		a.borrowaliasno AS "borrowaliasno",
+		a.borrowalias AS "borrowalias",
+		a.ip AS "ip",
+		a.loannumber AS "loannumber",
+		a.oriuserid AS "oriuserid",
+		a.name AS "name",
+		a.oriuseridcard AS "oriuseridcard",
+		a.auditdate AS "auditdate",
+		a.hasinvestamount AS "hasinvestamount",
+		a.hasinvestnum AS "hasinvestnum",
+		a.create_time AS "createTime",
+		a.servicefree AS "servicefree",
+		a.full_borrow_date AS "fullBorrowDate",
+		a.contractsigningtime AS "contractsigningtime",
+		a.contractcode AS "contractcode",
+		a.productcode AS "productcode",
+		a.repaymentdate AS "repaymentdate",
+		a.monthinterest AS "monthinterest",
+		a.monthcapital AS "monthcapital",
+		a.monthprepaymentamount AS "monthprepaymentamount",
+		a.giveamount AS "giveamount",
+		a.monthmanagementfee AS "monthmanagementfee",
+		a.servicecharge AS "servicecharge",
+		a.businesschannel AS "businesschannel",
+		a.mobile AS "mobile",
+		a.bcbizdeptid AS "bcbizdeptid",
+		a.bztype AS "bztype",
+		a.loantime AS "loantime",
+		a.borrowfid AS "borrowfid",
+		a.criticalid AS "criticalid",
+		a.warnings AS "warnings",
+		a.paidinamount AS "paidinamount",
+		a.usageofloan AS "usageofloan",
+		a.creditrating AS "creditrating",
+		a.idcardno AS "idcardno",
+		a.sex AS "sex",
+		a.age AS "age",
+		a.city AS "city",
+		a.annualincome AS "annualincome",
+		a.assetsliabilities AS "assetsliabilities",
+		a.is_edit AS "isEdit",
+		a.is_match AS "isMatch",
+		a.loan_name AS "loanName",
+		a.lendingtime AS "lendingtime",
+		a.borrow_customer_code AS "borrowCustomerCode",
+		a.borrow_acc_code AS "borrowAccCode",
+		a.open_bank_code AS "openBankCode",
+		a.cardno AS "cardno",
+		a.creditlevel AS "creditlevel",
+		a.is_finish AS "isFinish",
+		a.open_bank AS "openBank",
+		a.fill_mark AS "fillMark",
+		a.risk_warning AS "riskWarning",
+		a.remainamount AS "remainamount"
+	</sql>
+	
+	<sql id="tBorrowJoins">
+	</sql>
+    
+	<select id="get" resultType="TBorrow">
+		SELECT 
+			<include refid="tBorrowColumns"/>
+		FROM t_borrow a
+		<include refid="tBorrowJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TBorrow">
+		SELECT 
+			<include refid="tBorrowColumns"/>,b.investTime as investTime,b.investAmount as investAmount,(select userName from t_user where id = b.investor) as bBName
+		FROM t_borrow a INNER JOIN t_invest b on a.BORROW_ID = b.borrowId
+		<include refid="tBorrowJoins"/>
+		<where>
+			
+			<if test="payMethod != null and payMethod != ''">
+				AND a.pay_method = #{payMethod}
+			</if>
+			<if test="borrowtype != null and borrowtype != ''">
+				AND a.borrowtype = #{borrowtype}
+			</if>
+			<if test="borrowstatus != null and borrowstatus != ''">
+				AND a.borrowstatus = #{borrowstatus}
+			</if>
+			<if test="beginOpenborrowdate != null and endOpenborrowdate != null and beginOpenborrowdate != '' and endOpenborrowdate != ''">
+				AND b.investTime BETWEEN #{beginOpenborrowdate} AND #{endOpenborrowdate}
+			</if>
+			<if test="userid != null and userid != ''">
+				AND a.userid = #{userid}
+			</if>
+			<if test="borrowaliasno != null and borrowaliasno != ''">
+				AND a.borrowaliasno = #{borrowaliasno}
+			</if>
+			<if test="borrowalias != null and borrowalias != ''">
+				AND a.borrowalias = #{borrowalias}
+			</if>
+			<if test="loannumber != null and loannumber != ''">
+				AND a.loannumber = #{loannumber}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			and b.channel = 'mgmt'
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TBorrow">
+		SELECT 
+			<include refid="tBorrowColumns"/>
+		FROM t_borrow a
+		<include refid="tBorrowJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_borrow(
+			status,
+			borrow_id,
+			type,
+			borrowtitle,
+			borrowway,
+			borrowcode,
+			borrowamount,
+			deadline,
+			anualrate,
+			mintendersum,
+			pay_method,
+			maxtendersum,
+			raiseterm,
+			borrowtype,
+			borrowstatus,
+			raisetermunit,
+			detail,
+			openborrowdate,
+			userid,
+			repaysource,
+			borrowaliasno,
+			borrowalias,
+			ip,
+			loannumber,
+			oriuserid,
+			name,
+			oriuseridcard,
+			auditdate,
+			hasinvestamount,
+			hasinvestnum,
+			create_time,
+			servicefree,
+			full_borrow_date,
+			contractsigningtime,
+			contractcode,
+			productcode,
+			repaymentdate,
+			monthinterest,
+			monthcapital,
+			monthprepaymentamount,
+			giveamount,
+			monthmanagementfee,
+			servicecharge,
+			businesschannel,
+			mobile,
+			bcbizdeptid,
+			bztype,
+			loantime,
+			borrowfid,
+			criticalid,
+			warnings,
+			paidinamount,
+			usageofloan,
+			creditrating,
+			idcardno,
+			sex,
+			age,
+			city,
+			annualincome,
+			assetsliabilities,
+			is_edit,
+			is_match,
+			loan_name,
+			lendingtime,
+			borrow_customer_code,
+			borrow_acc_code,
+			open_bank_code,
+			cardno,
+			creditlevel,
+			is_finish,
+			open_bank,
+			fill_mark,
+			risk_warning,
+			remainamount
+		) VALUES (
+			#{status},
+			#{borrowId},
+			#{type},
+			#{borrowtitle},
+			#{borrowway},
+			#{borrowcode},
+			#{borrowamount},
+			#{deadline},
+			#{anualrate},
+			#{mintendersum},
+			#{payMethod},
+			#{maxtendersum},
+			#{raiseterm},
+			#{borrowtype},
+			#{borrowstatus},
+			#{raisetermunit},
+			#{detail},
+			#{openborrowdate},
+			#{userid},
+			#{repaysource},
+			#{borrowaliasno},
+			#{borrowalias},
+			#{ip},
+			#{loannumber},
+			#{oriuserid},
+			#{name},
+			#{oriuseridcard},
+			#{auditdate},
+			#{hasinvestamount},
+			#{hasinvestnum},
+			#{createTime},
+			#{servicefree},
+			#{fullBorrowDate},
+			#{contractsigningtime},
+			#{contractcode},
+			#{productcode},
+			#{repaymentdate},
+			#{monthinterest},
+			#{monthcapital},
+			#{monthprepaymentamount},
+			#{giveamount},
+			#{monthmanagementfee},
+			#{servicecharge},
+			#{businesschannel},
+			#{mobile},
+			#{bcbizdeptid},
+			#{bztype},
+			#{loantime},
+			#{borrowfid},
+			#{criticalid},
+			#{warnings},
+			#{paidinamount},
+			#{usageofloan},
+			#{creditrating},
+			#{idcardno},
+			#{sex},
+			#{age},
+			#{city},
+			#{annualincome},
+			#{assetsliabilities},
+			#{isEdit},
+			#{isMatch},
+			#{loanName},
+			#{lendingtime},
+			#{borrowCustomerCode},
+			#{borrowAccCode},
+			#{openBankCode},
+			#{cardno},
+			#{creditlevel},
+			#{isFinish},
+			#{openBank},
+			#{fillMark},
+			#{riskWarning},
+			#{remainamount}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_borrow SET 	
+			status = #{status},
+			borrow_id = #{borrowId},
+			type = #{type},
+			borrowtitle = #{borrowtitle},
+			borrowway = #{borrowway},
+			borrowcode = #{borrowcode},
+			borrowamount = #{borrowamount},
+			deadline = #{deadline},
+			anualrate = #{anualrate},
+			mintendersum = #{mintendersum},
+			pay_method = #{payMethod},
+			maxtendersum = #{maxtendersum},
+			raiseterm = #{raiseterm},
+			borrowtype = #{borrowtype},
+			borrowstatus = #{borrowstatus},
+			raisetermunit = #{raisetermunit},
+			detail = #{detail},
+			openborrowdate = #{openborrowdate},
+			userid = #{userid},
+			repaysource = #{repaysource},
+			borrowaliasno = #{borrowaliasno},
+			borrowalias = #{borrowalias},
+			ip = #{ip},
+			loannumber = #{loannumber},
+			oriuserid = #{oriuserid},
+			name = #{name},
+			oriuseridcard = #{oriuseridcard},
+			auditdate = #{auditdate},
+			hasinvestamount = #{hasinvestamount},
+			hasinvestnum = #{hasinvestnum},
+			create_time = #{createTime},
+			servicefree = #{servicefree},
+			full_borrow_date = #{fullBorrowDate},
+			contractsigningtime = #{contractsigningtime},
+			contractcode = #{contractcode},
+			productcode = #{productcode},
+			repaymentdate = #{repaymentdate},
+			monthinterest = #{monthinterest},
+			monthcapital = #{monthcapital},
+			monthprepaymentamount = #{monthprepaymentamount},
+			giveamount = #{giveamount},
+			monthmanagementfee = #{monthmanagementfee},
+			servicecharge = #{servicecharge},
+			businesschannel = #{businesschannel},
+			mobile = #{mobile},
+			bcbizdeptid = #{bcbizdeptid},
+			bztype = #{bztype},
+			loantime = #{loantime},
+			borrowfid = #{borrowfid},
+			criticalid = #{criticalid},
+			warnings = #{warnings},
+			paidinamount = #{paidinamount},
+			usageofloan = #{usageofloan},
+			creditrating = #{creditrating},
+			idcardno = #{idcardno},
+			sex = #{sex},
+			age = #{age},
+			city = #{city},
+			annualincome = #{annualincome},
+			assetsliabilities = #{assetsliabilities},
+			is_edit = #{isEdit},
+			is_match = #{isMatch},
+			loan_name = #{loanName},
+			lendingtime = #{lendingtime},
+			borrow_customer_code = #{borrowCustomerCode},
+			borrow_acc_code = #{borrowAccCode},
+			open_bank_code = #{openBankCode},
+			cardno = #{cardno},
+			creditlevel = #{creditlevel},
+			is_finish = #{isFinish},
+			open_bank = #{openBank},
+			fill_mark = #{fillMark},
+			risk_warning = #{riskWarning},
+			remainamount = #{remainamount}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findBorrowById" parameterType="java.util.Map" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+		SELECT 	<include refid="tBorrowColumns"></include> FROM t_borrow a WHERE  a.BORROW_ID=#{borrowId}
+	</select>
+	<!-- 查询已投金额 -->
+	<select id="subjectMoney" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT SUM(a.investAmount) as sumMoney	FROM t_invest a  LEFT JOIN t_user b  ON a.investor = b.id 
+  		WHERE a.investType='1' AND a.borrowId=#{borrowId}
+	</select>
+	
+	
+	<update id="delete">
+		DELETE FROM t_borrow
+		WHERE id = #{id}
+	</update>
+	<select id = "selectBorrowCount" resultType="map">
+		SELECT COUNT(1) as count, SUM(investAmount) as BORROWAMOUNT FROM t_invest where channel = "mgmt"
+	</select>
+</mapper>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.exitmanage.dao.TExitSettingsDao">
+    
+	<sql id="tExitSettingsColumns">
+		a.id AS "id",
+		a.expire_amount AS "expireAmount",
+		a.not_exited_amount AS "notExitedAmount",
+		a.can_quit_amount AS "canQuitAmount",
+		a.quit_amount AS "quitAmount",
+		a.create_time AS "createTime",
+		a.release_time AS "releaseTime",
+		a.status AS "status",
+		a.detail AS "detail"
+	</sql>
+	
+	<sql id="tExitSettingsJoins">
+	</sql>
+    
+	<select id="get" resultType="TExitSettings">
+		SELECT 
+			<include refid="tExitSettingsColumns"/>
+		FROM t_exit_settings a
+		<include refid="tExitSettingsJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TExitSettings">
+		SELECT 
+			<include refid="tExitSettingsColumns"/>
+		FROM t_exit_settings a
+		<include refid="tExitSettingsJoins"/>
+		<where>
+			<if test="beginTimes != null and beginTimes != '' ">
+                AND a.release_time &gt;= #{beginTimes}
+            </if>
+            <if test="endTimes != null and endTimes != '' ">
+                AND a.release_time &lt;= #{endTimes}
+            </if>
+            <if test="status!=null and status!=''">
+				and status=#{status}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="TExitSettings">
+		SELECT 
+			<include refid="tExitSettingsColumns"/>
+		FROM t_exit_settings a
+		<include refid="tExitSettingsJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	<update id="update">
+		UPDATE t_exit_settings SET 	
+			expire_amount = #{expireAmount},
+			not_exited_amount = #{notExitedAmount},
+			can_quit_amount = #{canQuitAmount},
+			quit_amount = #{quitAmount},
+			create_time = #{createTime},
+			release_time = #{releaseTime},
+			status = #{status},
+			detail = #{detail}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_exit_settings
+		WHERE id = #{id}
+	</update>
+	<!-- 设置退出金额 -->
+	<update id="updateCanQuitAmount" parameterType="String">
+	    update t_exit_settings set can_quit_amount=#{1} where id=#{0}
+	</update>
+	<!-- 提交审核 -->
+	<update id="submitAudit">
+		 update t_exit_settings set status='2' where id=#{0}
+	</update>
+	<!-- 审核 -->
+	<update id="audit">
+		 update t_exit_settings set status=#{1},detail=#{2}  where id=#{0}
+	</update>
+	<!-- 设置金额按钮的可见,如果没有记录则可见,否则隐藏 -->
+	<select id="setExitMoneyShow" resultType="int">
+		select count(can_quit_amount) as size from t_exit_settings
+	</select>
+</mapper>

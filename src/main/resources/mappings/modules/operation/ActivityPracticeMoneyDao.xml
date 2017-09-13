@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.operation.dao.ActivityPracticeMoneyDao">
+
+	<sql id="practiceMoneyColumns">
+		a.id AS "id",
+		a.activityid AS "activityid",
+		a.giftamount AS "giftamount",
+		a.isused AS "isused",
+		a.usedamount AS "usedamount",
+		a.profitamount AS "profitamount",
+		a.senddate AS "senddate",
+		a.useddate AS "useddate",
+		a.profitdate AS "profitdate",
+		a.profitid AS "profitid",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="practiceMoneyJoins">
+	</sql>
+
+	<select id="get" resultType="ActivityPracticeMoney">
+		SELECT
+		<include refid="practiceMoneyColumns" />
+		FROM t_practice_money a
+		<include refid="practiceMoneyJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="ActivityPracticeMoney">
+		SELECT
+			<include refid="practiceMoneyColumns" />,
+			CONCAT(SUBSTRING(a.realName,1,1),'**') as realName,
+			CONCAT(SUBSTRING(a.mobile,1,3),'****',SUBSTRING(a.mobile,8)) as mobile, 
+			t.activityName as activityName,
+			CASE a.sourcechannel WHEN '1' THEN 'web' WHEN '2' THEN '安卓' WHEN '3' THEN '苹果' WHEN '4' THEN '微信' WHEN '5' THEN '其他' END as sourcechannel,
+			CASE a.status WHEN '1' THEN '已发' WHEN '2' THEN '待发' WHEN '3' THEN '失败' END as status,
+			CASE a.profitstatus WHEN '1' THEN '已发' WHEN '2' THEN '待发' WHEN '3' THEN '失败' END as profitstatus
+		FROM t_practice_money a 
+		JOIN t_activity t on a.activityId = t.id
+		<include refid="practiceMoneyJoins" />
+		<where>
+			a.remarks = ${remarks}
+			<if test="activityName != null and activityName != ''">
+				AND t.activityName LIKE
+				<if test="dbName == 'oracle'">'%'||#{activityName}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{activityName}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{activityName},'%')</if>
+			</if>
+			<if test="realName != null and realName != ''">
+				AND a.realName = #{realName}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="sourcechannel != null and sourcechannel != ''">
+				AND a.sourcechannel = #{sourcechannel}
+			</if>
+			<if test="beginUseddate != null and endUseddate != null and beginUseddate != '' and endUseddate != ''">
+				AND a.useddate BETWEEN #{beginUseddate} AND #{endUseddate}
+			</if>
+			<if test="beginProfitdate != null and endProfitdate != null and beginProfitdate != '' and endProfitdate != ''">
+				AND a.profitdate BETWEEN #{beginProfitdate} AND #{endProfitdate}
+			</if>
+			<if test="profitstatus != null and profitstatus != ''">
+				AND a.profitstatus = #{profitstatus}
+			</if>
+			<if test="beginSenddate != null and endSenddate != null and beginSenddate != '' and endSenddate != ''">
+				AND a.senddate BETWEEN #{beginSenddate} AND #{endSenddate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			<if test="remarks=='1'">
+					ORDER BY a.status DESC, a.sendDate DESC
+				</if>
+				<if test="remarks=='2'">
+					ORDER BY a.status DESC, a.usedDate DESC
+				</if>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 导出数据列表  -->
+	<select id="exportPracticeMoneyFile" resultType="ActivityPracticeMoney">
+		SELECT
+			<include refid="practiceMoneyColumns" />,
+			a.realName as realName,
+			a.mobile as mobile,
+			t.activityName as activityName,
+			CASE a.sourcechannel WHEN '1' THEN 'web' WHEN '2' THEN '安卓' WHEN '3' THEN '苹果' WHEN '4' THEN '微信' WHEN '5' THEN '其他' END as sourcechannel,
+			CASE a.status WHEN '1' THEN '已发' WHEN '2' THEN '待发' WHEN '3' THEN '失败' END as status,
+			CASE a.profitstatus WHEN '1' THEN '已发' WHEN '2' THEN '待发' WHEN '3' THEN '失败' END as profitstatus
+		FROM t_practice_money a 
+		JOIN t_activity t on a.activityId = t.id
+		<include refid="practiceMoneyJoins" />
+		<where>
+			a.remarks = ${remarks}
+			<if test="activityName != null and activityName != ''">
+				AND t.activityName LIKE
+				<if test="dbName == 'oracle'">'%'||#{activityName}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{activityName}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{activityName},'%')</if>
+			</if>
+			<if test="realName != null and realName != ''">
+				AND a.realName = #{realName}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="sourcechannel != null and sourcechannel != ''">
+				AND a.sourcechannel = #{sourcechannel}
+			</if>
+			<if test="beginUseddate != null and endUseddate != null and beginUseddate != '' and endUseddate != ''">
+				AND a.useddate BETWEEN #{beginUseddate} AND #{endUseddate}
+			</if>
+			<if test="beginProfitdate != null and endProfitdate != null and beginProfitdate != '' and endProfitdate != ''">
+				AND a.profitdate BETWEEN #{beginProfitdate} AND #{endProfitdate}
+			</if>
+			<if test="profitstatus != null and profitstatus != ''">
+				AND a.profitstatus = #{profitstatus}
+			</if>
+			<if test="beginSenddate != null and endSenddate != null and beginSenddate != '' and endSenddate != ''">
+				AND a.senddate BETWEEN #{beginSenddate} AND #{endSenddate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			<if test="remarks=='1'">
+					ORDER BY a.status DESC, a.sendDate DESC
+				</if>
+				<if test="remarks=='2'">
+					ORDER BY a.status DESC, a.usedDate DESC
+				</if>
+			</otherwise>
+		</choose>
+	</select>
+	
+
+	<!-- 获取发放总体验金  -->
+	<select id="getPracticeMoney" resultType="map">
+		SELECT
+			count(*) as counts,
+			count(distinct mobile) as userCounts,
+			SUM(giftamount) as giftamounts
+		FROM t_practice_money a 
+		JOIN t_activity t ON a.activityId = t.id
+		<where>
+			a.remarks = ${remarks}
+			<if test="activityName != null and activityName != ''">
+				AND t.activityName LIKE
+				<if test="dbName == 'oracle'">'%'||#{activityName}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{activityName}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{activityName},'%')</if>
+			</if>
+			<if test="realName != null and realName != ''">
+				AND a.realName = #{realName}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="sourcechannel != null and sourcechannel != ''">
+				AND a.sourcechannel = #{sourcechannel}
+			</if>
+			<if test="beginUseddate != null and endUseddate != null and beginUseddate != '' and endUseddate != ''">
+				AND a.useddate BETWEEN #{beginUseddate} AND #{endUseddate}
+			</if>
+			<if test="beginProfitdate != null and endProfitdate != null and beginProfitdate != '' and endProfitdate != ''">
+				AND a.profitdate BETWEEN #{beginProfitdate} AND #{endProfitdate}
+			</if>
+			<if test="profitstatus != null and profitstatus != ''">
+				AND a.profitstatus = #{profitstatus}
+			</if>
+			<if test="beginSenddate != null and endSenddate != null and beginSenddate != '' and endSenddate != ''">
+				AND a.senddate BETWEEN #{beginSenddate} AND #{endSenddate}
+			</if>
+		</where>
+			<if test="remarks=='1'">
+					ORDER BY a.status DESC, a.sendDate DESC
+				</if>
+				<if test="remarks=='2'">
+					ORDER BY a.status DESC, a.usedDate DESC
+				</if>
+	</select>
+
+
+	<select id="findAllList" resultType="ActivityPracticeMoney">
+		SELECT
+		<include refid="practiceMoneyColumns" />
+		FROM t_practice_money a
+		<include refid="practiceMoneyJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO t_practice_money(
+		id,
+		activityid,
+		giftamount,
+		isused,
+		usedamount,
+		profitamount,
+		status,
+		sourcechannel,
+		senddate,
+		useddate,
+		profitdate,
+		profitid,
+		profitstatus,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		remarks,
+		del_flag
+		) VALUES (
+		#{id},
+		#{activityid},
+		#{giftamount},
+		#{isused},
+		#{usedamount},
+		#{profitamount},
+		#{status},
+		#{sourcechannel},
+		#{senddate},
+		#{useddate},
+		#{profitdate},
+		#{profitid},
+		#{profitstatus},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{remarks},
+		#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE t_practice_money SET
+		activityid =
+		#{activityid},
+		giftamount = #{giftamount},
+		isused =
+		#{isused},
+		usedamount = #{usedamount},
+		profitamount = #{profitamount},
+		status = #{status},
+		sourcechannel = #{sourcechannel},
+		senddate =
+		#{senddate},
+		useddate = #{useddate},
+		profitdate = #{profitdate},
+		profitid = #{profitid},
+		profitstatus = #{profitstatus},
+		update_by =
+		#{updateBy.id},
+		update_date = #{updateDate},
+		remarks = #{remarks}
+		WHERE
+		id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE t_practice_money SET
+		del_flag =
+		#{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

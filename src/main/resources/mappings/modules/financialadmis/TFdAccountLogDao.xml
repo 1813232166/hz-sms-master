@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.TFdAccountLogDao">
+    
+	<sql id="tFdAccountLogColumns">
+	    SELECT  concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4)) AS 'mobile',
+		a.createDate AS 'createtime',
+		a.bizType AS 'biztype',
+		a.transactionAmt AS 'debit',
+		'2636.3' AS 'credit',
+		'5689.45' AS 'bal'
+	</sql>
+	
+	<sql id="tFdAccountLogJoins">
+	</sql>
+    
+	<select id="get" resultType="TFdAccountLog">
+		SELECT         concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4)) AS "realMobile",
+          tu.mobile AS 'mobile',
+          a.create_date AS 'createtime',a.request_no AS 'tradeNo',a.type AS 'biztype',
+          tu.userType AS 'remark',
+                    (CASE WHEN a.type IN('1','14','8','15')THEN a.amount ELSE '0.00' END) AS 'debit',
+                    (CASE WHEN a.type IN('5','6','7') THEN a.amount 
+                                WHEN a.type='10' THEN a.amount+a.commission
+                                ELSE '0.00' END) AS 'credit'
+        FROM t_fd_payment a
+        INNER JOIN t_user tu ON a.user_id = tu.id
+		<include refid="tFdAccountLogJoins"/>
+		WHERE a.id = #{id} 
+	</select>
+	<!-- 查询个人账户资金-->
+	<select id="findList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.TFdAccountLog">
+	SELECT        concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4)) AS "realMobile",
+          tu.mobile AS 'mobile',
+          a.create_date AS 'createtime',a.request_no AS 'tradeNo',a.type AS 'biztype',
+          tu.userType AS 'remark',
+                    (CASE WHEN a.type IN('1','14','8','15')THEN a.amount ELSE '0.00' END) AS 'debit',
+          (CASE WHEN a.type IN('5','6','7') THEN a.amount 
+                                WHEN a.type='10' THEN a.amount+a.commission
+                                ELSE '0.00' END) AS 'credit'
+        FROM t_fd_payment a
+        INNER JOIN t_user tu ON a.user_id = tu.id
+        <where>
+              a.type IN('1','5','6','7','8','10','14','15') AND a.`status`='S'
+            <if test="mobile != null and mobile != ''">
+                AND tu.mobile like '%${mobile}%'
+            </if>
+            <if test="null !=beginTime  and beginTime != ''">
+                AND a.create_date &gt;= #{beginTime}
+            </if>
+            <if test="null !=overTime and overTime != ''">
+                AND #{overTime} &gt;=  a.create_date
+            </if>
+            <if test=" null != biztype and biztype != ''">
+                AND a.type = #{biztype}
+            </if>
+            <if test=" null != tradeNo and '' != tradeNo">
+                AND a.request_no=#{tradeNo}
+            </if>
+        </where>
+        ORDER BY a.create_date DESC
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TFdAccountLog">
+		SELECT        tu.mobile AS "realMobile",
+          tu.mobile AS 'mobile',
+          a.create_date AS 'createtime',a.request_no AS 'tradeNo',a.type AS 'biztype',
+          tu.userType AS 'remark',
+                    (CASE WHEN a.type IN('1','14','8','15')THEN a.amount ELSE '0.00' END) AS 'debit',
+          (CASE WHEN a.type IN('5','6','7') THEN a.amount 
+                                WHEN a.type='10' THEN a.amount+a.commission
+                                ELSE '0.00' END) AS 'credit'
+        FROM t_fd_payment a
+        INNER JOIN t_user tu ON a.user_id = tu.id
+        WHERE a.type IN('1','5','6','7','8','10','14','15') AND a.`status`='S'
+		<include refid="tFdAccountLogJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_fd_account_log(
+			id,
+			userid,
+			acdate,
+			biztype,
+			debit,
+			credit,
+			bal,
+			bizid,
+			createtime,
+			status,
+			remark,
+			termno,
+			operuserid
+		) VALUES (
+			#{id},
+			#{userid},
+			#{acdate},
+			#{biztype},
+			#{debit},
+			#{credit},
+			#{bal},
+			#{bizid},
+			#{createtime},
+			#{status},
+			#{remark},
+			#{termno},
+			#{operuserid}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_fd_account_log SET 	
+			userid = #{userid},
+			acdate = #{acdate},
+			biztype = #{biztype},
+			debit = #{debit},
+			credit = #{credit},
+			bal = #{bal},
+			bizid = #{bizid},
+			createtime = #{createtime},
+			status = #{status},
+			remark = #{remark},
+			termno = #{termno},
+			operuserid = #{operuserid}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_fd_account_log
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findexportList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.TFdAccountLogVo">
+		SELECT        concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4))  AS "realMobile",
+          tu.mobile AS 'mobile',
+          a.create_date AS 'createtime',a.request_no AS 'tradeNo',a.type AS 'biztype',
+          tu.userType AS 'remark',
+                    (CASE WHEN a.type IN('1','14','8','15')THEN a.amount ELSE '0.00' END) AS 'debit',
+          (CASE WHEN a.type IN('5','6','7') THEN a.amount 
+                                WHEN a.type='10' THEN a.amount+a.commission
+                                ELSE '0.00' END) AS 'credit'
+        FROM t_fd_payment a
+        INNER JOIN t_user tu ON a.user_id = tu.id
+        <where>
+              a.type IN('1','5','6','7','8','10','14','15') AND a.`status`='S'
+            <if test="mobile != null and mobile != ''">
+                AND tu.mobile like '%${mobile}%'
+            </if>
+            <if test="null !=beginTime  and beginTime != ''">
+                AND a.create_date &gt;= #{beginTime}
+            </if>
+            <if test="null !=overTime and overTime != ''">
+                AND #{overTime} &gt;=  a.create_date
+            </if>
+            <if test=" null != biztype and biztype != ''">
+                AND a.type = #{biztype}
+            </if>
+            <if test=" null != tradeNo and '' != tradeNo">
+                AND a.request_no=#{tradeNo}
+            </if>
+        </where>
+		ORDER BY a.create_date DESC
+		LIMIT 20000
+	</select>
+	
+</mapper>

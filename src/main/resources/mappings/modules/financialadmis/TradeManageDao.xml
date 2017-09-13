@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.TradeManageDao">
+	<sql id="sqlTransactionList">
+		SELECT
+			tfd.request_no AS 'tradeNo',
+			IFNULL(CONCAT(SUBSTRING(tu.mobile,1,3),'****',SUBSTRING(tu.mobile,8,4)),tfd.user_id) AS 'accCode',
+			tfd.type AS 'tradeType',
+			tfd.create_date AS 'tradeTime',
+			tfd.`status` AS 'tradeStatus'
+		FROM
+			t_fd_payment AS tfd, t_user AS tu
+			<where>
+				tfd.user_Id = tu.id
+				<if test="null !=accCode  and accCode != ''">
+					<choose>
+						<when test="accCode == 'service'.toString()" >   <!-- 服务费账户 -->
+							AND tfd.user_Id in ('SYS_GENERATE_003','SYS_GENERATE_004')
+						</when>
+						<when test="accCode == 'platform'.toString()" >  <!-- 平台垫付账户 -->
+							AND tfd.user_Id in ('SYS_GENERATE_001','SYS_GENERATE_002')
+						</when>
+						<otherwise>
+							AND tu.mobile like '%${accCode}%'
+						</otherwise>
+					</choose>
+				</if>
+				<if test="null !=tradeNo  and tradeNo != ''">
+					AND tfd.request_no like '%${tradeNo}%'
+				</if>
+				<if test="null !=beginTime  and beginTime != ''">
+					AND tfd.create_date >= #{beginTime}
+				</if>
+				<if test="null !=overTime and overTime != ''">
+					AND  #{overTime} >= tfd.create_date
+				</if>
+				<if test="null !=tradeStatus  and tradeStatus != ''">
+					<choose>
+						<when test="tradeStatus == '1'.toString()" >   <!-- 成功 -->
+							AND tfd.`status` = 'S'
+						</when>
+						<when test="tradeStatus == '2'.toString()" >  <!-- 处理中-->
+							AND tfd.`status` in ('I','P','R','L','D')
+						</when>
+						<when test="tradeStatus == '3'.toString()" >  <!-- 失败-->
+							AND tfd.`status` in ('F','M','C')
+						</when>
+						<when test="tradeStatus == '4'.toString()" >  <!-- 冻结-->
+							AND tfd.`status` = 'FZ'
+						</when>
+						<otherwise>                                   <!-- 异常-->
+							AND tfd.`status` in ('N','E')
+						</otherwise>
+					</choose>
+				</if>
+			</where>
+	</sql>
+    <!--交易  -->
+	<select id="findTransactionList"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.TransactionVo">
+		<include refid="sqlTransactionList" />
+		ORDER BY tfd.create_date DESC
+	</select>
+
+	<!-- 导出交易列表 -->
+	<select id="exportTransaction"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.TransactionVo">
+		<include refid="sqlTransactionList" />
+		ORDER BY tfd.create_date DESC LIMIT 20000
+	</select>
+
+</mapper>

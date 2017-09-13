@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.rebate.dao.InvestRecordDao">
+	<!-- 插入 -->
+    <insert id="insert">
+        INSERT INTO t_yx_rel_invest (
+			id,
+			user_mobile,
+			order_id,
+			invest_time,
+			invest_amount,
+			deadline,
+			project_name,
+			project_no,
+			order_type,
+			STATUS,
+			resource,
+			create_date
+		)
+		VALUES
+		(
+			#{id},#{userMobile},#{orderId},#{investTime},
+			#{investAmount},#{deadline},#{projectName},#{projectNo},
+			#{orderType},'0',#{resource},SYSDATE()
+		)
+    </insert>
+    <!-- 查询 -->	
+	<select id="findList" resultType="com.hzdjr.hzwd.modules.rebate.entity.InvestRecord">
+	    SELECT
+			t.id,
+			t.user_mobile as userMobile,
+			t.order_id as orderId,
+			t.invest_time as investTime,
+			t.deadline,
+			t.invest_amount as investAmount,
+			t.order_type as orderType,
+			t.project_name as projectName,
+			t.project_no as projectNo,
+			t.`status`,
+			t.resource,
+			t.create_date as createDate,
+			t.update_date as updateDate
+		FROM t_yx_rel_invest t
+		<where>
+            t.status=#{status}
+        </where>
+        order by t.invest_time asc
+    	limit 1000
+	</select>
+	<!-- 计算后更新-->
+	<update id="update">
+		update t_yx_rel_invest 
+		set status='1'
+		where id=#{id} and status='0'
+	</update>
+</mapper>

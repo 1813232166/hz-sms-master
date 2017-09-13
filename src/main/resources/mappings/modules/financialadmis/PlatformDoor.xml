@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.PlatformDoorDao">
+    
+	<sql id="tBorrowColumns">
+		a.status AS "status",
+		a.BORROW_ID AS "borrowId",
+		a.type AS "type",
+		a.borrowtitle AS "borrowtitle",
+		a.borrowway AS "borrowway",
+		a.borrowcode AS "borrowcode",
+		a.borrowamount AS "borrowamount",
+		a.deadline AS "deadline",
+		a.anualrate AS "anualrate",
+		a.mintendersum AS "mintendersum",
+		<!-- a.pay_method AS "payMethod", -->
+		a.maxtendersum AS "maxtendersum",
+		a.raiseterm AS "raiseterm",
+		a.borrowtype AS "borrowtype",
+		<!-- a.borrowstatus AS "borrowstatus", -->
+		a.raisetermunit AS "raisetermunit",
+		a.detail AS "detail",
+		a.openborrowdate AS "openborrowdate",
+		a.userid AS "userid",
+		a.repaysource AS "repaysource",
+		a.borrowaliasno AS "borrowaliasno",
+		a.borrowalias AS "borrowalias",
+		a.ip AS "ip",
+		a.loannumber AS "loannumber",
+		a.oriuserid AS "oriuserid",
+		a.name AS "name",
+		a.oriuseridcard AS "oriuseridcard",
+		a.auditdate AS "auditdate",
+		a.hasinvestamount AS "hasinvestamount",
+		a.hasinvestnum AS "hasinvestnum",
+		a.create_time AS "createTime",
+		a.servicefree AS "servicefree",
+		a.full_borrow_date AS "fullBorrowDate",
+		a.contractsigningtime AS "contractsigningtime",
+		a.contractcode AS "contractcode",
+		a.productcode AS "productcode",
+		a.repaymentdate AS "repaymentdate",
+		a.monthinterest AS "monthinterest",
+		a.monthcapital AS "monthcapital",
+		a.monthprepaymentamount AS "monthprepaymentamount",
+		a.giveamount AS "giveamount",
+		a.monthmanagementfee AS "monthmanagementfee",
+		a.servicecharge AS "servicecharge",
+		a.businesschannel AS "businesschannel",
+		a.mobile AS "mobile",
+		a.bcbizdeptid AS "bcbizdeptid",
+		a.bztype AS "bztype",
+		a.loantime AS "loantime",
+		a.borrowfid AS "borrowfid",
+		a.criticalid AS "criticalid",
+		a.warnings AS "warnings",
+		a.paidinamount AS "paidinamount",
+		a.usageofloan AS "usageofloan",
+		a.creditrating AS "creditrating",
+		<!-- a.idcardno AS "idcardno", -->
+		a.sex AS "sex",
+		a.age AS "age",
+		a.city AS "city",
+		a.annualincome AS "annualincome",
+		a.assetsliabilities AS "assetsliabilities",
+		a.is_edit AS "isEdit",
+		a.is_match AS "isMatch",
+		a.loan_name AS "loanName",
+		a.lendingtime AS "lendingtime",
+		a.borrow_customer_code AS "borrowCustomerCode",
+		a.borrow_acc_code AS "borrowAccCode",
+		a.open_bank_code AS "openBankCode",
+		a.cardno AS "cardno",
+		a.creditlevel AS "creditlevel",
+		a.is_finish AS "isFinish",
+		a.open_bank AS "openBank",
+		a.fill_mark AS "fillMark",
+		a.risk_warning AS "riskWarning",
+		a.remainamount AS "remainamount",
+		a.project_brief AS "projectBrief",
+		a.risk_reserve AS riskReserve
+	</sql>
+	
+	<sql id="tBorrowJoins">
+	</sql>
+    
+	<select id="get" resultType="TBorrow">
+		SELECT <include refid="tBorrowColumns"></include>,tu.realName as userName,
+		CASE 1 WHEN UNIX_TIMESTAMP(a.openborrowdate)&gt;UNIX_TIMESTAMP(NOW()) THEN '21' ELSE a.BORROWSTATUS END AS borrowstatus,
+		CONCAT(SUBSTR(a.idCardNo,1,3),'***********',SUBSTR(a.idCardNo,-4)) AS idcardno,
+    	CASE a.pay_method WHEN 'debx' THEN '等额本息' WHEN 'xxhb' THEN '先息后本' WHEN 'ychbx' THEN '一次性还本付息' 
+        ELSE '' END  AS "payMethod"
+		FROM t_borrow a,t_user tu
+		WHERE a.USERID = tu.id and a.borrow_id = #{borrowId}
+	</select>
+	<!-- 查询总额  -->
+	<select id="findcountMount" resultType="map" parameterType="TBorrow">
+		SELECT SUM(a.servicecharge) AS servicechargecount,SUM(a.risk_reserve) AS riskReservecount,0.00 AS outriskReservecount
+         FROM t_borrow a left join t_user tu on a.USERID = tu.id 
+            <where>
+            a.BORROWSTATUS IN (11,12) AND  a.borrowAliasNo IS NOT NULL
+            <if test="borrowaliasno != null and borrowaliasno != ''">
+                AND a.borrowaliasno like "%${borrowaliasno}%"
+            </if>
+            <if test="borrowalias != null and borrowalias != ''">
+                AND a.borrowalias like "%${borrowalias}%"
+            </if>
+            <if test="loannumber != null and loannumber != ''">
+                AND a.loannumber like "%${loannumber}%"
+            </if>
+            <if test="userName != null and userName != ''">
+                AND tu.realName LIKE 
+                    <if test="dbName == 'oracle'">'%'||#{userName}||'%'</if>
+                    <if test="dbName == 'mssql'">'%'+#{userName}+'%'</if>
+                    <if test="dbName == 'mysql'">concat('%',#{userName},'%')</if>
+            </if>
+            <if test="lowservicecharge != null and lowservicecharge != ''">
+                AND a.servicecharge &gt;= #{lowservicecharge}
+            </if>
+            <if test="highservicecharge != null and highservicecharge != ''">
+                AND a.servicecharge &lt;= #{highservicecharge}
+            </if>
+            <if test="startlendingtime != null and startlendingtime != '' ">
+                AND a.lendingtime &gt;= #{startlendingtime}
+            </if>
+            <if test="endlendingtime != null and endlendingtime != '' ">
+                AND a.lendingtime &lt;= #{endlendingtime}
+            </if>
+        </where>
+	</select>
+	
+	<!-- 已放款的标的  服务费账户-->
+	<select id="findList" resultType="TBorrow">
+		SELECT <include refid="tBorrowColumns"></include>
+		,tu.realName as userName,tb.audit_suggest as bzInfo,CONCAT(tiv.hasDeadline,"/",tiv.deadline) AS ratio,
+		CASE 1 WHEN UNIX_TIMESTAMP(a.openborrowdate)&gt;UNIX_TIMESTAMP(NOW()) THEN '21' ELSE a.BORROWSTATUS END AS borrowstatus,
+		CONCAT(SUBSTR(a.idCardNo,1,3),'***********',SUBSTR(a.idCardNo,-4)) AS idcardno,
+    	CASE a.pay_method WHEN 'debx' THEN '等额本息' WHEN 'xxhb' THEN '先息后本' WHEN 'ychbx' THEN '一次性还本付息' ELSE '' END  AS "payMethod"
+		FROM t_borrow a left join t_user tu on a.USERID = tu.id 
+		LEFT JOIN t_borrow_audit_record tb ON a.BORROW_ID = tb.audit_bid
+		LEFT JOIN t_invest tiv ON a.BORROW_ID=tiv.borrowId
+		<include refid="tBorrowJoins"/>
+		<where>
+			a.BORROWSTATUS IN (11,12) AND  a.borrowAliasNo IS NOT NULL
+			<if test="borrowaliasno != null and borrowaliasno != ''">
+				AND a.borrowaliasno like "%${borrowaliasno}%"
+			</if>
+			<if test="borrowalias != null and borrowalias != ''">
+				AND a.borrowalias like "%${borrowalias}%"
+			</if>
+			<if test="loannumber != null and loannumber != ''">
+				AND a.loannumber like "%${loannumber}%"
+			</if>
+			<if test="userName != null and userName != ''">
+				AND tu.realName LIKE 
+					<if test="dbName == 'oracle'">'%'||#{userName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{userName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{userName},'%')</if>
+			</if>
+			<if test="lowservicecharge != null and lowservicecharge != ''">
+				AND a.servicecharge &gt;= #{lowservicecharge}
+			</if>
+			<if test="highservicecharge != null and highservicecharge != ''">
+				AND a.servicecharge &lt;= #{highservicecharge}
+			</if>
+			<if test="startlendingtime != null and startlendingtime != '' ">
+                AND a.lendingtime &gt;= #{startlendingtime}
+            </if>
+            <if test="endlendingtime != null and endlendingtime != '' ">
+                AND a.lendingtime &lt;= #{endlendingtime}
+            </if>
+		</where>
+		 GROUP BY a.loanNumber 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>ORDER BY a.lendingTime DESC</otherwise>
+		</choose>
+		
+	</select>
+	<!-- 垫资总额 -->
+	<select id="findAdvanceCountMount"  resultType="map" >
+	  SELECT SUM(tbb.advances_amount) AS advancesCount,SUM(tbb.offset_amount) AS offsetCount 
+	  FROM t_borrow_billplan tbb LEFT JOIN  t_borrow  tbr  ON  tbb.apply_id = tbr.loanNumber 
+	  LEFT JOIN t_user tu ON tbr.USERID=tu.id 
+        <where>
+            AND tbb.is_overdue='1'  AND (tbb.is_advances='4' OR tbb.is_offset='2')
+            <if test="borrowaliasno != null and borrowaliasno != ''">
+                AND tbr.borrowAliasNo like "%${borrowaliasno}%"
+            </if>
+            <if test="applyId != null and applyId != ''">
+                AND tbb.apply_id like "%${applyId}%"
+            </if>
+             <if test="startAdvancesTime != null and startAdvancesTime != ''">
+                AND tbb.advances_time &gt; #{startAdvancesTime}
+            </if>
+             <if test="endAdvancesTime != null and endAdvancesTime != ''">
+                AND tbb.advances_time &lt; #{endAdvancesTime}
+            </if>
+             <if test="startOffsetTime != null and startOffsetTime != ''">
+                AND tbb.offset_time &gt; #{startOffsetTime}
+            </if>
+             <if test="endOffsetTime != null and endOffsetTime != ''">
+                AND tbb.offset_time &lt; #{endOffsetTime}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND tu.realName LIKE 
+                    <if test="dbName == 'oracle'">'%'||#{userName}||'%'</if>
+                    <if test="dbName == 'mssql'">'%'+#{userName}+'%'</if>
+                    <if test="dbName == 'mysql'">concat('%',#{userName},'%')</if>
+            </if>
+        </where>
+	</select>
+	
+    <!-- 垫资记录 -->
+    <select id="findPayinList" resultType="Overdue">
+        SELECT tbr.BORROW_ID AS borrowId,tbb.period,tbr.borrowAliasNo AS borrowaliasno,tu.realName AS userName,tbr.USERID AS userid,tbb.repay_time AS repayTime,
+        CONCAT(SUBSTR(tbr.idCardNo,1,3),'***********',SUBSTR(tbr.idCardNo,-4)) AS idcardno,tbr.BORROWAMOUNT AS borrowamount,tbb.advances_amount AS advancesSum,tbb.offset_amount AS offsetSum,
+        tbr.mobile,tbr.borrowCode AS borrowcode,tbb.month_capital,tbb.month_interest,tbb.apply_id AS applyId,tbb.is_advances AS isAdvances,
+        tbb.manage_fee AS manageFee,tbb.fails_charge_origin AS failsChargeOrigin,tbb.late_charge_origin AS lateChargeOrigin,tbb.monthly_payment_origin AS monthlyPaymentOrigin,
+        tbb.repay_status AS repayStatus,tbb.is_offset AS isOffset,tbb.advances_time AS advancesTime,tbb.offset_time AS offsetTime,tbb.overdue_day AS overdueDay
+		FROM t_borrow_billplan tbb LEFT JOIN  t_borrow  tbr  ON  tbb.apply_id = tbr.loanNumber 
+		LEFT JOIN t_user tu ON tbr.USERID=tu.id 
+        <include refid="tBorrowJoins"/>
+        <where>
+            AND tbb.is_overdue='1'  AND tbb.is_advances ='4'
+            <if test="borrowaliasno != null and borrowaliasno != ''">
+                AND tbr.borrowAliasNo like "%${borrowaliasno}%"
+            </if>
+            <if test="applyId != null and applyId != ''">
+                AND tbb.apply_id like "%${applyId}%"
+            </if>
+             <if test="startAdvancesTime != null and startAdvancesTime != ''">
+                AND tbb.advances_time &gt; #{startAdvancesTime}
+            </if>
+             <if test="endAdvancesTime != null and endAdvancesTime != ''">
+                AND tbb.advances_time &lt; #{endAdvancesTime}
+            </if>
+             <if test="startOffsetTime != null and startOffsetTime != ''">
+                AND tbb.offset_time &gt; #{startOffsetTime}
+            </if>
+             <if test="endOffsetTime != null and endOffsetTime != ''">
+                AND tbb.offset_time &lt; #{endOffsetTime}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND tu.realName LIKE 
+                    <if test="dbName == 'oracle'">'%'||#{userName}||'%'</if>
+                    <if test="dbName == 'mssql'">'%'+#{userName}+'%'</if>
+                    <if test="dbName == 'mysql'">concat('%',#{userName},'%')</if>
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+        
+    </select>
+    
+	<!-- 导出服务费账户  -->
+	<select id = "exportList" parameterType="map" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+		SELECT <include refid="tBorrowColumns"></include>
+        ,tu.realName as userName,tb.audit_suggest as bzInfo,CONCAT(tiv.hasDeadline,"/",tiv.deadline) AS ratio,
+        CASE 1 WHEN UNIX_TIMESTAMP(a.openborrowdate)&gt;UNIX_TIMESTAMP(NOW()) THEN '21' ELSE a.BORROWSTATUS END AS borrowstatus,
+        CONCAT(SUBSTR(a.idCardNo,1,3),'***********',SUBSTR(a.idCardNo,-4)) AS idcardno,
+        CASE a.pay_method WHEN 'debx' THEN '等额本息' WHEN 'xxhb' THEN '先息后本' WHEN 'ychbx' THEN '一次性还本付息' ELSE '' END  AS "payMethod"
+        FROM t_borrow a left join t_user tu on a.USERID = tu.id 
+        LEFT JOIN t_borrow_audit_record tb ON a.BORROW_ID = tb.audit_bid
+        LEFT JOIN t_invest tiv ON a.BORROW_ID=tiv.borrowId
+        <include refid="tBorrowJoins"/>
+        <where>
+            a.BORROWSTATUS IN (11,12) AND  a.borrowAliasNo IS NOT NULL
+            <if test="borrowaliasno != null and borrowaliasno != ''">
+                AND a.borrowaliasno like "%${borrowaliasno}%"
+            </if>
+            <if test="borrowalias != null and borrowalias != ''">
+                AND a.borrowalias like "%${borrowalias}%"
+            </if>
+            <if test="loannumber != null and loannumber != ''">
+                AND a.loannumber like "%${loannumber}%"
+            </if>
+            <if test="userName != null and userName != ''">
+                AND tu.realName LIKE CONCAT('%',#{userName},'%')
+            </if>
+            <if test="lowservicecharge != null and lowservicecharge != ''">
+                AND a.servicecharge &gt;= #{lowservicecharge}
+            </if>
+            <if test="highservicecharge != null and highservicecharge != ''">
+                AND a.servicecharge &lt;= #{highservicecharge}
+            </if>
+            <if test="startlendingtime != null and startlendingtime != '' ">
+                AND a.lendingtime &gt;= #{startlendingtime}
+            </if>
+            <if test="endlendingtime != null and endlendingtime != '' ">
+                AND a.lendingtime &lt;= #{endlendingtime}
+            </if>
+        </where>
+         GROUP BY a.loanNumber 
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>ORDER BY a.lendingTime DESC</otherwise>
+        </choose>
+		LIMIT 20000
+	</select>
+</mapper>

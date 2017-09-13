@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "./log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<!-- 控制台 -->
+	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d - %p %c{1}.%M(%L) | %m%n" />
+		</layout>
+	</appender>
+	<!-- 系统日志文件 -->
+	<appender name="LOGFILE" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="/temp/kafkademo.log" />
+		<param name="Append" value="true" />
+		<param name="MaxFileSize" value="100MB" />
+		<param name="MaxBackupIndex" value="10" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d - %p %c{1}.%M(%L) | %m%n" />
+		</layout>
+	</appender>
+	<appender name="socketAppender" class="org.apache.log4j.net.SocketAppender"> 
+	  <param name="remoteHost" value="10.20.100.5" /> 
+	  <!-- <param name="remoteHost" value="10.20.200.21" />  -->
+	  <param name="port" value="4560" /> 
+	  <param name="Threshold" value="DEBUG" /> 
+	  <param name="ReconnectionDelay" value="1000" /> 
+	  <param name="LocationInfo" value="true" /> 
+	</appender>
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="LOGFILE" />
+		<appender-ref ref="socketAppender" />
+	</root>
+</log4j:configuration>

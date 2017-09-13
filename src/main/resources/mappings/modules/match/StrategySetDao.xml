@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.match.dao.StrategySetDao">
+  <sql id="Base_Column_List" >
+    id, type, filed, value, weight, description, status, update_time, borrow_type
+  </sql>
+
+  <select id="getWeightListByAsset" resultType="com.hzdjr.hzwd.modules.match.entity.TWeight"  >
+    select 
+    <include refid="Base_Column_List" />
+    from t_weight 
+    where type = 'ASSET'
+  </select>
+  
+    <select id="getWeightListByCapital" resultType="com.hzdjr.hzwd.modules.match.entity.TWeight"  >
+    select 
+    <include refid="Base_Column_List" />
+    from t_weight
+    where type = 'CAPITAL'
+  </select>
+  
+  <select id="gettMatchInstallList" resultType="com.hzdjr.hzwd.modules.match.entity.TMatchInstall"  >
+    select 
+       id, type, asset_nper, capital_nper, whether_to_open, detail, update_time
+    from t_match_install
+  </select>
+  <select id="gettWeightLogList" resultType="com.hzdjr.hzwd.modules.match.entity.TWeightLog"  >
+    select 
+       id, type, create_time, name, account_number, filed, amount, value, weight, borrow_type
+    from t_weight_log
+  </select>
+  <select id="getMatchInstallLogList" resultType="com.hzdjr.hzwd.modules.match.entity.TMatchInstallLog"  >
+    select 
+       id, type, create_time, name, account_number, asset_nper, capital_nper, match_type
+    from t_match_install_log
+  </select>
+  	<update id="updateWeightStrategy" parameterType="map">
+		UPDATE t_weight SET weight=#{0}    WHERE id=#{1}
+	</update>	
+  	<update id="updateDeadlineStrategy" parameterType="map">
+		UPDATE t_match_install SET asset_nper=#{0} WHERE id=#{1}
+	</update>	
+  	<update id="updateWhetherToOpen" parameterType="map">
+		UPDATE t_match_install SET whether_to_open=#{0} WHERE id=#{1}
+	</update>	
+	
+	
+	 <select id="findTWeightByid" resultType="com.hzdjr.hzwd.modules.match.entity.TWeight">
+	    select 
+	    <include refid="Base_Column_List" />
+	    from t_weight 
+	    where id=#{id}
+  	</select>	
+	<select id="findTMatchInstallByid" resultType="com.hzdjr.hzwd.modules.match.entity.TMatchInstall">
+	    select 
+	         id, type, asset_nper, capital_nper, whether_to_open, detail, update_time
+	    from t_match_install 
+	    where id=#{id}
+  	</select>	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

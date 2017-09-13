@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.TBorrowLogDao">
+    
+	<sql id="tBorrowLogColumns">
+		a.borrow_id AS "borrowId",
+		a.borrowstatus AS "borrowstatus",
+		a.hasinvestamount AS "hasinvestamount",
+		a.create_time AS "createTime",
+		a.borrowcode AS "borrowcode",
+		a.giveamount AS "giveamount",
+		a.paidinamount AS "paidinamount",
+		(a.paidinamount-a.giveamount) AS "balance"
+	</sql>
+	
+	<sql id="tBorrowLogJoins">
+	</sql>
+    
+	<select id="get" resultType="TBorrowLog">
+		SELECT 
+			<include refid="tBorrowLogColumns"/>
+		FROM t_borrow_log a
+		<include refid="tBorrowLogJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TBorrowLog">
+		SELECT 
+			<include refid="tBorrowLogColumns"/>
+		FROM t_borrow_log a
+		<include refid="tBorrowLogJoins"/>
+		<where>
+			
+			<if test="borrowstatus != null and borrowstatus != ''">
+				AND a.borrowstatus = #{borrowstatus}
+			</if>
+			<if test="null !=beginTime  and beginTime != ''">
+					<![CDATA[  AND a.create_time >= #{beginTime}  ]]>
+			</if>
+			<if test="null !=overTime  and overTime != ''">
+					<![CDATA[ AND a.create_time <= #{overTime}  ]]>
+			</if>
+			<if test="borrowcode != null and borrowcode != ''">
+				AND a.borrowcode = #{borrowcode}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TBorrowLog">
+		SELECT 
+			<include refid="tBorrowLogColumns"/>
+		FROM t_borrow_log a
+		<include refid="tBorrowLogJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+</mapper>

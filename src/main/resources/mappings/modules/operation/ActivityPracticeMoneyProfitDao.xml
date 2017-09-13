@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.operation.dao.ActivityPracticeMoneyProfitDao">
+    
+	<sql id="activityPracticeMoneyProfitColumns">
+		a.id AS "id",
+		a.totalmoney AS "totalmoney",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="activityPracticeMoneyProfitJoins">
+	</sql>
+    
+	<select id="get" resultType="ActivityPracticeMoneyProfit">
+		SELECT 
+			<include refid="activityPracticeMoneyProfitColumns"/>
+		FROM t_practice_money_profit a
+		<include refid="activityPracticeMoneyProfitJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ActivityPracticeMoneyProfit">
+		SELECT 
+			<include refid="activityPracticeMoneyProfitColumns"/>,
+		 	CASE a.status WHEN '1' THEN '已发' WHEN '2' THEN '待发' WHEN '3' THEN '失败' END as status
+		FROM t_practice_money_profit a
+		<include refid="activityPracticeMoneyProfitJoins"/>
+		<where>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 收益发放总数  -->
+	<select id="getTotalmoneyCounts" resultType="map">
+		SELECT SUM(a.totalmoney) as totalMoneys FROM t_practice_money_profit a
+		<include refid="activityPracticeMoneyProfitJoins"/>
+		<where>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 收益明细查询  -->
+	<select id="getProfitParticulars" resultType="ActivityPracticeMoney">
+		SELECT
+			a.id AS id,
+			a.create_date AS createDate,
+			a.usedamount AS "usedamount",
+			a.profitamount AS "profitamount",
+			a.profitdate AS "profitdate",
+			CONCAT(SUBSTRING(a.realName,1,1),'**') as realName,
+			CONCAT(SUBSTRING(a.mobile,1,3),'****',SUBSTRING(a.mobile,8)) as mobile, 
+			CASE a.profitstatus WHEN '1' THEN '已发' WHEN '2' THEN '待发' WHEN '3' THEN '失败' END as profitstatus
+		FROM t_practice_money a 
+		<where>
+			a.profitId = #{profitid}
+			<if test="realName != null and realName != ''">
+				AND a.realName = #{realName}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="profitstatus != null and profitstatus != ''">
+				AND a.profitstatus = #{profitstatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.profitstatus DESC, a.realName DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 收益明细查询统计的总数  -->
+	<select id="getParticularsCounts" resultType="map">
+		SELECT
+			count(*) as counts,
+			count(distinct mobile) as userCounts,
+			SUM(profitAmount) as profitAmounts
+		FROM t_practice_money a 
+		<where>
+			a.profitId = #{profitid}
+			<if test="realName != null and realName != ''">
+				AND a.realName = #{realName}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="profitstatus != null and profitstatus != ''">
+				AND a.profitstatus = #{profitstatus}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="ActivityPracticeMoneyProfit">
+		SELECT 
+			<include refid="activityPracticeMoneyProfitColumns"/>
+		FROM t_practice_money_profit a
+		<include refid="activityPracticeMoneyProfitJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_practice_money_profit(
+			id,
+			totalmoney,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{totalmoney},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<!-- 获取单个收益人信息  -->
+	<select id="getPracticeMoney" resultType="ActivityPracticeMoney">
+		SELECT create_date as creatDate FROM t_practice_money WHERE id = #{id}
+	</select>
+	
+	<!-- 体验金收益补发成功修改   -->
+	<update id="updateProfitSuccess">
+		UPDATE t_practice_money_profit SET status = '1' WHERE id = #{id}
+	</update>
+	
+	<!-- 体验金收益补发失败修改   -->
+	<update id="updateProfitFail">
+		UPDATE t_practice_money_profit SET status = '3' WHERE id = #{id}
+	</update>
+	
+	<!-- 体验金补发详情成功修改   -->
+	<update id="updateSuccess">
+		UPDATE t_practice_money SET profitStatus = '1' WHERE id = #{id}
+	</update>
+	
+	<!-- 体验金补发详情失败修改   -->
+	<update id="updateFail">
+		UPDATE t_practice_money SET profitStatus = '3' WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE t_practice_money_profit SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

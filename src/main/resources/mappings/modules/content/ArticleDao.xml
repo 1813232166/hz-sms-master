@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.content.dao.ArticleDao">
+    
+	<sql id="articleColumns">
+		a.id AS "id",
+		a.articletitle AS "articletitle",
+    a.articleSubtitle AS "articleSubtitle",
+		a.artclepic AS "artclepic",
+		a.author AS "author",
+		a.creator AS "creator",
+		a.source AS "source",
+		a.articlecolumn AS "articlecolumn",
+		a.keyword AS "keyword",
+    a.articleDigest AS "articleDigest",
+		a.topstatus AS "topstatus",
+		a.articlecnt AS "articlecnt",
+		a.status AS "status",
+		a.releasetime AS "releasetime",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="articleJoins">
+	</sql>
+    
+	<select id="get" resultType="Article">
+		SELECT 
+			<include refid="articleColumns"/>
+		FROM content_article a
+		<include refid="articleJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getArticlePerview" resultType="Article">
+		SELECT <include refid="articleColumns"/> FROM content_article a where a.id=#{id}
+	</select>
+	
+	<select id="findList" resultType="Article">
+		SELECT 
+			<include refid="articleColumns"/>
+		FROM content_article a
+		<include refid="articleJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="articletitle != null and articletitle != ''">
+				AND a.articletitle LIKE 
+					<if test="dbName == 'oracle'">'%'||#{articletitle}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{articletitle}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{articletitle},'%')</if>
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="articlecolumn != null and articlecolumn != ''">
+				AND a.articlecolumn = #{articlecolumn}
+			</if>
+			<if test="beginUpdateDate != null and endUpdateDate != null and beginUpdateDate != '' and endUpdateDate != ''">
+				AND a.update_date BETWEEN #{beginUpdateDate} AND #{endUpdateDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.status,a.releasetime DESC, a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Article">
+		SELECT 
+			<include refid="articleColumns"/>
+		FROM content_article a
+		<include refid="articleJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 文章发布状态和置顶状态修改功能  -->
+	<update id="updateStatus">
+		UPDATE content_article SET 	
+			<if test="status != null and status != ''">
+				status = #{status},
+			</if>
+			<if test="status == 1">
+				releasetime = now(),
+			</if>
+			<if test="topstatus != null and topstatus != ''">
+				topstatus = #{topstatus}
+			</if>
+			WHERE id = #{id}
+	</update>
+	
+	<insert id="insert">
+		INSERT INTO content_article(
+			id,
+			articletitle,
+      articleSubtitle,
+			artclepic,
+			author,
+			creator,
+			source,
+			articlecolumn,
+			keyword,
+      articleDigest,
+			articlecnt,
+      releasetime,
+			create_by,
+			create_date,
+			update_by,
+      update_date,
+			remarks
+		) VALUES (
+			#{id},
+			#{articletitle},
+      #{articleSubtitle},
+			#{artclepic},
+			#{author},
+			#{creator},
+			#{source},
+			#{articlecolumn},
+			#{keyword},
+      #{articleDigest},
+			#{articlecnt},
+      #{releasetime},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+      #{updateDate},
+			#{remarks}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE content_article SET 	
+			articletitle = #{articletitle},
+      articleSubtitle = #{articleSubtitle},
+			artclepic = #{artclepic},
+			author = #{author},
+			creator=#{creator},
+			source = #{source},
+			articlecolumn = #{articlecolumn},
+			keyword = #{keyword},
+      articleDigest = #{articleDigest},
+			articlecnt = #{articlecnt},
+			topstatus = #{topstatus},
+			releasetime = #{releasetime},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			del_flag = #{delFlag}
+		WHERE id = #{id}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM content_article WHERE id = #{id}
+	</delete>
+	
+	<!-- <update id="delete">
+		UPDATE content_article SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update> -->
+	
+</mapper>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.usercount.dao.UserInfoDao">
+    
+	<select id="getUserInfo" parameterType="map" resultType="com.hzdjr.hzwd.modules.usercount.entity.UserInfo">
+		SELECT
+			 tuf.date1 times,
+			 tuf.num1 currentreg,
+			 user_new.num_new newuser,
+			 user_invest.num1 investuser,
+			 user_borrow.num2 borrowuser,
+			 user_login.num2 loginuser,
+			 user_pc.numpc pcreguser,
+			 userapp.numapp appreguser
+			FROM
+			
+			(SELECT
+			 SUBSTRING(tu.regDate, 1, 10) date1,
+			 count(*) num1
+			FROM
+			 t_user tu
+			GROUP BY
+			 SUBSTRING(tu.regDate, 1, 10)) tuf
+			
+			LEFT JOIN
+			
+			(SELECT
+			 SUBSTRING(tu.regDate, 1, 10) date_new,
+			 count(*) num_new
+			FROM
+			 t_user tu
+			GROUP BY
+			 SUBSTRING(tu.regDate, 1, 10)) user_new
+			ON tuf.date1=user_new.date_new
+			
+			LEFT JOIN
+			
+			(SELECT
+			 SUBSTRING(tu.regDate, 1, 10) date1,
+			 count(*) num1
+			FROM
+			 t_user tu
+			WHERE 
+			 tu.userType=2
+			GROUP BY
+			 SUBSTRING(tu.regDate, 1, 10)) user_invest
+			ON tuf.date1=user_invest.date1
+			
+			LEFT JOIN
+			
+			(SELECT
+			 SUBSTRING(tu.regDate, 1, 10) date2,
+			 COUNT(*) num2
+			FROM
+			 t_user tu
+			WHERE 
+			 tu.userType=1
+			GROUP BY
+			 SUBSTRING(tu.regDate, 1, 10)) user_borrow
+			ON tuf.date1=user_borrow.date2
+			
+			LEFT JOIN
+			
+			(SELECT
+			 SUBSTRING(tu.regDate, 1, 10) date2,
+			 count(*) num2
+			FROM
+			 t_user tu
+			WHERE 
+			 tu.isLoginLimit=0
+			GROUP BY
+			 SUBSTRING(tu.regDate, 1, 10)) user_login
+			ON tuf.date1=user_login.date2
+			
+			LEFT JOIN
+			
+			(SELECT
+			 SUBSTRING(tu.regDate, 1, 10) datepc,
+			 count(*) numpc
+			FROM
+			 t_user tu
+			WHERE 
+			 tu.regSource='web01' OR tu.regSource='web02'
+			GROUP BY
+			 SUBSTRING(tu.regDate, 1, 10)) user_pc
+			ON tuf.date1=user_pc.datepc
+			
+			LEFT JOIN
+			
+			(SELECT
+			 SUBSTRING(tu.regDate, 1, 10) dateapp,
+			 count(*) numapp
+			FROM
+			 t_user tu
+			WHERE 
+			 tu.regSource='iosApp01' 
+			OR tu.regSource='iosApp02' 
+			OR tu.regSource='androidApp01' 
+			OR tu.regSource='androidApp02' 
+			OR tu.regSource='weixin01'
+			OR tu.regSource='weixin02'
+			GROUP BY
+			 SUBSTRING(tu.regDate, 1, 10)) userapp
+			ON tuf.date1=userapp.dateapp
+ 		<where>
+	 		<if test="beginTimes!=null and beginTimes!='' and endTimes!=null and endTimes!=''">
+	 			and tuf.date1 between #{beginTimes} and #{endTimes}
+	 		</if>
+		</where>
+	</select>
+	<select id="getWithdraw" parameterType="map" resultType="com.hzdjr.hzwd.modules.usercount.entity.Withdraw">
+		SELECT
+			 fu.date_fu times,
+			 fu.sum_fu withdrawamount,
+			 20000000.00 alreadyload,
+			 1500000.00 pendingload,
+			 fu.count_fu withdrawnum,
+			 fpc.pc pcwithdraw,
+			 fapp.app appwithdraw
+			FROM
+			
+			(SELECT
+			 SUBSTRING(f.createDate, 1, 10) date_fu,SUM(f.amount) sum_fu,COUNT(f.userId) count_fu
+			FROM
+			 t_fd_user_fund f
+			WHERE f.rechargeType='3'
+			GROUP BY
+			 SUBSTRING(f.createDate, 1, 10)) fu
+			
+			LEFT JOIN
+			
+			(SELECT
+			 SUBSTRING(f.createDate, 1, 10) date_pc,SUM(f.amount) pc
+			FROM
+			 t_fd_user_fund f
+			WHERE f.rechargeType='3' AND f.source='pc'
+			GROUP BY
+			 SUBSTRING(f.createDate, 1, 10)) fpc
+			ON fu.date_fu=fpc.date_pc
+			
+			LEFT JOIN
+			
+			(SELECT
+			 SUBSTRING(f.createDate, 1, 10) date_app,SUM(f.amount) app
+			FROM
+			 t_fd_user_fund f
+			WHERE f.rechargeType='3' AND f.source='app'
+			GROUP BY
+			 SUBSTRING(f.createDate, 1, 10)) fapp
+			ON fu.date_fu=fapp.date_app
+
+ 		<where>
+	 		<if test="beginTimes!=null and beginTimes!='' and endTimes!=null and endTimes!=''">
+	 			and times between #{beginTimes} and #{endTimes}
+	 		</if>
+		</where>
+		
+	</select>
+</mapper>

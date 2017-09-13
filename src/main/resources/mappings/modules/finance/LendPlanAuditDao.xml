@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.finance.dao.LendPlanAuditDao">
+	<sql id="financeColumns">
+		a.id AS "id",
+		a.product_id AS "productId",
+		a.status AS "status",
+		a.name AS "name",
+		a.finance_code AS "financeCode",
+		a.collect_amount AS "collectAmount",
+		a.already_collected_amount AS "alreadyCollectedAmount",
+		a.nper AS "nper",
+		a.lending_method AS "lendingMethod",
+		a.rate AS "rate",
+		a.interest_date_type  AS "interestDateType",
+		a.min_tender_sum AS "minTenderSum",
+		a.incremental_amount AS "incrementalAmount",
+		a.max_tender_sum AS "maxTenderSum",
+		a.start_time_of_collection AS "startTimeOfCollection",
+		a.end_time_of_collection AS "endTimeOfCollection",
+		a.poundage AS "poundage",
+		a.exit_mode AS "exitMode",
+		a.guarantee_mode AS "guaranteeMode",
+		a.detail AS "detail",
+		a.create_time AS "createTime"
+	</sql>
+		<sql id="financeJoins">
+	    </sql>
+		<select id="findList"  resultType="com.hzdjr.hzwd.modules.finance.entity.Finance" >
+		SELECT 
+			<include refid="financeColumns"/>,ROUND(a.already_collected_amount*100/a.collect_amount,2) as scale
+		FROM t_finance a
+		<include refid="financeJoins"/>
+		<where>
+			
+			<if test="name != null and name != ''">
+				AND a.name = #{name}
+			</if>
+			
+			<if test="financeCode != null and financeCode != ''">
+				AND a.finance_code = #{financeCode}
+			</if>
+			
+			<if test="status != null and status != ''">
+			
+			<choose>
+				<when test="status == '4'.toString()" >   
+					AND a.status in ('4','5')
+				</when>
+				<when test="status == '5'.toString()" >
+					AND a.status in ('6','7','8')
+				</when>
+				<otherwise>
+					AND a.status = #{status}
+				</otherwise>
+			</choose>
+			
+			</if>
+			<if test="status == null or status == ''">
+			  AND a.status != '10'
+			</if>
+			<if test="beginCreateTime != null and beginCreateTime != '' ">
+                AND a.create_time &gt;= #{beginCreateTime}
+            </if>
+            <if test="endCreateTime != null and endCreateTime != '' ">
+                AND a.create_time &lt;= #{endCreateTime}
+            </if>
+	
+		</where>
+				ORDER BY a.create_time DESC
+	</select>
+	<select id="getLendPlanDetailById" parameterType="String" resultType="Finance">
+	SELECT   
+	  t1.*,t2.*,t3.creat_time as "auditCreatTime",ROUND(t1.already_collected_amount*100/t1.collect_amount,2) as scale,t3.cause
+	 FROM  t_finance t1
+	 LEFT JOIN t_finance_product t2 ON t1.id=t2.id
+	 LEFT JOIN t_finance_examine_log t3 ON t1.id=t3.finance_id
+	 where t1.id=#{id}
+	</select>
+	<insert id="lendPlanAudit" parameterType="map">
+		INSERT INTO t_finance_examine_log 
+			(id,user_id,finance_id,creat_time,cause,examine_status) 
+		VALUES 
+			(#{id},#{user_id},#{finance_id},#{creat_time},#{cause},#{examine_status});
+	</insert>
+	<update id="updateFinanceStatus" parameterType="java.util.Map">
+	   update t_finance set status=#{status} where id=#{finance_id}
+	</update>
+</mapper>

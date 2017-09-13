@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.invest.dao.InvestDao">
+    
+	<sql id="investColumns">
+		a.id AS "id",
+		a.investamount AS "investamount",
+		a.yearrate AS "yearrate",
+		a.monthrate AS "monthrate",
+		a.investor AS "investor",
+		a.borrowid AS "borrowid",
+		a.investtime AS "investtime",
+		a.arritradetime AS "arritradetime",
+		a.oriinvestor AS "oriinvestor",
+		a.realamount AS "realamount",
+		a.haspi AS "haspi",
+		a.deadline AS "deadline",
+		a.hasdeadline AS "hasdeadline",
+		a.recivedprincipal AS "recivedprincipal",
+		a.recievedinterest AS "recievedinterest",
+		a.hasprincipal AS "hasprincipal",
+		a.hasinterest AS "hasinterest",
+		a.recivedfi AS "recivedfi",
+		a.hasfi AS "hasfi",
+		a.managefee AS "managefee",
+		a.reward AS "reward",
+		a.flag AS "flag",
+		a.offlineflag AS "offlineflag",
+		a.interestflag AS "interestflag",
+		a.channel AS "channel",
+		a.isautobid AS "isautobid",
+		a.isdebt AS "isdebt",
+		a.investtype AS "investtype",
+		a.investcode AS "investcode",
+		a.bizid AS "bizid",
+		a.interestaccrualdate AS "interestaccrualdate",
+		a.expiredate AS "expiredate",
+		a.refferee AS "refferee",
+		a.serverip AS "serverip",
+		a.departmentinfo AS "departmentinfo"
+	</sql>
+	
+	<sql id="investJoins">
+	</sql>
+    
+	<select id="get" resultType="Invest">
+		SELECT 
+			<include refid="investColumns"/>
+		FROM t_invest a
+		<include refid="investJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findBorrowById" parameterType="String" resultType="com.hzdjr.hzwd.modules.borrow.entity.Borrow">
+		SELECT * FROM t_borrow WHERE borrow_Id = #{borrowid}
+	</select>
+	
+	<update id="updateInvestFlag" parameterType="String">
+		UPDATE t_invest SET flag=3 WHERE bizId=#{bizId} and flag=1
+	</update>
+	
+	<select id="findInvestById" parameterType="String" resultType="com.hzdjr.hzwd.modules.invest.entity.Invest">
+		SELECT bizid,investAmount,investor FROM t_invest WHERE borrowId = #{borrowId} and flag=1
+	</select>
+	
+	<select id="findDeadline" parameterType="Map" resultType="String">
+		SELECT deadline FROM t_invest WHERE borrowid = #{borrowid} AND id = #{id}
+	</select>
+	<select id="findSum" parameterType="Map" resultType="BigDecimal">
+		SELECT SUM(b.realAmount) AS ss
+		from t_borrow a INNER JOIN t_invest b on a.BORROW_ID=b.borrowId
+		INNER JOIN t_user u on b.investor=u.id
+		INNER JOIN t_user u2 on a.USERID=u2.id
+		<!-- <include refid="investJoins"/> -->
+		<where>
+			b.investType = '2' and b.flag='1'
+			<if test="id != null and id != ''">
+				AND b.id = #{id}
+			</if>
+			<if test="beginInvesttime != null and endInvesttime != null and beginInvesttime != '' and endInvesttime != ''">
+				AND b.investtime BETWEEN #{beginInvesttime} AND #{endInvesttime}
+			</if>
+			<if test="investtype != null and investtype != ''">
+				AND b.investtype = #{investtype}
+			</if>
+			<if test="realName != null and realName != ''">
+				AND u.realName like CONCAT('%',#{realName},'%')
+			</if>
+			<if test="borrowCode != null and borrowCode != ''">
+				AND a.borrowAliasNo like CONCAT('%',#{borrowCode},'%')
+			</if>
+			
+		</where>
+	</select>
+	<select id="findList" resultType="Invest">
+		SELECT 
+		b.id as id,a.borrowAliasNo as borrowAliasNo,a.borrowAlias as borrowAlias,a.BORROW_ID as borrowid,
+		b.realAmount as realAmount ,b.investTime as investTime,u.realName as realName,b.isAutoBid as isAutoBid, 
+		b.investType as investtype,
+		u2.realName as jrealName,a.pay_method AS payMethod,a.ANUALRATE AS anualRate,
+		a.loanNumber as loanNumber,a.BORROWSTATUS as borrowStatus,a.DEADLINE as deadline 
+		from t_borrow a 
+		INNER JOIN t_invest b on a.BORROW_ID=b.borrowId
+		INNER JOIN t_user u on b.investor=u.id
+		INNER JOIN t_user u2 on a.USERID=u2.id
+		<!-- <include refid="investJoins"/> -->
+		<where>
+			(b.investType = '1' OR b.investType = '2' )and b.flag='1'
+			<if test="id != null and id != ''">
+				AND b.id = #{id}
+			</if>
+			<if test="beginInvesttime != null and endInvesttime != null and beginInvesttime != '' and endInvesttime != ''">
+				AND b.investtime BETWEEN #{beginInvesttime} AND #{endInvesttime}
+			</if>
+			<if test="investtype != null and investtype != ''">
+				AND b.investtype = #{investtype}
+			</if>
+			<if test="realName != null and realName != ''">
+				AND u.realName like CONCAT('%',#{realName},'%')
+			</if>
+			<if test="borrowCode != null and borrowCode != ''">
+				AND a.borrowAliasNo like CONCAT('%',#{borrowCode},'%')
+			</if>
+			
+		</where>
+				ORDER BY b.investTime DESC
+	</select>
+	
+	<select id="findExcel" parameterType="Invest" resultType="Invest">
+		SELECT 
+		b.id as id,a.borrowAliasNo as borrowAliasNo,a.borrowAlias as borrowAlias,a.BORROW_ID as borrowid,
+		b.realAmount as realAmount ,b.investTime as investTime,u.realName as realName,b.isAutoBid as isAutoBid, 
+		b.investType as investtype,
+		u2.realName as jrealName,a.pay_method AS payMethod,a.ANUALRATE AS anualRate,
+		a.loanNumber as loanNumber,a.BORROWSTATUS as borrowStatus,a.DEADLINE as deadline 
+		from t_borrow a 
+		INNER JOIN t_invest b on a.BORROW_ID=b.borrowId
+		INNER JOIN t_user u on b.investor=u.id
+		INNER JOIN t_user u2 on a.USERID=u2.id
+		<!-- <include refid="investJoins"/> -->
+		<where>
+			(b.investType = '1' OR b.investType = '2' )and b.flag='1'
+			<if test="id != null and id != ''">
+				AND b.id = #{id}
+			</if>
+			<if test="beginInvesttime != null and endInvesttime != null and beginInvesttime != '' and endInvesttime != ''">
+				AND b.investtime BETWEEN #{beginInvesttime} AND #{endInvesttime}
+			</if>
+			<if test="investtype != null and investtype != ''">
+				AND b.investtype = #{investtype}
+			</if>
+			<if test="realName != null and realName != ''">
+				AND u.realName like CONCAT('%',#{realName},'%')
+			</if>
+			<if test="borrowCode != null and borrowCode != ''">
+				AND a.borrowAliasNo like CONCAT('%',#{borrowCode},'%')
+			</if>
+			
+		</where>
+				ORDER BY b.investTime DESC
+	</select>
+	
+	<select id="findAllList" resultType="Invest">
+		SELECT 
+			<include refid="investColumns"/>
+		FROM t_invest a
+		<include refid="investJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_invest(
+			id,
+			investamount,
+			yearrate,
+			monthrate,
+			investor,
+			borrowid,
+			investtime,
+			arritradetime,
+			oriinvestor,
+			realamount,
+			haspi,
+			deadline,
+			hasdeadline,
+			recivedprincipal,
+			recievedinterest,
+			hasprincipal,
+			hasinterest,
+			recivedfi,
+			hasfi,
+			managefee,
+			reward,
+			flag,
+			offlineflag,
+			interestflag,
+			channel,
+			isautobid,
+			isdebt,
+			investtype,
+			investcode,
+			bizid,
+			interestaccrualdate,
+			expiredate,
+			refferee,
+			serverip,
+			departmentinfo
+		) VALUES (
+			#{id},
+			#{investamount},
+			#{yearrate},
+			#{monthrate},
+			#{investor},
+			#{borrowid},
+			#{investtime},
+			#{arritradetime},
+			#{oriinvestor},
+			#{realamount},
+			#{haspi},
+			#{deadline},
+			#{hasdeadline},
+			#{recivedprincipal},
+			#{recievedinterest},
+			#{hasprincipal},
+			#{hasinterest},
+			#{recivedfi},
+			#{hasfi},
+			#{managefee},
+			#{reward},
+			#{flag},
+			#{offlineflag},
+			#{interestflag},
+			#{channel},
+			#{isautobid},
+			#{isdebt},
+			#{investtype},
+			#{investcode},
+			#{bizid},
+			#{interestaccrualdate},
+			#{expiredate},
+			#{refferee},
+			#{serverip},
+			#{departmentinfo}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_invest SET 	
+			investamount = #{investamount},
+			yearrate = #{yearrate},
+			monthrate = #{monthrate},
+			investor = #{investor},
+			borrowid = #{borrowid},
+			investtime = #{investtime},
+			arritradetime = #{arritradetime},
+			oriinvestor = #{oriinvestor},
+			realamount = #{realamount},
+			haspi = #{haspi},
+			deadline = #{deadline},
+			hasdeadline = #{hasdeadline},
+			recivedprincipal = #{recivedprincipal},
+			recievedinterest = #{recievedinterest},
+			hasprincipal = #{hasprincipal},
+			hasinterest = #{hasinterest},
+			recivedfi = #{recivedfi},
+			hasfi = #{hasfi},
+			managefee = #{managefee},
+			reward = #{reward},
+			flag = #{flag},
+			offlineflag = #{offlineflag},
+			interestflag = #{interestflag},
+			channel = #{channel},
+			isautobid = #{isautobid},
+			isdebt = #{isdebt},
+			investtype = #{investtype},
+			investcode = #{investcode},
+			bizid = #{bizid},
+			interestaccrualdate = #{interestaccrualdate},
+			expiredate = #{expiredate},
+			refferee = #{refferee},
+			serverip = #{serverip},
+			departmentinfo = #{departmentinfo}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_invest
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

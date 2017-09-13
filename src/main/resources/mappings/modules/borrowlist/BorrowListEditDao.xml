@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.borrowlist.dao.BorrowListEditDao">
+    
+	<sql id="tBorrowColumns">
+		a.status AS "status",
+		a.borrow_id AS "borrowId",
+		a.type AS "type",
+		a.borrowtitle AS "borrowtitle",
+		a.borrowway AS "borrowway",
+		a.borrowcode AS "borrowcode",
+		a.borrowamount AS "borrowamount",
+		a.deadline AS "deadline",
+		a.anualrate AS "anualrate",
+		a.mintendersum AS "mintendersum",
+		a.pay_method AS "payMethod",
+		a.maxtendersum AS "maxtendersum",
+		a.raiseterm AS "raiseterm",
+		a.borrowtype AS "borrowtype",
+		a.borrowstatus AS "borrowstatus",
+		a.raisetermunit AS "raisetermunit",
+		a.detail AS "detail",
+		a.openborrowdate AS "openborrowdate",
+		a.userid AS "userid",
+		a.repaysource AS "repaysource",
+		a.borrowaliasno AS "borrowaliasno",
+		a.borrowalias AS "borrowalias",
+		a.ip AS "ip",
+		a.loannumber AS "loannumber",
+		a.oriuserid AS "oriuserid",
+		a.name AS "name",
+		a.oriuseridcard AS "oriuseridcard",
+		a.auditdate AS "auditdate",
+		a.hasinvestamount AS "hasinvestamount",
+		a.hasinvestnum AS "hasinvestnum",
+		a.create_time AS "createTime",
+		a.servicefree AS "servicefree",
+		a.full_borrow_date AS "fullBorrowDate",
+		a.contractsigningtime AS "contractsigningtime",
+		a.contractcode AS "contractcode",
+		a.productcode AS "productcode",
+		a.repaymentdate AS "repaymentdate",
+		a.monthinterest AS "monthinterest",
+		a.monthcapital AS "monthcapital",
+		a.monthprepaymentamount AS "monthprepaymentamount",
+		a.giveamount AS "giveamount",
+		a.monthmanagementfee AS "monthmanagementfee",
+		a.servicecharge AS "servicecharge",
+		a.businesschannel AS "businesschannel",
+		a.mobile AS "mobile",
+		a.bcbizdeptid AS "bcbizdeptid",
+		a.bztype AS "bztype",
+		a.loantime AS "loantime",
+		a.borrowfid AS "borrowfid",
+		a.criticalid AS "criticalid",
+		a.warnings AS "warnings",
+		a.paidinamount AS "paidinamount",
+		a.usageofloan AS "usageofloan",
+		a.creditrating AS "creditrating",
+		a.idcardno AS "idcardno",
+		a.sex AS "sex",
+		a.age AS "age",
+		a.city AS "city",
+		a.annualincome AS "annualincome",
+		a.assetsliabilities AS "assetsliabilities",
+		a.is_edit AS "isEdit",
+		a.is_match AS "isMatch",
+		a.loan_name AS "loanName",
+		a.lendingtime AS "lendingtime",
+		a.borrow_customer_code AS "borrowCustomerCode",
+		a.borrow_acc_code AS "borrowAccCode",
+		a.open_bank_code AS "openBankCode",
+		a.cardno AS "cardno",
+		a.creditlevel AS "creditlevel",
+		a.is_finish AS "isFinish",
+		a.open_bank AS "openBank",
+		a.fill_mark AS "fillMark",
+		a.risk_warning AS "riskWarning",
+		a.remainamount AS "remainamount",
+		a.project_brief AS "projectBrief",
+		a.credit_status AS creditStatus
+	</sql>
+	
+	<sql id="tBorrowJoins">
+	</sql>
+    
+	
+	<update id="updateBorrow" parameterType="TBorrow" >
+				UPDATE t_borrow tb
+				<set>
+					<if test="riskWarning != null and riskWarning != ''" >
+						tb.RISK_WARNING = #{riskWarning},
+					</if>
+					<if test="projectBrief != null and projectBrief != ''" >
+						tb.project_brief = #{projectBrief},
+					</if>
+					<if test="raiseterm != null and raiseterm != ''" >
+						tb.RAISETERM = #{raiseterm},
+					</if>
+					<if test="raisetermunit != null and raisetermunit != ''" >
+						tb.RAISETERMUNIT = #{raisetermunit},
+					</if>
+					<if test="fillMark != null and fillMark != ''" >
+						tb.FILL_MARK = #{fillMark},
+					</if>
+					<if test="mintendersum != null and mintendersum != ''" >
+						tb.MINTENDERSUM = #{mintendersum},
+					</if>
+					<if test="borrowstatus != null and borrowstatus != '' ">
+						tb.BORROWSTATUS = #{borrowstatus},
+					</if>
+					<if test="isMatch != null and isMatch != ''">
+						tb.is_match = #{isMatch},
+					</if>
+					<if test="borrowalias != null and borrowalias != ''">
+						tb.borrowAlias = #{borrowalias},
+					</if>
+					<if test="borrowalias != null and borrowalias != ''">
+						tb.BORROWTITLE = #{borrowalias},
+					</if>
+					<if test="borrowaliasno != null and borrowaliasno != ''">
+						tb.borrowAliasNo = #{borrowaliasno},
+					</if>
+					<if test="openborrowdate != null and openborrowdate != ''">
+						tb.OPENBORROWDATE = #{openborrowdate},
+					</if>
+					<if test="borrowListId != null and borrowListId != ''">
+						tb.borrow_list_id = #{borrowListId},
+					</if>
+					tb.MAXTENDERSUM = tb.BORROWAMOUNT
+				</set>
+				WHERE tb.BORROW_ID = #{borrowId}
+	</update>
+	<!-- 更新删除的标的 -->
+	<update id="updateDeleteBorrow" parameterType="TBorrow" >
+				UPDATE t_borrow tb
+				<set>
+						tb.borrow_list_id = #{borrowListId},
+						tb.RISK_WARNING = #{riskWarning},
+						tb.project_brief = #{projectBrief},
+						tb.RAISETERM = #{raiseterm},
+						tb.RAISETERMUNIT = #{raisetermunit},
+						tb.MINTENDERSUM = #{mintendersum},
+						tb.BORROWSTATUS = #{borrowstatus},
+						tb.borrowAlias = #{borrowalias},
+						tb.BORROWTITLE = #{borrowtitle},
+						tb.borrowAliasNo = #{borrowaliasno},
+					    tb.MAXTENDERSUM = #{maxtendersum}
+				</set>
+				WHERE tb.BORROW_ID = #{borrowId}
+	</update>
+	
+	
+	<!-- 通过标的编号查询散标集合  -->
+	<select id="getBorrowListId" parameterType="java.lang.String" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+		select b.*,u.realName as userName from t_borrow b,t_user u
+		 WHERE  b.USERID = u.id and b.borrow_list_id = #{borrowListId}
+	</select>
+	
+	<select id="getBorrowListCode" parameterType="java.lang.String" resultType="com.hzdjr.hzwd.modules.borrowlist.entity.TBorrowList">
+		select * from t_borrow_list
+		 WHERE borrow_list_code = #{borrowListCode}
+	</select>
+	
+	
+	<update id="updateBorrowList" parameterType="TBorrowList" >
+				UPDATE t_borrow_list tb
+				<set>
+					<if test="riskWarning != null and riskWarning != ''" >
+						tb.risk_warning = #{riskWarning},
+					</if>
+					<if test="projectBrief != null and projectBrief != ''" >
+						tb.project_brief = #{projectBrief},
+					</if>
+					<if test="raiseDay != null and raiseDay != ''" >
+						tb.raise_day = #{raiseDay},
+					</if>
+					<if test="minTenderSum != null and minTenderSum != ''" >
+						tb.min_tender_sum = #{minTenderSum},
+					</if>
+					<if test="borrowListStatus != null and borrowListStatus != ''" >
+						tb.borrow_list_status = #{borrowListStatus},
+					</if>
+					<if test="borrowListAmount != null and borrowListAmount != ''" >
+						tb.borrowAmount = #{borrowListAmount},
+					</if>
+				</set>
+				WHERE tb.borrow_list_id = #{borrowListId}
+	</update>
+	
+	<!-- 通过标的id查询借款  -->
+	<select id="getByBorrowId" parameterType="java.util.List" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+		SELECT <include refid="tBorrowColumns"/>
+		 FROM t_borrow a WHERE  BORROW_ID IN(
+		<foreach collection="list" item="item" index="index" separator="," > 
+			#{item}
+		</foreach>
+		)
+	</select>
+</mapper>

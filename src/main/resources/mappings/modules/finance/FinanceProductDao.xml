@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.finance.dao.FinanceProductDao">
+    
+	<sql id="financeProductColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.nper AS "nper",
+		a.lending_method AS "lendingMethod",
+		a.rate AS "rate",
+		a.reward_rate AS "rewardRate",
+		a.is_novice_label AS "isNoviceLabel",
+		a.lending_agreement AS "lendingAgreement",
+		a.lending_agreement_code AS "lendingAgreementCode"
+	</sql>
+	
+	<sql id="financeProductJoins">
+	</sql>
+    
+	<select id="get" resultType="FinanceProduct">
+		SELECT 
+			<include refid="financeProductColumns"/>
+		FROM t_finance_product a
+		<include refid="financeProductJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="FinanceProduct">
+		SELECT 
+			<include refid="financeProductColumns"/>
+		FROM t_finance_product a
+		<include refid="financeProductJoins"/>
+		<where>
+			
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="FinanceProduct">
+		SELECT 
+			<include refid="financeProductColumns"/>
+		FROM t_finance_product a
+		<include refid="financeProductJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+		<select id="findListNoXS" resultType="FinanceProduct">
+		SELECT 
+			<include refid="financeProductColumns"/>
+		FROM t_finance_product a
+		<include refid="financeProductJoins"/>
+		<where>
+			a.is_novice_label = 'PT'
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<insert id="insert">
+		INSERT INTO t_finance_product(
+			id,
+			name,
+			nper,
+			lending_method,
+			rate,
+			lending_agreement,
+			lending_agreement_code
+		) VALUES (
+			#{id},
+			#{name},
+			#{nper},
+			#{lendingMethod},
+			#{rate},
+			#{lendingAgreement},
+			#{lendingAgreementCode}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_finance_product SET 	
+			name = #{name},
+			nper = #{nper},
+			lending_method = #{lendingMethod},
+			rate = #{rate},
+			lending_agreement = #{lendingAgreement},
+			lending_agreement_code = #{lendingAgreementCode}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_finance_product
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

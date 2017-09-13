@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.exitmanage.dao.TExitDataDao">
+    
+	<sql id="tExitDataColumns">
+		a.id AS "id",
+		a.can_quit_amount AS "canQuitAmount",
+		a.quit_amount AS "quitAmount",
+		a.quit_time AS "quitTime",
+		a.status AS "status",
+		a.detail AS "detail",
+		a.num AS "num"
+	</sql>
+	
+	<sql id="tExitDataJoins">
+	</sql>
+    
+	<select id="get" resultType="TExitData">
+		SELECT 
+			<include refid="tExitDataColumns"/>
+		FROM t_exit_data a
+		<include refid="tExitDataJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TExitData">
+		SELECT 
+			<include refid="tExitDataColumns"/>
+		FROM t_exit_data a
+		<include refid="tExitDataJoins"/>
+		<where>
+			<if test="beginTimes != null and beginTimes != '' ">
+                AND a.quit_time &gt;= #{beginTimes}
+            </if>
+            <if test="endTimes != null and endTimes != '' ">
+                AND a.quit_time &lt;= #{endTimes}
+            </if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 已退出总金额 -->
+	<select id="getQuitAmountSum" resultType="string">
+	  select sum(quit_amount)  as  quitamountsum from t_exit_data
+	</select>
+	<select id="findAllList" resultType="TExitData">
+		SELECT 
+			<include refid="tExitDataColumns"/>
+		FROM t_exit_data a
+		<include refid="tExitDataJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_exit_data(
+			id,
+			can_quit_amount,
+			quit_amount,
+			quit_time,
+			status,
+			detail,
+			num
+		) VALUES (
+			#{id},
+			#{canQuitAmount},
+			#{quitAmount},
+			#{quitTime},
+			#{status},
+			#{detail},
+			#{num}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_exit_data SET 	
+			can_quit_amount = #{canQuitAmount},
+			quit_amount = #{quitAmount},
+			quit_time = #{quitTime},
+			status = #{status},
+			detail = #{detail},
+			num = #{num}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_exit_data
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

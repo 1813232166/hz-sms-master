@@ -1,0 +1,835 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.borrow.dao.BorrowDao">
+    
+	<sql id="borrowColumns">
+		a.status AS "status",
+		a.borrow_id AS "borrowId",
+		a.type AS "type",
+		a.borrowtitle AS "borrowtitle",
+		a.borrowway AS "borrowway",
+		a.borrowcode AS "borrowcode",
+		a.borrowamount AS "borrowamount",
+		a.deadline AS "deadline",
+		a.anualrate AS "anualrate",
+		a.mintendersum AS "mintendersum",
+		a.pay_method AS "payMethod",
+		a.maxtendersum AS "maxtendersum",
+		a.raiseterm AS "raiseterm",
+		a.borrowtype AS "borrowtype",
+		a.borrowstatus AS "borrowstatus",
+		a.raisetermunit AS "raisetermunit",
+		a.detail AS "detail",
+		a.openborrowdate AS "openborrowdate",
+		a.userid AS "userid",
+		a.repaysource AS "repaysource",
+		a.borrowaliasno AS "borrowaliasno",
+		a.borrowalias AS "borrowalias",
+		a.ip AS "ip",
+		a.loannumber AS "loannumber",
+		a.oriuserid AS "oriuserid",
+		a.name AS "name",
+		a.oriuseridcard AS "oriuseridcard",
+		a.auditdate AS "auditdate",
+		a.hasinvestamount AS "hasinvestamount",
+		a.hasinvestnum AS "hasinvestnum",
+		a.create_time AS "createTime",
+		a.servicefree AS "servicefree",
+		a.full_borrow_date AS "fullBorrowDate",
+		a.contractsigningtime AS "contractsigningtime",
+		a.contractcode AS "contractcode",
+		a.productcode AS "productcode",
+		a.repaymentdate AS "repaymentdate",
+		a.monthinterest AS "monthinterest",
+		a.monthcapital AS "monthcapital",
+		a.monthprepaymentamount AS "monthprepaymentamount",
+		a.giveamount AS "giveamount",
+		a.monthmanagementfee AS "monthmanagementfee",
+		a.servicecharge AS "servicecharge",
+		a.businesschannel AS "businesschannel",
+		a.mobile AS "mobile",
+		a.bcbizdeptid AS "bcbizdeptid",
+		a.bztype AS "bztype",
+		a.loantime AS "loantime",
+		a.borrowfid AS "borrowfid",
+		a.criticalid AS "criticalid",
+		a.warnings AS "warnings",
+		a.paidinamount AS "paidinamount",
+		a.usageofloan AS "usageofloan",
+		a.creditrating AS "creditrating",
+		a.idcardno AS "idcardno",
+		a.sex AS "sex",
+		a.age AS "age",
+		a.city AS "city",
+		a.annualincome AS "annualincome",
+		a.assetsliabilities AS "assetsliabilities",
+		a.is_edit AS "isEdit",
+		a.is_match AS "isMatch",
+		a.loan_name AS "loanName",
+		a.lendingtime AS "lendingtime",
+		a.borrow_customer_code AS "borrowCustomerCode",
+		a.borrow_acc_code AS "borrowAccCode",
+		a.open_bank_code AS "openBankCode",
+		a.cardno AS "cardno",
+		a.creditlevel AS "creditlevel",
+		a.is_finish AS "isFinish",
+		a.open_bank AS "openBank",
+		a.fill_mark AS "fillMark",
+		a.risk_warning AS "riskWarning",
+		a.remainamount AS "remainamount",
+		a.project_brief AS "projectBrief"
+	</sql>
+	
+	<sql id="borrowJoins">
+	</sql>
+    
+	<select id="get" resultType="Borrow">
+		SELECT 
+			<include refid="borrowColumns"/>
+		FROM t_borrow a
+		<include refid="borrowJoins"/>
+		WHERE a.borrow_id = #{borrowId}
+	</select>
+	
+	<select id="getChecks" resultType="Borrow">
+		SELECT 
+			<include refid="borrowColumns"/>
+		FROM t_borrow a
+		<include refid="borrowJoins"/>
+		WHERE a.borrowstatus in (0 5)
+	</select>
+	<!-- 获取待审核列表 -->
+	<select id="findList" resultType="Borrow">
+		SELECT 
+			<include refid="borrowColumns"/>,u.realName as borrowUserName
+		FROM t_borrow a JOIN t_user u on a.USERID = u.id
+		<include refid="borrowJoins"/>
+		<where>
+			a.borrowstatus in ('19')
+			<if test="borrowcode != null and borrowcode != ''">
+				AND a.borrowcode = #{borrowcode}
+			</if>
+			<if test="payMethod != null and payMethod != ''">
+				AND a.pay_method = #{payMethod}
+			</if>
+			<if test="borrowtype != null and borrowtype != ''">
+				AND a.borrowtype = #{borrowtype}
+			</if>
+			<if test="beginOpenborrowdate != null and endOpenborrowdate != null and beginOpenborrowdate != '' and endOpenborrowdate != ''">
+				AND a.openborrowdate BETWEEN #{beginOpenborrowdate} AND #{endOpenborrowdate}
+			</if>
+			<if test="borrowUserName != null and borrowUserName != ''">
+				AND u.userName = #{borrowUserName}
+			</if>
+			<if test="borrowalias != null and borrowalias != ''">
+				AND a.borrowalias = #{borrowalias}
+			</if>
+			<if test="loannumber != null and loannumber != ''">
+				AND a.loannumber = #{loannumber}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getBorrowCounts" resultType="map">
+		select count(*) as counts,count(distinct userid) as userCounts,SUM(borrowamount) as amountCounts
+		FROM t_borrow a JOIN t_user u on a.USERID = u.id
+		<where>
+			a.borrowstatus in ('19')
+			<if test="borrowcode != null and borrowcode != ''">
+				AND a.borrowcode = #{borrowcode}
+			</if>
+			<if test="payMethod != null and payMethod != ''">
+				AND a.pay_method = #{payMethod}
+			</if>
+			<if test="borrowtype != null and borrowtype != ''">
+				AND a.borrowtype = #{borrowtype}
+			</if>
+			<if test="beginOpenborrowdate != null and endOpenborrowdate != null and beginOpenborrowdate != '' and endOpenborrowdate != ''">
+				AND a.openborrowdate BETWEEN #{beginOpenborrowdate} AND #{endOpenborrowdate}
+			</if>
+			<if test="borrowUserName != null and borrowUserName != ''">
+				AND u.userName = #{borrowUserName}
+			</if>
+			<if test="borrowalias != null and borrowalias != ''">
+				AND a.borrowalias = #{borrowalias}
+			</if>
+			<if test="loannumber != null and loannumber != ''">
+				AND a.loannumber = #{loannumber}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Borrow">
+		SELECT 
+			<include refid="borrowColumns"/>
+		FROM t_borrow a
+		<include refid="borrowJoins"/>
+		WHERE a.borrowstatus in (0 5)		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+	
+	<insert id="insert">
+		INSERT INTO t_borrow(
+			status,
+			borrow_id,
+			type,
+			borrowtitle,
+			borrowway,
+			borrowcode,
+			borrowamount,
+			deadline,
+			anualrate,
+			mintendersum,
+			pay_method,
+			maxtendersum,
+			raiseterm,
+			borrowtype,
+			borrowstatus,
+			raisetermunit,
+			detail,
+			openborrowdate,
+			userid,
+			repaysource,
+			borrowaliasno,
+			borrowalias,
+			ip,
+			loannumber,
+			oriuserid,
+			name,
+			oriuseridcard,
+			auditdate,
+			hasinvestamount,
+			hasinvestnum,
+			create_time,
+			servicefree,
+			full_borrow_date,
+			contractsigningtime,
+			contractcode,
+			productcode,
+			repaymentdate,
+			monthinterest,
+			monthcapital,
+			monthprepaymentamount,
+			giveamount,
+			monthmanagementfee,
+			servicecharge,
+			businesschannel,
+			mobile,
+			bcbizdeptid,
+			bztype,
+			loantime,
+			borrowfid,
+			criticalid,
+			warnings,
+			paidinamount,
+			usageofloan,
+			creditrating,
+			idcardno,
+			sex,
+			age,
+			city,
+			annualincome,
+			assetsliabilities,
+			is_edit,
+			is_match,
+			loan_name,
+			lendingtime,
+			borrow_customer_code,
+			borrow_acc_code,
+			open_bank_code,
+			cardno,
+			creditlevel,
+			is_finish,
+			open_bank,
+			fill_mark,
+			risk_warning,
+			remainamount
+		) VALUES (
+			#{status},
+			#{borrowId},
+			#{type},
+			#{borrowtitle},
+			#{borrowway},
+			#{borrowcode},
+			#{borrowamount},
+			#{deadline},
+			#{anualrate},
+			#{mintendersum},
+			#{payMethod},
+			#{maxtendersum},
+			#{raiseterm},
+			#{borrowtype},
+			#{borrowstatus},
+			#{raisetermunit},
+			#{detail},
+			#{openborrowdate},
+			#{userid},
+			#{repaysource},
+			#{borrowaliasno},
+			#{borrowalias},
+			#{ip},
+			#{loannumber},
+			#{oriuserid},
+			#{name},
+			#{oriuseridcard},
+			#{auditdate},
+			#{hasinvestamount},
+			#{hasinvestnum},
+			#{createTime},
+			#{servicefree},
+			#{fullBorrowDate},
+			#{contractsigningtime},
+			#{contractcode},
+			#{productcode},
+			#{repaymentdate},
+			#{monthinterest},
+			#{monthcapital},
+			#{monthprepaymentamount},
+			#{giveamount},
+			#{monthmanagementfee},
+			#{servicecharge},
+			#{businesschannel},
+			#{mobile},
+			#{bcbizdeptid},
+			#{bztype},
+			#{loantime},
+			#{borrowfid},
+			#{criticalid},
+			#{warnings},
+			#{paidinamount},
+			#{usageofloan},
+			#{creditrating},
+			#{idcardno},
+			#{sex},
+			#{age},
+			#{city},
+			#{annualincome},
+			#{assetsliabilities},
+			#{isEdit},
+			#{isMatch},
+			#{loanName},
+			#{lendingtime},
+			#{borrowCustomerCode},
+			#{borrowAccCode},
+			#{openBankCode},
+			#{cardno},
+			#{creditlevel},
+			#{isFinish},
+			#{openBank},
+			#{fillMark},
+			#{riskWarning},
+			#{remainamount}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_borrow SET 	
+			status = #{status},
+			borrow_id = #{borrowId},
+			type = #{type},
+			borrowtitle = #{borrowtitle},
+			borrowway = #{borrowway},
+			borrowcode = #{borrowcode},
+			borrowamount = #{borrowamount},
+			deadline = #{deadline},
+			anualrate = #{anualrate},
+			mintendersum = #{mintendersum},
+			pay_method = #{payMethod},
+			maxtendersum = #{maxtendersum},
+			raiseterm = #{raiseterm},
+			borrowtype = #{borrowtype},
+			borrowstatus = #{borrowstatus},
+			raisetermunit = #{raisetermunit},
+			detail = #{detail},
+			openborrowdate = #{openborrowdate},
+			userid = #{userid},
+			repaysource = #{repaysource},
+			borrowaliasno = #{borrowaliasno},
+			borrowalias = #{borrowalias},
+			ip = #{ip},
+			loannumber = #{loannumber},
+			oriuserid = #{oriuserid},
+			name = #{name},
+			oriuseridcard = #{oriuseridcard},
+			auditdate = #{auditdate},
+			hasinvestamount = #{hasinvestamount},
+			hasinvestnum = #{hasinvestnum},
+			create_time = #{createTime},
+			servicefree = #{servicefree},
+			full_borrow_date = #{fullBorrowDate},
+			contractsigningtime = #{contractsigningtime},
+			contractcode = #{contractcode},
+			productcode = #{productcode},
+			repaymentdate = #{repaymentdate},
+			monthinterest = #{monthinterest},
+			monthcapital = #{monthcapital},
+			monthprepaymentamount = #{monthprepaymentamount},
+			giveamount = #{giveamount},
+			monthmanagementfee = #{monthmanagementfee},
+			servicecharge = #{servicecharge},
+			businesschannel = #{businesschannel},
+			mobile = #{mobile},
+			bcbizdeptid = #{bcbizdeptid},
+			bztype = #{bztype},
+			loantime = #{loantime},
+			borrowfid = #{borrowfid},
+			criticalid = #{criticalid},
+			warnings = #{warnings},
+			paidinamount = #{paidinamount},
+			usageofloan = #{usageofloan},
+			creditrating = #{creditrating},
+			idcardno = #{idcardno},
+			sex = #{sex},
+			age = #{age},
+			city = #{city},
+			annualincome = #{annualincome},
+			assetsliabilities = #{assetsliabilities},
+			is_edit = #{isEdit},
+			is_match = #{isMatch},
+			loan_name = #{loanName},
+			lendingtime = #{lendingtime},
+			borrow_customer_code = #{borrowCustomerCode},
+			borrow_acc_code = #{borrowAccCode},
+			open_bank_code = #{openBankCode},
+			cardno = #{cardno},
+			creditlevel = #{creditlevel},
+			is_finish = #{isFinish},
+			open_bank = #{openBank},
+			fill_mark = #{fillMark},
+			risk_warning = #{riskWarning},
+			remainamount = #{remainamount}
+		WHERE borrow_id = #{borrowId}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_borrow
+		WHERE borrow_id = #{borrowId}
+	</update>
+	
+	<sql id="findBorrowApplyTrialsSql">
+		SELECT 
+		  tbp.productName AS 'productName',
+		  tbp.periods AS 'periods',
+		  tbp.yearRate * 100 AS 'yearRate',
+		  tb.BORROW_ID AS 'borrowId',
+		  tb.loanNumber AS 'loanNumber',
+		  tb.borrowCode AS 'borrowCode',
+		  tb.BORROWAMOUNT AS 'borrowAmount',
+		  tb.CREATE_TIME AS 'createTime',
+		  tb.borrowing_sources AS 'borrowingSources', 
+		  CASE WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NULL) THEN tb.name 
+		    WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NOT NULL) THEN tu.realName 
+		    ELSE tu.realName END AS 'realName',
+		  CASE WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NULL) THEN CONCAT(SUBSTRING(tb.mobile, 1, 3), '****', SUBSTRING(tb.mobile, 8, 4)) 
+		    WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NOT NULL) THEN CONCAT(SUBSTRING(tu.mobile, 1, 3), '****', SUBSTRING(tu.mobile, 8, 4)) 
+		    ELSE CONCAT(SUBSTRING(tu.mobile, 1, 3), '****', SUBSTRING(tu.mobile, 8, 4)) END AS 'mobile',
+		  CASE WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NULL) THEN '0' 
+		    WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NOT NULL) THEN '1' 
+		    ELSE tb.BORROWSTATUS END AS 'borrowStatus'
+		FROM
+		  t_borrow tb 
+		  JOIN t_borrow_pm tbp 
+		    ON tbp.productId = tb.productCode 
+		  LEFT JOIN t_user tu 
+		    ON tu.id = tb.USERID 
+		<where>
+			tb.BORROWSTATUS in
+			<foreach collection="borrowStatusMap" index="borrowStatusCode" item="borrowStatusName" open="(" separator="," close=")">
+				<if test="borrowStatusCode != null and borrowStatusCode != '' and borrowStatusCode=='3,5,17,19'.toString()">
+					'3','5','17','19'
+				</if>
+				<if test="borrowStatusCode != null and borrowStatusCode != '' and borrowStatusCode!='3,5,17,19'.toString()">
+					#{borrowStatusCode}
+				</if>
+			</foreach>
+			<if test="borrowCode != null and borrowCode != ''">
+				AND tb.borrowCode like CONCAT('%',TRIM(#{borrowCode}),'%')
+			</if>
+			<if test="realName != null and realName != ''">
+				AND (tu.realName like CONCAT('%',TRIM(#{realName}),'%') OR tb.name like CONCAT('%',TRIM(#{realName}),'%'))
+			</if>
+			<if test="borrowStatus != null and borrowStatus != '' and borrowStatus!='3,5,17,19'.toString() and borrowStatus!='0'.toString()">
+				AND tb.borrowStatus = #{borrowStatus}
+			</if>
+			<if test="borrowStatus != null and borrowStatus != '' and borrowStatus=='3,5,17,19'.toString()">
+				AND tb.borrowStatus IN ('3','5','17','19')
+			</if>
+			<if test="borrowStatus != null and borrowStatus != '' and borrowStatus=='0'.toString()">
+				AND tb.borrowStatus = '1' AND tb.USERID IS NULL
+			</if>
+			<if test="borrowStatus != null and borrowStatus != '' and borrowStatus=='1'.toString()">
+				AND tb.USERID IS NOT NULL
+			</if>
+			<if test="borrowAmountLow != null and borrowAmountLow != ''">
+				<![CDATA[AND tb.BORROWAMOUNT >= TRIM(#{borrowAmountLow})]]>
+			</if>
+			<if test="borrowAmountHigh != null and borrowAmountHigh != ''">
+				<![CDATA[AND tb.BORROWAMOUNT <= TRIM(#{borrowAmountHigh})]]>
+			</if>
+			<if test="createTimeBegin != null and createTimeBegin != ''">
+				<![CDATA[AND tb.CREATE_TIME >= STR_TO_DATE(TRIM(#{createTimeBegin}),'%Y-%m-%d %H:%i:%s')]]>
+			</if>
+			<if test="createTimeEnd != null and createTimeEnd != ''">
+				<![CDATA[AND tb.CREATE_TIME <= STR_TO_DATE(TRIM(#{createTimeEnd}),'%Y-%m-%d %H:%i:%s')]]>
+			</if>
+			<if test="productType != null and productType != ''">
+				AND tbp.productNo = #{productType}
+			</if>
+			<if test="periodsLow != null and periodsLow != ''">
+				<![CDATA[AND tbp.periods >= TRIM(#{periodsLow})]]>
+			</if>
+			<if test="periodsHigh != null and periodsHigh != ''">
+				<![CDATA[AND tbp.periods <= TRIM(#{periodsHigh})]]>
+			</if>
+		</where>
+	</sql>
+	
+	<!-- 查询线下进件标的 -->
+	<select id="findBorrowApplyTrials" parameterType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyTrialQueryVo" 
+			resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyTrialVo">
+		<!-- SELECT
+			tb.BORROW_ID AS 'borrowId',
+			tb.loanNumber AS 'loanNumber',
+			tb.borrowCode AS 'borrowCode',
+			
+			CASE WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NULL) THEN tb.name 
+		    WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NOT NULL) THEN tu.realName
+		    ELSE tu.realName END AS 'realName',
+		     
+		    CASE WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NULL) THEN 			
+		    CONCAT(
+				SUBSTRING(tb.mobile, 1, 3),
+				'****',
+				SUBSTRING(tb.mobile, 8, 4)
+			) 
+		    WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NOT NULL) THEN 			
+		    CONCAT(
+				SUBSTRING(tu.mobile, 1, 3),
+				'****',
+				SUBSTRING(tu.mobile, 8, 4)
+			) 
+		    ELSE 			
+		    CONCAT(
+				SUBSTRING(tu.mobile, 1, 3),
+				'****',
+				SUBSTRING(tu.mobile, 8, 4)
+			)  END AS 'mobile',
+
+			tbp.productName AS 'productName',
+			tb.BORROWAMOUNT AS 'borrowAmount',
+			tbp.periods AS 'periods',
+			tbp.yearRate * 100 AS 'yearRate',
+			tb.CREATE_TIME AS 'createTime',
+			CASE WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NULL) THEN '0' 
+		    WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NOT NULL) THEN '1'
+		    ELSE tb.BORROWSTATUS END AS 'borrowStatus',
+			tba1p.audit_suggest AS 'firstPassSuggest',
+			tba1n.audit_suggest AS 'firstNopassSuggest',
+			tba2p.audit_suggest AS 'reviewPassSuggest',
+			tba2n.audit_suggest AS 'reviewNopassSuggest',
+			tb.borrowing_sources AS 'borrowingSources'
+		FROM
+			t_borrow tb
+		LEFT JOIN t_user tu ON tu.id = tb.USERID
+		LEFT JOIN t_borrow_pm tbp ON tbp.productId = tb.productCode
+		LEFT JOIN t_borrow_audit_record tba1p ON tba1p.audit_bid = tb.BORROW_ID
+		AND tba1p.audit_type = '1' AND tba1p.audit_status = 'pass'
+		LEFT JOIN t_borrow_audit_record tba1n ON tba1n.audit_bid = tb.BORROW_ID
+		AND tba1n.audit_type = '1' AND tba1n.audit_status = 'nopass'
+		LEFT JOIN t_borrow_audit_record tba2p ON tba2p.audit_bid = tb.BORROW_ID
+		AND tba2p.audit_type = '2' AND tba2p.audit_status = 'pass'
+		LEFT JOIN t_borrow_audit_record tba2n ON tba2n.audit_bid = tb.BORROW_ID
+		AND tba2n.audit_type = '2' AND tba2n.audit_status = 'nopass'
+		LEFT JOIN t_borrow_billplan AS tbb ON tb.loanNumber=tbb.apply_id
+        AND tbb.is_overdue='1' AND tbb.repay_status='1' AND  tb.borrowstatus='11'
+		<where>
+			tb.BORROWSTATUS in
+			<foreach collection="borrowStatusMap" index="borrowStatusCode" item="borrowStatusName" open="(" separator="," close=")">
+				<if test="borrowStatusCode != null and borrowStatusCode != '' and borrowStatusCode=='3,5,17,19'.toString()">
+					'3','5','17','19'
+				</if>
+				<if test="borrowStatusCode != null and borrowStatusCode != '' and borrowStatusCode!='3,5,17,19'.toString()">
+					#{borrowStatusCode}
+				</if>
+			</foreach>
+			<if test="loanNumber != null and loanNumber != ''">
+				AND tb.loanNumber like CONCAT('%',TRIM(#{loanNumber}),'%')
+			</if>
+			<if test="realName != null and realName != ''">
+				AND (tu.realName like CONCAT('%',TRIM(#{realName}),'%') OR tb.name like CONCAT('%',TRIM(#{realName}),'%'))
+			</if>
+			<if test="borrowStatus != null and borrowStatus != '' and borrowStatus!='3,5,17,19'.toString() and borrowStatus!='0'.toString()">
+				AND tb.borrowStatus = #{borrowStatus}
+			</if>
+			<if test="borrowStatus != null and borrowStatus != '' and borrowStatus=='3,5,17,19'.toString()">
+				AND tb.borrowStatus IN ('3','5','17','19')
+			</if>
+			<if test="borrowStatus != null and borrowStatus != '' and borrowStatus=='0'.toString()">
+				AND tb.borrowStatus = '1' AND tb.USERID IS NULL
+			</if>
+			<if test="borrowStatus != null and borrowStatus != '' and borrowStatus=='1'.toString()">
+				AND tb.USERID IS NOT NULL
+			</if>
+			<if test="borrowAmountLow != null and borrowAmountLow != ''">
+				<![CDATA[AND tb.BORROWAMOUNT >= TRIM(#{borrowAmountLow})]]>
+			</if>
+			<if test="borrowAmountHigh != null and borrowAmountHigh != ''">
+				<![CDATA[AND tb.BORROWAMOUNT <= TRIM(#{borrowAmountHigh})]]>
+			</if>
+			<if test="createTimeBegin != null and createTimeBegin != ''">
+				<![CDATA[AND tb.CREATE_TIME >= STR_TO_DATE(TRIM(#{createTimeBegin}),'%Y-%m-%d %H:%i:%s')]]>
+			</if>
+			<if test="createTimeEnd != null and createTimeEnd != ''">
+				<![CDATA[AND tb.CREATE_TIME <= STR_TO_DATE(TRIM(#{createTimeEnd}),'%Y-%m-%d %H:%i:%s')]]>
+			</if>
+			<if test="productType != null and productType != ''">
+				AND tbp.productNo = #{productType}
+			</if>
+			<if test="periodsLow != null and periodsLow != ''">
+				<![CDATA[AND tbp.periods >= TRIM(#{periodsLow})]]>
+			</if>
+			<if test="periodsHigh != null and periodsHigh != ''">
+				<![CDATA[AND tbp.periods <= TRIM(#{periodsHigh})]]>
+			</if>
+		</where>
+		ORDER BY createTime DESC, loanNumber 
+		<if test="isExcel != null">
+			LIMIT 20000
+		</if> -->
+		
+		SELECT 
+		  tba1p.audit_suggest AS 'firstPassSuggest',
+		  tba1n.audit_suggest AS 'firstNopassSuggest',
+		  tba2p.audit_suggest AS 'reviewPassSuggest',
+		  tba2n.audit_suggest AS 'reviewNopassSuggest',
+		  ft.*
+		  FROM 
+		(
+			<include refid="findBorrowApplyTrialsSql" />
+			ORDER BY createTime DESC, loanNumber 
+			<if test="isExcel != null and isExcel == 'no'.toString()">
+				LIMIT #{pageStart},#{pageSize}
+			</if>
+			<if test="isExcel != null and isExcel == 'yes'.toString()">
+				LIMIT 20000
+			</if>
+		) ft
+		  LEFT JOIN t_borrow_audit_record tba1p 
+		    ON tba1p.audit_bid = ft.borrowId 
+		    AND tba1p.audit_type = '1' 
+		    AND tba1p.audit_status = 'pass' 
+		  LEFT JOIN t_borrow_audit_record tba1n 
+		    ON tba1n.audit_bid = ft.borrowId  
+		    AND tba1n.audit_type = '1' 
+		    AND tba1n.audit_status = 'nopass' 
+		  LEFT JOIN t_borrow_audit_record tba2p 
+		    ON tba2p.audit_bid = ft.borrowId 
+		    AND tba2p.audit_type = '2' 
+		    AND tba2p.audit_status = 'pass' 
+		  LEFT JOIN t_borrow_audit_record tba2n 
+		    ON tba2n.audit_bid = ft.borrowId 
+		    AND tba2n.audit_type = '2' 
+		    AND tba2n.audit_status = 'nopass'
+		  ORDER BY ft.createTime DESC, ft.loanNumber
+	</select>
+	
+	<select id="countBorrowApplyTrials" parameterType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyTrialQueryVo" 
+		resultType="int" >
+		SELECT COUNT(1) FROM (
+			<include refid="findBorrowApplyTrialsSql" />
+		) tmp_count
+	</select>
+	
+	<!-- 查询产品类型字典 -->
+	<select id="findProductTypeList" resultType="java.util.Map">
+		SELECT
+			MAX(tbp.productNo) AS 'productNo',
+			MAX(tbp.productName) AS 'productName'
+		FROM
+			t_borrow_pm tbp
+		GROUP BY
+			tbp.productNo
+		ORDER BY
+			CONVERT (productNo, SIGNED)
+	</select>
+	
+	<select id="getBorrowDetailByBorrowId" parameterType="java.util.Map" 
+		resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyDeatil" >
+		SELECT
+			tb.BORROW_ID AS 'borrowId',
+			tb.type AS 'type',
+			tb.usageOfLoanType AS 'usageOfLoanType',
+			tb.usageOfLoan AS 'usageOfLoan',
+			tb.BORROWAMOUNT_LOW AS 'borrowAmountLow',
+			tb.BORROWAMOUNT_HIGH AS 'borrowAmountHigh',
+			tb.DEADLINE AS 'periods',
+			tb.ANUALRATE AS 'yearRate',
+			tb.monthPrepaymentAmount AS 'monthPrepaymentAmount',
+			tb.criticalId AS 'criticalId',
+			CASE WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NULL) THEN tb.name 
+		    WHEN (tb.BORROWSTATUS = '1' AND tb.USERID IS NOT NULL) THEN tu.realName
+		    ELSE tu.realName END AS 'name',
+			tb.sex AS 'sex',
+			tbd.heducation AS 'heducation',
+			tbd.birthday AS 'birthday',
+			tb.idCardNo AS 'idCardNo',
+			tbd.validityofDocumnets AS 'validityofDocumnets',
+			tbd.maritalStauts AS 'maritalStauts',
+			tbd.hasChildren AS 'hasChildren',
+			tbd.realeStateSituation AS 'realeStateSituation',
+			tbd.coResident AS 'coResident',
+			tb.annualIncome AS 'annualIncome',
+			tbd.highCredit AS 'highCredit',
+			tbd.registryProvince AS 'registryProvince',
+			tbd.registryCity AS 'registryCity',
+			tbd.registryQu AS 'registryQu',
+			tbd.registryAddress AS 'registryAddress',
+			tbd.registryCode AS 'registryCode',
+			tbd.familyProvince AS 'familyProvince',
+			tbd.familyCity AS 'familyCity',
+			tbd.familyQu AS 'familyQu',
+			tbd.familyAddress AS 'familyAddress',
+			tbd.familyCode AS 'familyCode',
+			tbd.familyQuhao AS 'familyQuhao',
+			tbd.familyTel AS 'familyTel',
+			tbd.companyName AS 'companyName',
+			tbd.companyStyle AS 'companyStyle',
+			tbd.companyInTime AS 'companyInTime',
+			tbd.companyDepartment AS 'companyDepartment',
+			tbd.companyAssume AS 'companyAssume',
+			tbd.companyCode AS 'companyCode',
+			tbd.companyPorvince AS 'companyPorvince',
+			tbd.companyCity AS 'companyCity',
+			tbd.companyQu AS 'companyQu',
+			tbd.companyAddress AS 'companyAddress',
+			tbd.companyQuhao AS 'companyQuhao',
+			tbd.companyTel AS 'companyTel',
+			tbd.companyQuhao AS 'companyQuhao',
+			tbd.companyTel AS 'companyTel',
+			tbd.companySuffix AS 'companySuffix',
+			tbd.queryNet AS 'queryNet',
+			tbd.accountType AS 'accountType',
+			tbd.accountNo AS 'accountNo',
+			tbd.accountPassword AS 'accountPassword'
+		FROM
+			t_borrow tb
+		LEFT JOIN t_borrow_detail tbd ON tb.BORROW_ID = tbd.BORROW_ID
+		LEFT JOIN t_user tu ON tu.id = tb.USERID
+		WHERE
+			tb.BORROW_ID = #{borrowId}
+	</select>
+	
+	<select id="findProvinceList" resultType="java.util.Map">
+	   SELECT
+			t.`code` AS 'code',
+			t.`name` AS 'name'
+		FROM
+			t_region_province t
+	</select>
+	
+	<select id="findCityList" parameterType="java.util.Map" resultType="java.util.Map" >
+	   SELECT
+			t.`code` AS 'code',
+			t.`name` AS 'name'
+		FROM
+			t_region_city t
+		<where>
+			<if test="pid != null">
+				t.pid = ${pid}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAreaList" parameterType="java.util.Map" resultType="java.util.Map">
+	   SELECT
+			t.`code` AS 'code',
+			t.`name` AS 'name'
+		FROM
+			t_region_area t
+		<where>
+			<if test="pid != null">
+				t.pid = ${pid}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findBorrowPicList" parameterType="java.util.Map" resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowPicVo">
+		SELECT
+			tba.id AS 'id',
+			tba.picdesc AS 'picdesc',
+			tba.bid AS 'bid',
+			tba.`status` AS 'status',
+			tba.largePictype AS 'pictype',
+			tba.picurl AS 'picurl',
+			tba.createtime AS 'createtime'
+		FROM
+			t_borrow_apply tba
+		<where>
+			bid = #{borrowId}
+			<if test="status != null">
+				AND tba.`status` = #{status}
+			</if>
+			<if test="picType != null">
+				AND tba.largePictype = #{picType}
+			</if>
+		</where>
+		ORDER BY
+			createtime
+	</select>
+	
+	<insert id="insertSuggest" parameterType="map">
+		INSERT INTO t_borrow_audit_record 
+			(id,auditor,audit_date,audit_suggest,audit_type,audit_bid,audit_status) 
+		VALUES 
+			(#{id},#{auditor},#{auditDate},#{auditSuggest},#{auditType},#{auditBid},#{auditStatus});
+	</insert>
+	
+	<select id="getSuggest" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			t.id
+		FROM
+			t_borrow_audit_record t
+		WHERE
+			t.audit_type = #{auditType}
+		AND t.audit_bid = #{auditBid}
+		AND t.audit_status = #{auditStatus}
+	</select>
+	
+	<update id="updateSuggest" parameterType="java.util.Map">
+		UPDATE t_borrow_audit_record t
+		SET t.auditor = #{auditor},
+		 t.audit_date = #{auditDate},
+		 t.audit_suggest = #{auditSuggest}
+		WHERE
+			t.audit_type = #{auditType} 
+		AND t.audit_bid = #{auditBid}
+		AND t.audit_status = #{auditStatus}
+	</update>
+	
+	<update id="updateBorrowWithStatus" parameterType="map">
+	    update t_borrow set BORROWSTATUS = #{status} where BORROW_ID = #{borrowId}
+	</update>
+</mapper>

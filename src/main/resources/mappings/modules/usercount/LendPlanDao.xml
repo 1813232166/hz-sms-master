@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.usercount.dao.LendPlanDao">
+    
+	<select id="getLendPlan" parameterType="map" resultType="com.hzdjr.hzwd.modules.usercount.entity.LendPlan">
+		SELECT
+		 substring(fp.start_time,1,10) times,
+		 fp.finance_id productnum,
+		 fp.product_name producttype,
+		 fp.`name` productname,
+		 fp.amount amountsum,
+		 fp.closeTime deadline,
+		 fp.rate anualrate
+		FROM
+		 t_finance_product fp
+ 		<where>
+	 		<if test="beginTimes!=null and beginTimes!='' and endTimes!=null and endTimes!=''">
+	 			and times between #{beginTimes} and #{endTimes}
+	 		</if>
+		</where>
+		
+	</select>
+	
+	<select id="getPuCount" parameterType="map" resultType="com.hzdjr.hzwd.modules.usercount.entity.PuCount">
+		SELECT
+			 substring(tb.OPENBORROWDATE,1,10) times,
+			 tb.borrowCode biaonum,
+			 tb.borrowAlias biaoname,
+			 tb.loanNumber borrownum,
+			 tb.BORROWAMOUNT borrowamount,
+			 tb.type borrowtype,
+			 tb.DEADLINE deadline,
+			 tb.ANUALRATE anualrate
+		FROM
+			 t_borrow tb
+ 		<where>
+	 		<if test="beginTimes!=null and beginTimes!='' and endTimes!=null and endTimes!=''">
+	 			and times between #{beginTimes} and #{endTimes}
+	 		</if>
+		</where>
+		
+	</select>
+</mapper>

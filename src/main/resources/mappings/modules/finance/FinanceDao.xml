@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.finance.dao.FinanceDao">
+    
+	<sql id="financeColumns">
+		a.id AS "id",
+		a.product_id AS "productId",
+		a.status AS "status",
+		a.name AS "name",
+		a.finance_code AS "financeCode",
+		a.collect_amount AS "collectAmount",
+		a.already_collected_amount AS "alreadyCollectedAmount",
+		a.nper AS "nper",
+		a.lending_method AS "lendingMethod",
+		a.rate AS "rate",
+		a.reward_rate AS "rewardRate",
+		a.is_novice_label AS "isNoviceLabel",
+		a.interest_date_type AS "interestDateType",
+		a.min_tender_sum AS "minTenderSum",
+		a.incremental_amount AS "incrementalAmount",
+		a.max_tender_sum AS "maxTenderSum",
+		a.start_time_of_collection AS "startTimeOfCollection",
+		a.end_time_of_collection AS "endTimeOfCollection",
+		a.poundage AS "poundage",
+		a.exit_mode AS "exitMode",
+		a.guarantee_mode AS "guaranteeMode",
+		a.detail AS "detail",
+		a.create_time AS "createTime",
+		a.lending_agreement AS "lendingAgreement",
+		a.lending_agreement_code AS "lendingAgreementCode",
+		a.poundage_more AS "poundageMore"
+	</sql>
+	
+	<sql id="financeJoins">
+	</sql>
+    
+	<select id="get" resultType="Finance">
+		SELECT 
+			<include refid="financeColumns"/>
+		FROM t_finance a
+		<include refid="financeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Finance">
+		SELECT 
+			<include refid="financeColumns"/>,ROUND(a.already_collected_amount*100/a.collect_amount,2) as scale
+		FROM t_finance a
+		<include refid="financeJoins"/>
+		<where>
+			
+			<if test="name != null and name != ''">
+				AND a.name = #{name}
+			</if>
+			
+			<if test="financeCode != null and financeCode != ''">
+				AND a.finance_code = #{financeCode}
+			</if>
+			
+			<if test="status != null and status != ''">
+			
+			<choose>
+				<when test="status == '4'.toString()" >   
+					AND a.status in ('4','5')
+				</when>
+				<when test="status == '5'.toString()" >
+					AND a.status in ('6','7','8')
+				</when>
+				<otherwise>
+					AND a.status = #{status}
+				</otherwise>
+			</choose>
+			
+			</if>
+			
+			<if test="beginCreateTime != null and beginCreateTime != '' ">
+                AND a.create_time &gt;= #{beginCreateTime}
+            </if>
+            <if test="endCreateTime != null and endCreateTime != '' ">
+                AND a.create_time &lt;= #{endCreateTime}
+            </if>
+				AND a.status != '10'
+		</where>
+				ORDER BY a.create_time DESC
+	</select>
+	
+	
+	<insert id="insert">
+		INSERT INTO t_finance(
+			id,
+			product_id,
+			status,
+			name,
+			finance_code,
+			collect_amount,
+			already_collected_amount,
+			nper,
+			lending_method,
+			rate,
+			reward_rate,
+			is_novice_label,
+			interest_date_type,
+			min_tender_sum,
+			incremental_amount,
+			max_tender_sum,
+			start_time_of_collection,
+			end_time_of_collection,
+			poundage,
+			exit_mode,
+			guarantee_mode,
+			detail,
+			create_time,
+			lending_agreement,
+			lending_agreement_code,
+			poundage_more
+		) VALUES (
+			#{id},
+			#{productId},
+			#{status},
+			#{name},
+			#{financeCode},
+			#{collectAmount},
+			#{alreadyCollectedAmount},
+			#{nper},
+			#{lendingMethod},
+			#{rate},
+			#{rewardRate},
+			#{isNoviceLabel},
+			#{interestDateType},
+			#{minTenderSum},
+			#{incrementalAmount},
+			#{maxTenderSum},
+			#{startTimeOfCollection},
+			#{endTimeOfCollection},
+			#{poundage},
+			#{exitMode},
+			#{guaranteeMode},
+			#{detail},
+			#{createTime},
+			#{lendingAgreement},
+			#{lendingAgreementCode},
+			#{poundageMore}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_finance SET 	
+			product_id = #{productId},
+			status = #{status},
+			name = #{name},
+			finance_code = #{financeCode},
+			collect_amount = #{collectAmount},
+			already_collected_amount = #{alreadyCollectedAmount},
+			nper = #{nper},
+			lending_method = #{lendingMethod},
+			rate = #{rate},
+			reward_rate = #{rewardRate},
+			is_novice_label = #{isNoviceLabel},
+			interest_date_type = #{interestDateType},
+			min_tender_sum = #{minTenderSum},
+			incremental_amount = #{incrementalAmount},
+			max_tender_sum = #{maxTenderSum},
+			start_time_of_collection = #{startTimeOfCollection},
+			end_time_of_collection = #{endTimeOfCollection},
+			poundage = #{poundage},
+			exit_mode = #{exitMode},
+			guarantee_mode = #{guaranteeMode},
+			detail = #{detail},
+			create_time = #{createTime},
+			lending_agreement = #{lendingAgreement},
+			lending_agreement_code = #{lendingAgreementCode},
+			poundage_more = #{poundageMore}
+			
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_finance
+		WHERE id = #{id}
+	</update>
+
+	
+	<select id="groupFinaceStatus" resultType="map">
+		SELECT 
+		
+		COUNT(a.STATUS) AS statusCount ,a.STATUS AS status
+		
+		FROM t_finance a 
+		
+		<where>
+			
+			<if test="name != null and name != ''">
+				AND a.name = #{name}
+			</if>
+			
+			<if test="financeCode != null and financeCode != ''">
+				AND a.finance_code = #{financeCode}
+			</if>
+			
+			<if test="status != null and status != ''">
+			
+			<choose>
+				<when test="status == '4'.toString()" >   
+					AND a.status in ('4','5')
+				</when>
+				<when test="status == '5'.toString()" >
+					AND a.status in ('6','7','8')
+				</when>
+				<otherwise>
+					AND a.status = #{status}
+				</otherwise>
+			</choose>
+			
+			</if>
+			
+			<if test="beginCreateTime != null and beginCreateTime != '' ">
+                AND a.create_time &gt;= #{beginCreateTime}
+            </if>
+            <if test="endCreateTime != null and endCreateTime != '' ">
+                AND a.create_time &lt;= #{endCreateTime}
+            </if>
+	
+		AND a.status != '10'
+		</where>
+	
+		
+		GROUP BY  a.status
+		
+	</select>
+	
+	<select id="queryCollectSumAmount" resultType="string">
+		SELECT 
+		
+		SUM(a.collect_amount)
+		
+		FROM t_finance a
+		
+		<where>
+			
+			<if test="name != null and name != ''">
+				AND a.name = #{name}
+			</if>
+			
+			<if test="financeCode != null and financeCode != ''">
+				AND a.finance_code = #{financeCode}
+			</if>
+			
+			<if test="status != null and status != ''">
+			
+			<choose>
+				<when test="status == '4'.toString()" >   
+					AND a.status in ('4','5')
+				</when>
+				<when test="status == '5'.toString()" >
+					AND a.status in ('6','7','8')
+				</when>
+				<otherwise>
+					AND a.status = #{status}
+				</otherwise>
+			</choose>
+			
+			</if>
+			
+			<if test="beginCreateTime != null and beginCreateTime != '' ">
+                AND a.create_time &gt;= #{beginCreateTime}
+            </if>
+            <if test="endCreateTime != null and endCreateTime != '' ">
+                AND a.create_time &lt;= #{endCreateTime}
+            </if>
+				AND a.status != '10'
+		</where>
+		
+	</select>
+	
+	
+	<update id="updateFinanceStatus" parameterType="java.util.Map">
+	   update t_finance set status=#{status} where id=#{financeId}
+	</update>
+	
+	
+	<select id="queryThisProductListSize" resultType="int" parameterType="string">
+		SELECT 
+		 COUNT(*)
+		FROM t_finance a
+		
+		<where>
+			AND a.status in('1','2','3','4','5')
+			
+			AND a.product_id=#{productId} 
+		</where>
+		
+	</select>
+	
+	
+	
+	<select id="queryTodayProductListSize" resultType="string">
+		SELECT 
+		 COUNT(*)
+		FROM t_finance a
+		
+		<where>
+			AND DATEDIFF(now(),a.create_time) =0
+		</where>
+		
+	</select>
+	
+	
+</mapper>

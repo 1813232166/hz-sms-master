@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.borrow.dao.TBorrowBillplanDao">
+    
+	<sql id="tBorrowBillplanColumns">
+		a.id AS "id",
+		a.apply_id AS "applyId",
+		a.period AS "period",
+		a.monthly_payment_origin AS "monthlyPaymentOrigin",
+		a.monthly_payment_actual AS "monthlyPaymentActual",
+		a.manage_fee AS "manageFee",
+		a.fails_charge_origin AS "failsChargeOrigin",
+		a.fails_charge_actual AS "failsChargeActual",
+		a.late_charge_origin AS "lateChargeOrigin",
+		a.late_charge_actual AS "lateChargeActual",
+		a.repay_status AS "repayStatus",
+		a.repay_time AS "repayTime",
+		a.plan_repay_amount AS "planRepayAmount",
+		a.month_capital AS "monthCapital",
+		a.month_interest AS "monthInterest",
+		a.contract_id AS "contractId",
+		a.noallotamount AS "noallotamount",
+		a.remains_principal AS "remainsPrincipal",
+		a.prepayment_amount AS "prepaymentAmount",
+		a.prepayment_failscharge AS "prepaymentFailscharge",
+		a.roll_out_id AS "rollOutId",
+		a.is_overdue AS "isOverdue",
+		a.late_payment_time AS "latePaymentTime",
+		a.parking_fee AS "parkingFee"
+	</sql>
+	
+	<sql id="tBorrowBillplanJoins">
+	</sql>
+    
+	<select id="get" resultType="TBorrowBillplan">
+		SELECT 
+			<include refid="tBorrowBillplanColumns"/>
+		FROM t_borrow_billplan a
+		<include refid="tBorrowBillplanJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TBorrowBillplan">
+		SELECT 
+			<include refid="tBorrowBillplanColumns"/>
+		FROM t_borrow_billplan a
+		<include refid="tBorrowBillplanJoins"/>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TBorrowBillplan">
+		SELECT 
+			<include refid="tBorrowBillplanColumns"/>
+		FROM t_borrow_billplan a
+		<include refid="tBorrowBillplanJoins"/>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+</mapper>

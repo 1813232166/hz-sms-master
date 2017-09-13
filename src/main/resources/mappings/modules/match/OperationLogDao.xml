@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.match.dao.OperationLogDao">
+  <sql id="operationLog" >
+    id, 
+    type,
+    create_time as createTime, 
+    name, 
+    account_number as accountNumber,
+    filed as filed,
+    amount as amount,
+    value as value,
+    weight as weight,
+    borrow_type as borrowType,
+    detail as detail
+  </sql>
+	<select id="findList" resultType="com.hzdjr.hzwd.modules.match.entity.OperationLog">
+		SELECT 
+			<include refid="operationLog"/>
+		FROM t_weight_log a
+		<where>
+			<if test="filed != null and filed != ''">
+				AND a.filed = #{filed}
+			</if>			
+	</where>
+		ORDER BY a.create_time DESC
+	 </select>
+
+		<insert id="createWeightLog" parameterType="com.hzdjr.hzwd.modules.match.entity.OperationLog">
+		INSERT INTO t_weight_log(
+			id,
+			type,
+			create_time,
+			name,
+			account_number,
+			filed,
+			amount,
+			value,
+			weight,
+			borrow_type,
+			detail
+		) VALUES (
+			#{id},
+			#{type},
+			#{createTime},
+			#{name},
+			#{accountNumber},
+			#{filed},
+			#{amount},
+			#{value},
+			#{weight},
+			#{borrowType},
+			#{detail}
+		)
+	</insert>
+
+
+</mapper>

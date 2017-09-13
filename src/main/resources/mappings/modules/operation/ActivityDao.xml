@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.operation.dao.ActivityDao">
+    
+	<sql id="activityColumns">
+		a.id AS "id",
+		a.activityname AS "activityname",
+		a.rewardtype AS "rewardtype",
+		a.rewardcount AS "rewardcount",
+		a.couponid AS "couponid",
+		a.activitydescribe AS "activitydescribe",
+		a.lender AS "lender",
+		a.lendtime AS "lendtime",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="activityJoins">
+	</sql>
+    
+	<select id="get" resultType="Activity">
+		SELECT 
+			<include refid="activityColumns"/>
+		FROM t_activity a
+		<include refid="activityJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Activity">
+		SELECT 
+			<include refid="activityColumns"/>
+		FROM t_activity a
+		<include refid="activityJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="activityname != null and activityname != ''">
+				AND a.activityname LIKE 
+					<if test="dbName == 'oracle'">'%'||#{activityname}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{activityname}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{activityname},'%')</if>
+			</if>
+			<if test="rewardtype != null and rewardtype != ''">
+				AND a.rewardtype = #{rewardtype}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Activity">
+		SELECT 
+			<include refid="activityColumns"/>
+		FROM t_activity a
+		<include refid="activityJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_activity(
+		  id,
+			activityname,
+			rewardtype,
+			rewardcount,
+			couponid,
+			activitydescribe,
+			create_by,
+			create_date
+		) VALUES (
+		  #{id},
+			#{activityname},
+			#{rewardtype},
+			#{rewardcount},
+			#{couponid},
+			#{activitydescribe},
+			#{createBy.id},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_activity SET 	
+			activityname = #{activityname},
+			rewardtype = #{rewardtype},
+			rewardcount = #{rewardcount},
+			couponid = #{couponid},
+			activitydescribe = #{activitydescribe}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE t_activity SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

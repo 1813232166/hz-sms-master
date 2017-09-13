@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.finance.dao.FinanceTransactionSDao">
+    
+	
+	<sql id="financeTransactionJoins">
+		LEFT JOIN sys_user u25 ON u25.id = a.user_id
+	</sql>
+
+	<select id="findList" resultType="FinanceTransactionS">
+	SELECT 
+		t_user.`mobile` AS mobile,
+		t_user.`realName` AS NAME,
+		t_invest.investCode AS transactionNumber,
+		t_invest.investTime AS investTime,
+		t_invest.`investAmount` AS investAmount,
+		IF(t_invest.borrowListId=NULL,2,1) AS productType,
+		CASE 
+		<![CDATA[ WHEN (t_invest.flag='-1') THEN '-1' ]]>
+	    <![CDATA[ WHEN (t_invest.invest_status=0 AND t_invest.flag=1 AND (t_invest.interestAccrualDate IS NULL OR DATE_FORMAT(NOW(), '%Y-%m-%d') < t_invest.interestAccrualDate)) THEN '1' ]]>
+	    <![CDATA[ WHEN (t_invest.invest_status=0 AND t_invest.flag=1 AND DATE_FORMAT(NOW(), '%Y-%m-%d') >= t_invest.interestAccrualDate ) THEN 'beforeBack' ]]>
+	    <![CDATA[ WHEN (t_invest.invest_status=1) THEN '7' ]]>
+	    <![CDATA[ WHEN (t_invest.invest_status=2) THEN '4' ]]>
+	    <![CDATA[ WHEN (t_invest.invest_status=3) THEN '10' ]]>
+	      ELSE '4'
+	  	END AS status,
+		t_borrow.`loanNumber` borrowCode
+	FROM t_invest,t_user,t_borrow
+			<where>
+			t_invest.`investor` = t_user.`id` and t_invest.`borrowId`=t_borrow.`BORROW_ID`
+			<if test="productType=='1'.toString()">
+				AND t_invest.borrowListId IS NULL
+			</if>
+			<if test="productType=='2'.toString()">
+				AND t_invest.borrowListId IS NOT NULL
+			</if>
+			<if test="transactionNumber != null and transactionNumber != ''">
+				AND t_invest.investCode like CONCAT('%',TRIM(#{transactionNumber}),'%') 
+			</if>
+			<if test="status != null and status != ''">
+				AND 
+				<choose>
+					<when test="status == '-1'.toString()">
+						t_invest.flag='-1'
+					</when>
+					<when test="status == '1'.toString()">
+						<![CDATA[ t_invest.invest_status=0 AND t_invest.flag=1 AND (t_invest.interestAccrualDate IS NULL OR DATE_FORMAT(NOW(), '%Y-%m-%d') < t_invest.interestAccrualDate) ]]>
+					</when>
+					<when test="status == 'beforeBack'.toString()">
+						<![CDATA[ t_invest.invest_status=0 AND t_invest.flag=1 AND DATE_FORMAT(NOW(), '%Y-%m-%d') >= t_invest.interestAccrualDate ]]>
+					</when>
+					<when test="status == '7'.toString()">
+						t_invest.invest_status in ('1')
+					</when>
+					<when test="status == '4'.toString()">
+						t_invest.invest_status in ('2')
+					</when>
+					<when test="status == '10'.toString()">
+						t_invest.invest_status in ('3')
+					</when>
+					<otherwise>
+					1!=1
+					</otherwise>
+				</choose>	
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND t_user.mobile like CONCAT('%',TRIM(#{mobile}),'%') 
+			</if>
+			<if test="name != null and name != ''">
+				AND t_user.realName like CONCAT('%',TRIM(#{name}),'%')
+			</if>
+			<if test="investTimeBegin != null and investTimeBegin != '' ">
+               <![CDATA[ AND t_invest.investTime >= #{investTimeBegin} ]]>
+            </if>
+            <if test="investTimeEnd != null and investTimeEnd != '' ">
+               <![CDATA[ AND t_invest.investTime <= #{investTimeEnd} ]]>
+            </if>
+		</where>
+	</select>
+
+	
+
+	
+</mapper>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.repaymentmanage.dao.RePaymentDao">
+   <!-- 还款列表(满标放款)    t_user  t_borrower t_invest t_borrow_billplan -->
+   <select id="findList" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.PuBiao">
+    SELECT v.*, tu.realName AS 'name',CONCAT(SUBSTR(tu.mobile, 1, 3),"****",SUBSTR(tu.mobile ,- 4)) AS 'mobile'
+    FROM  (SELECT
+            t1.BORROW_ID AS 'borrowId',
+            t1.borrowCode AS 'borrowCode',
+            t1.borrowAliasNo AS 'borrowaliasno',
+            t1.borrowAlias AS 'borrowAlias',
+            t1.loanNumber AS 'loanNumber',
+            t1.MAXTENDERSUM AS 'borrowAmount',
+            t1.ANUALRATE AS 'anualrate',
+            t1.DEADLINE AS 'deadline',
+            t1.pay_method AS 'payMethod',
+            tiv.hasDeadline AS 'repaymentNum',
+            tiv.deadline AS 'repaymentNumSum',
+            CONCAT(tiv.hasDeadline,"/",tiv.deadline) AS bili,
+            t1.BORROWSTATUS AS 'borrowStatus',
+            (SELECT SUM(tbb.fails_charge_actual + tbb.late_charge_actual + tbb.manage_fee + tbb.monthly_payment_actual)
+                FROM t_borrow tb1
+                INNER JOIN t_borrow_billplan tbb ON tb1.loanNumber = tbb.apply_id
+                WHERE tb1.loanNumber = t1.loanNumber ) AS 'remainAmount',
+            (CASE
+                WHEN tb.repay_status = '1' THEN MIN(tb.repay_time)
+                WHEN tb.repay_status = '2' THEN   (SELECT MAX(tbb.repay_time) FROM  t_borrow tb1
+                        INNER JOIN t_borrow_billplan tbb ON tb1.loanNumber = tbb.apply_id  WHERE  tbb.repay_status = '2' AND tb1.loanNumber = t1.loanNumber)
+                ELSE '' END) AS 'repaymentDate', t1.USERID AS 'userId'
+        FROM t_borrow t1
+        INNER JOIN t_invest tiv ON t1.BORROW_ID = tiv.borrowId
+        INNER JOIN t_borrow_billplan tb ON t1.loanNumber = tb.apply_id
+        <where>
+            t1.BORROWSTATUS IN ('11', '12') AND tiv.flag = '1'
+            <if test="borrowaliasno!=null and borrowaliasno!=''">
+               AND t1.borrowaliasno  LIKE '%${borrowaliasno}%'
+            </if>
+            <if test="borrowAlias!=null and borrowAlias!=''">
+               AND t1.BORROWTITLE  LIKE '%${borrowAlias}%'
+            </if>
+            <if test="loanNumber!=null and loanNumber!=''">
+               AND t1.loanNumber LIKE '%${loanNumber}%'
+            </if>
+        </where>
+            GROUP BY t1.loanNumber ) v 
+        JOIN t_user tu ON v.userId = tu.id WHERE 1=1
+            <if test="name!=null and name!=''">
+               AND tu.realName  LIKE '%${name}%'
+            </if>
+            <if test="mobile!=null and mobile!=''">
+               AND tu.mobile  LIKE '%${mobile}%'
+            </if>
+        ORDER BY v.repaymentDate DESC 
+   </select>
+   <!-- 导出还款列表 -->
+    <select id="getPuBiaoList" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.PuBiao" parameterType="map">
+     SELECT v.*, tu.realName AS 'name',CONCAT(SUBSTR(tu.mobile, 1, 3),"****",SUBSTR(tu.mobile ,- 4)) AS 'mobile'
+    FROM (SELECT
+            t1.BORROW_ID AS 'borrowId',
+            t1.borrowCode AS 'borrowCode',
+            t1.borrowAliasNo AS 'borrowaliasno',
+            t1.borrowAlias AS 'borrowAlias',
+            t1.loanNumber AS 'loanNumber',
+            t1.MAXTENDERSUM AS 'borrowAmount',
+            t1.ANUALRATE AS 'anualrate',
+            t1.DEADLINE AS 'deadline',
+            t1.pay_method AS 'payMethod',
+            tiv.hasDeadline AS 'repaymentNum',
+            tiv.deadline AS 'repaymentNumSum',
+            CONCAT(tiv.hasDeadline,"/",tiv.deadline) AS bili,
+            t1.BORROWSTATUS AS 'borrowStatus',
+            (SELECT SUM(tbb.fails_charge_actual + tbb.late_charge_actual + tbb.manage_fee + tbb.monthly_payment_actual)
+                FROM t_borrow tb1
+                INNER JOIN t_borrow_billplan tbb ON tb1.loanNumber = tbb.apply_id
+                WHERE tb1.loanNumber = t1.loanNumber ) AS 'remainAmount',
+            (CASE
+                WHEN tb.repay_status = '1' THEN MIN(tb.repay_time)
+                WHEN tb.repay_status = '2' THEN   (SELECT MAX(tbb.repay_time) FROM  t_borrow tb1
+                        INNER JOIN t_borrow_billplan tbb ON tb1.loanNumber = tbb.apply_id  WHERE  tbb.repay_status = '2' AND tb1.loanNumber = t1.loanNumber)
+                ELSE '' END) AS 'repaymentDate', t1.USERID AS 'userId'
+        FROM t_borrow t1
+        INNER JOIN t_invest tiv ON t1.BORROW_ID = tiv.borrowId
+        INNER JOIN t_borrow_billplan tb ON t1.loanNumber = tb.apply_id
+        <where>
+            t1.BORROWSTATUS IN ('11', '12') AND tiv.flag = '1'
+            <if test="borrowaliasno!=null and borrowaliasno!=''">
+               AND t1.borrowaliasno  LIKE '%${borrowaliasno}%'
+            </if>
+            <if test="borrowAlias!=null and borrowAlias!=''">
+               AND t1.BORROWTITLE  LIKE '%${borrowAlias}%'
+            </if>
+            <if test="loanNumber!=null and loanNumber!=''">
+               AND t1.loanNumber LIKE '%${loanNumber}%'
+            </if>
+        </where>
+            GROUP BY t1.loanNumber ) v 
+        JOIN t_user tu ON v.userId = tu.id WHERE 1=1
+            <if test="name!=null and name!=''">
+               AND tu.realName  LIKE '%${name}%'
+            </if>
+            <if test="mobile!=null and mobile!=''">
+               AND tu.mobile  LIKE '%${mobile}%'
+            </if>
+        ORDER BY  v.repaymentDate DESC 
+         <if test="null!=endLimit and ''!=endLimit">
+            LIMIT 0,#{endLimit}
+         </if>  
+   </select>
+   <select id="findBorrowBillplans" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrowBillplan">
+        SELECT tbb.apply_id,tbb.period,tbb.is_advances AS "isAdvances",tbb.is_offset AS "isOffset",tbb.is_overdue AS "isOverdue"
+        FROM t_borrow_billplan tbb WHERE  tbb.is_overdue='1' AND tbb.apply_id=#{loanNumber};
+   </select>
+   
+   <select id="getPuBiaoListById" parameterType="String" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.PuBiao">
+   		SELECT
+		  tb.borrowCode borrowCode,
+		  tb.RISK_WARNING riskWarning,
+		  tb.usageofloan usageofloan,
+		  tb.borrowaliasno borrowaliasno,
+		  tb.borrowAlias borrowAlias,
+		  tb.loanNumber loanNumber,
+		  tb.`name` name,
+		  tb.bzType bzType,
+		  tb.mobile mobile,
+		  tb.borrowType borrowType,
+		  tb.loanTime loanTime,
+		  tb.pay_method payMethod,
+		  tb.DEADLINE deadline,
+		  tb.criticalId criticalId,
+		  tb.repaymentDate repaymentDate,
+		  tb.BORROWAMOUNT borrowAmount,
+		  tb.OPENBORROWDATE openborrowDate,
+		  tb.lendingTime lendingTime,
+		  tb.ANUALRATE anualrate,
+		  tb.MINTENDERSUM minTenderSum,
+		  tb.borrowType borrowType,
+		  tb.RAISETERM raiseTerm,
+		  tb.FILL_MARK fillMark,
+		  tb.full_borrow_date fullBorrowDate,
+		  tb.BORROWSTATUS borrowStatus
+		FROM
+			t_borrow tb 
+		WHERE tb.BORROW_ID=#{borrowId}
+   
+   
+   </select>
+   <!-- 还款计划 -->
+   <select id="selectTermNum" resultType="map" parameterType="String">
+   		SELECT
+		  	period,
+			month_capital,
+			month_interest,
+			is_overdue,
+			repay_status,
+			repay_time,
+			apply_id
+		FROM
+			t_borrow_billplan b
+		WHERE
+			b.apply_id = #{apply_id}
+			
+   </select>
+
+   <!-- 还款计划明细 -->
+   <select id="findlendDetailInfoList" resultType="map" parameterType="map">
+   		select  *,(
+		SELECT
+			concat(
+				substring(realname, 1, 1),
+				'**'
+			)
+		FROM
+			t_user u
+		WHERE
+			u.id = i.investor
+	) AS NAME,i.recivedPrincipal,i.recievedInterest,i.recivedPrincipal+i.recievedInterest as total,r.sDate   from   t_borrow_repay_billplan  r  left join t_invest i on r.investId=i.id         
+   where   r.billNum = #{rbillNum}
+   </select>
+   
+   
+</mapper>

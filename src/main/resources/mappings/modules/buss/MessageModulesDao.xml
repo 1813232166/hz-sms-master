@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.buss.dao.MessageModulesDao">
+    
+	<sql id="messageModulesColumns">
+		a.id AS "id",
+		a.receiver AS "receiver",
+		a.message_type AS "messageType",
+		a.message_content AS "messageContent",
+		a.message_status AS "messageStatus",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="messageModulesJoins">
+	</sql>
+    
+	<select id="get" resultType="MessageModules">
+		SELECT 
+			<include refid="messageModulesColumns"/>
+		FROM t_message a
+		<include refid="messageModulesJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="MessageModules">
+		SELECT 
+			<include refid="messageModulesColumns"/>
+		FROM t_message a
+		<include refid="messageModulesJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="receiver != null and receiver != ''">
+				AND a.receiver = #{receiver}
+			</if>
+			<if test="messageType != null and messageType != ''">
+				AND a.message_type = #{messageType}
+			</if>
+			<if test="messageStatus != null and messageStatus != ''">
+				AND a.message_status = #{messageStatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="MessageModules">
+		SELECT 
+			<include refid="messageModulesColumns"/>
+		FROM t_message a
+		<include refid="messageModulesJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_message(
+			id,
+			receiver,
+			message_type,
+			message_content,
+			message_status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{receiver},
+			#{messageType},
+			#{messageContent},
+			#{messageStatus},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_message SET 	
+			receiver = #{receiver},
+			message_type = #{messageType},
+			message_content = #{messageContent},
+			message_status = #{messageStatus}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE t_message SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getMessage" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT message_content , message_status FROM  `t_message` WHERE  `receiver`=#{receiver}   AND  `message_type`=#{message_type}
+	</select>
+	
+</mapper>

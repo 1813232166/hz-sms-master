@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.salesupport.dao.TYxCouponAuditRecordDao">
+    
+	<sql id="tYxCouponAuditRecordColumns">
+		a.coupon_audit_record_id AS "couponAuditRecordId",
+		a.relation_type AS "relationType",
+		a.main_id AS "mainId",
+		a.submitter_id AS "submitterId",
+		a.audit_flag AS "auditFlag",
+		a.audit_content AS "auditContent",
+		a.audit_time AS "auditTime",
+		a.auditor_id AS "auditorId",
+		a.createdate AS "createdate",
+		a.createby AS "createby",
+		a.updatedate AS "updatedate",
+		a.updateby AS "updateby",
+		a.remarks AS "remarks",
+		a.delflag AS "delflag"
+	</sql>
+	
+	<sql id="tYxCouponAuditRecordJoins">
+	</sql>
+    
+	<select id="getauditRecord" resultType="TYxCouponAuditRecord">
+		SELECT 
+			<include refid="tYxCouponAuditRecordColumns"/>
+		FROM t_yx_coupon_audit_record a
+		<include refid="tYxCouponAuditRecordJoins"/>
+		WHERE a.main_id = #{id}  order by createdate desc  limit 0,1
+	</select>
+	
+	<select id="get" resultType="TYxCouponAuditRecord">
+		SELECT 
+			<include refid="tYxCouponAuditRecordColumns"/>
+		FROM t_yx_coupon_audit_record a
+		<include refid="tYxCouponAuditRecordJoins"/>
+		WHERE a.coupon_audit_record_id = #{couponAuditRecordId}
+	</select>
+	
+	<select id="findList" resultType="TYxCouponAuditRecord">
+		SELECT 
+			<include refid="tYxCouponAuditRecordColumns"/>
+		FROM t_yx_coupon_audit_record a
+		<include refid="tYxCouponAuditRecordJoins"/>
+		<where>
+			
+			<if test="auditFlag != null and auditFlag != ''">
+				AND a.audit_flag = #{auditFlag}
+			</if>
+			<if test="auditTime != null and auditTime != ''">
+				AND a.audit_time = #{auditTime}
+			</if>
+			<if test="createdate != null and createdate != ''">
+				AND a.createdate = #{createdate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TYxCouponAuditRecord">
+		SELECT 
+			<include refid="tYxCouponAuditRecordColumns"/>
+		FROM t_yx_coupon_audit_record a
+		<include refid="tYxCouponAuditRecordJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+
+	<insert id="saveTYxCouponAuditRecord">
+		INSERT INTO t_yx_coupon_audit_record(
+			coupon_audit_record_id,
+			relation_type,
+			main_id,
+			submitter_id,
+			audit_flag,
+			audit_content,
+			audit_time,
+			auditor_id,
+			createdate
+
+		) VALUES (
+			#{couponAuditRecordId},
+			#{relationType},
+			#{mainId},
+			#{submitterId},
+			#{auditFlag},
+			#{auditContent},
+			#{auditTime},
+			#{auditorId},
+			#{createdate}
+			
+		)
+	</insert>
+	
+
+	<insert id="insert">
+		INSERT INTO t_yx_coupon_audit_record(
+			coupon_audit_record_id,
+			relation_type,
+			main_id,
+			submitter_id,
+			audit_flag,
+			audit_content,
+			audit_time,
+			auditor_id,
+			createdate,
+			createby,
+			updatedate,
+			updateby,
+			remarks,
+			delflag
+		) VALUES (
+			#{couponAuditRecordId},
+			#{relationType},
+			#{mainId},
+			#{submitterId},
+			#{auditFlag},
+			#{auditContent},
+			#{auditTime},
+			#{auditorId},
+			#{createdate},
+			#{createby},
+			#{updatedate},
+			#{updateby},
+			#{remarks},
+			#{delflag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_yx_coupon_audit_record SET 	
+			audit_flag = #{auditFlag},
+			audit_content = #{auditContent},
+			audit_time = #{auditTime},
+			auditor_id = #{auditorId},
+			updatedate = #{updatedate},
+			updateby = #{updateby},
+			remarks = #{remarks}
+		WHERE main_id = #{mainId}
+	</update>
+
+	<update id="delete">
+		UPDATE FROM t_yx_coupon_audit_record SET delflag='1'
+		WHERE coupon_audit_record_id = #{couponAuditRecordId}
+	</update>
+	
+	<update id="updateAuditCouponRecord">
+		UPDATE t_yx_coupon_audit_record SET 	
+			relation_type = #{relationType},
+			main_id = #{mainId},
+			submitter_id = #{submitterId},
+			audit_flag = #{auditFlag},
+			audit_content = #{auditContent},
+			audit_time = #{auditTime},
+			auditor_id = #{auditorId},
+			createdate = #{createdate},
+			createby = #{createby},
+			updatedate = #{updatedate},
+			updateby = #{updateby},
+			remarks = #{remarks},
+			delflag = #{delflag}
+		WHERE main_id = #{mainId}
+	</update>
+	
+</mapper>

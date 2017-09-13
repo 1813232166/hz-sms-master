@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.operation.dao.ActivityIrcouponDao">
+    
+	<sql id="activityIrcouponColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.scale AS "scale",
+		a.sendnumber AS "sendnumber",
+		a.usednumber AS "usednumber",
+		a.expirenumber AS "expirenumber",
+		a.profitamount AS "profitamount",
+		a.enddate AS "enddate",
+		a.useconditionstatus AS "useconditionstatus",
+		a.useconditionamount AS "useconditionamount",
+		a.usetype AS "usetype",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="activityIrcouponJoins">
+	</sql>
+    
+	<select id="get" resultType="ActivityIrcoupon">
+		SELECT 
+			<include refid="activityIrcouponColumns"/>
+		FROM t_ircoupon a
+		<include refid="activityIrcouponJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ActivityIrcoupon">
+		SELECT 
+			<include refid="activityIrcouponColumns"/>,a.startdate AS startdate,
+			CASE a.profitTime WHEN -1 THEN '永久' else a.profitTime END as profittime,
+			<!-- CASE WHEN a.startdate is null THEN '永久' WHEN a.startdate=='' THEN '永久' else a.startdate END as startdate, -->
+			CASE a.status WHEN '1' THEN '待发布' WHEN '2' THEN '进行中' WHEN '3' THEN '已停止' WHEN '4' THEN '已结束' END as status 
+		FROM t_ircoupon a
+		<include refid="activityIrcouponJoins"/>
+		<where>
+			<if test="id != null and id != ''">
+				AND a.id = #{id}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="beginStartdate != null and beginStartdate != ''">
+				AND a.startdate &gt;= #{beginStartdate}
+			</if>
+			<if test="endStartdate != null and endStartdate != ''">
+				AND a.enddate &lt;=  #{endStartdate}
+			</if>
+			<if test="usetype != null and usetype != ''">
+				AND a.usetype = #{usetype}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="profittime != null and profittime != ''">
+				<if test="profittime == '-1'">
+				AND a.profittime ='-1'
+				</if>
+				<if test="profittime != '-1'">
+					AND a.profittime !='-1'
+				</if>
+			</if>
+			<if test="expDate != null and expDate != ''">
+				<if test="expDate == '-1'">
+				AND a.startdate IS NULL AND a.enddate IS NULL
+				</if>
+				<if test="expDate != '-1'">
+					AND a.startdate IS NOT NULL AND a.enddate IS NOT NULL
+				</if>
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.status,create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 导出数据列表信息  -->
+	<select id="exportActivityIrcoupon" resultType="ActivityIrcoupon">
+		SELECT 
+			<include refid="activityIrcouponColumns"/>,
+			CASE a.profitTime WHEN -1 THEN '永久' else a.profitTime END as profittime,
+			a.startdate<!--CASE WHEN a.startdate is not null THEN a.startdate  WHEN a.startdate ='' THEN '永久'  else '永久' END--> as startdate,
+			CASE a.status WHEN '1' THEN '待发布' WHEN '2' THEN '进行中' WHEN '3' THEN '已停止' WHEN '4' THEN '已结束' END as status 
+		FROM t_ircoupon a
+		<include refid="activityIrcouponJoins"/>
+		<where>
+			<if test="id != null and id != ''">
+				AND a.id = #{id}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="beginStartdate != null and beginStartdate != ''">
+				AND a.startdate &gt;= #{beginStartdate}
+			</if>
+			<if test="endStartdate != null and endStartdate != ''">
+				AND a.enddate &lt;=  #{endStartdate}
+			</if>
+			<if test="usetype != null and usetype != ''">
+				AND a.usetype = #{usetype}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="profittime != null and profittime != ''">
+				<if test="profittime == '-1'">
+				AND a.profittime ='-1'
+				</if>
+				<if test="profittime != '-1'">
+					AND a.profittime !='-1'
+				</if>
+			</if>
+			<if test="expDate != null and expDate != ''">
+				<if test="expDate == '-1'">
+				AND a.startdate IS NULL AND a.enddate IS NULL
+				</if>
+				<if test="expDate != '-1'">
+					AND a.startdate IS NOT NULL AND a.enddate IS NOT NULL
+				</if>
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+		</where>
+			ORDER BY a.status,create_date DESC
+	</select>
+	
+	<!-- 获取总计  -->
+	<select id="getIrcouponCounts" resultType="map">
+		SELECT 
+			SUM(a.sendNumber) as sendNumberCount ,
+			SUM(a.usedNumber) as usedNumberCount ,
+			SUM(a.expireNumber) as expireNumberCount ,
+			SUM(a.profitAmount) as profitAmountCount
+		FROM t_ircoupon a
+		<where>
+			<if test="id != null and id != ''">
+				AND a.id = #{id}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="beginStartdate != null and beginStartdate != ''">
+				AND a.startdate &gt;= #{beginStartdate}
+			</if>
+			<if test="endStartdate != null and endStartdate != ''">
+				AND a.enddate &lt;=  #{endStartdate}
+			</if>
+			<if test="usetype != null and usetype != ''">
+				AND a.usetype = #{usetype}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="profittime != null and profittime != ''">
+				<if test="profittime == '-1'">
+					AND a.profittime ='-1'
+				</if>
+				<if test="profittime != '-1'">
+					AND a.profittime !='-1'
+				</if>
+			</if>
+			<if test="expDate != null and expDate != ''">
+				<if test="expDate == '-1'">
+				AND a.startdate IS NULL AND a.enddate IS NULL
+				</if>
+				<if test="expDate != '-1'">
+					AND a.startdate IS NOT NULL AND a.enddate IS NOT NULL
+				</if>
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="ActivityIrcoupon">
+		SELECT 
+			<include refid="activityIrcouponColumns"/>
+		FROM t_ircoupon a
+		<include refid="activityIrcouponJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_ircoupon(
+			id,
+			name,
+			scale,
+			profittime,
+			sendnumber,
+			usednumber,
+			expirenumber,
+			profitamount,
+			startdate,
+			enddate,
+			useconditionstatus,
+			useconditionamount,
+			usetype,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{scale},
+			#{profittime},
+			#{sendnumber},
+			#{usednumber},
+			#{expirenumber},
+			#{profitamount},
+			#{startdate},
+			#{enddate},
+			#{useconditionstatus},
+			#{useconditionamount},
+			#{usetype},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<!-- 修改加息券状态 -->
+	<update id="updateStatus">
+		UPDATE t_ircoupon SET 	
+			status = #{status}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="update">
+		UPDATE t_ircoupon SET 	
+			name = #{name},
+			scale = #{scale},
+			profittime = #{profittime},
+			startdate = #{startdate},
+			enddate = #{enddate},
+			useconditionstatus = #{useconditionstatus},
+			useconditionamount = #{useconditionamount},
+			usetype = #{usetype}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE t_ircoupon SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.finance.dao.TCapitalBespeakDao">
+    
+	<sql id="tCapitalBespeakColumns">
+		a.id AS "id",
+		a.capital_category AS "capitalCategory",
+		a.status AS "status",
+		a.amount AS "amount",
+		a.invest_amount AS "investAmount",
+		a.surplus_amount AS "surplusAmount",
+		a.rate AS "rate",
+		a.nper AS "nper",
+		a.customer AS "customer",
+		a.invest_time AS "investTime",
+		a.capital_source AS "capitalSource",
+		a.capital_code AS "capitalCode",
+		a.user_id AS "user.id",
+		a.finance_id AS "financeId",
+		a.finance_bespeak_id AS "financeBespeakId",
+		u13.name AS "user.name"
+	</sql>
+	
+	<sql id="tCapitalBespeakJoins">
+		LEFT JOIN sys_user u13 ON u13.id = a.user_id
+	</sql>
+    <sql id="whereQuery">
+
+    </sql>
+	<select id="findList" resultType="TCapitalBespeak">
+		select t1.*,t2.realname as "realname",t2.mobile as "mobile",t3.name as "name"
+		 from t_capital_bespeak t1 
+              left join t_user t2 on t1.user_id=t2.id
+              left join t_finance_bespeak t3 on t3.id=t1.finance_bespeak_id
+        <where>
+			<if test="name != null and name != ''">
+				and t3.name like concat('%',#{name},'%')
+			</if>
+			<if test="mobile != null and mobile != ''">
+				and t2.mobile like concat('%',#{mobile},'%')
+			</if>
+			<if test="realName != null and realName != ''">
+				and t2.realName like concat('%',#{realName},'%')
+			</if>
+			<if test="status != null and status != ''">
+				AND t1.status = #{status}
+			</if>
+			<if test="beginBespeakTime != null and beginBespeakTime != '' ">
+                AND t1.invest_time &gt;= #{beginBespeakTime}
+            </if>
+            <if test="endBespeakTime != null and endBespeakTime != '' ">
+                AND t1.invest_time &lt;= #{endBespeakTime}
+            </if>
+		</where>  
+	</select>
+	<!-- 计算预约中数,金额    预约中状态为1-->
+	 <select id="findBespeaking" resultType="java.util.Map">
+		select  count(t1.id) as capOne,sum(t1.amount) as amountSumOne
+		 from t_capital_bespeak t1 
+              left join t_user t2 on t1.user_id=t2.id
+              left join t_finance_bespeak t3 on t3.id=t1.finance_bespeak_id
+          <where>
+			<if test="name != null and name != ''">
+				and t3.name like concat('%',#{name},'%')
+			</if>
+			<if test="mobile != null and mobile != ''">
+				and t2.mobile like concat('%',#{mobile},'%')
+			</if>
+			<if test="realName != null and realName != ''">
+				and t2.realName like concat('%',#{realName},'%')
+			</if>
+			<if test="beginBespeakTime != null and beginBespeakTime != '' ">
+                AND t1.invest_time &gt;= #{beginBespeakTime}
+            </if>
+            <if test="endBespeakTime != null and endBespeakTime != '' ">
+                AND t1.invest_time &lt;= #{endBespeakTime}
+            </if>
+             and  t1.status='1'
+		</where>  
+       
+    </select>
+	<!-- 计算取消预约数,金额   取消状态为2-->
+	 <select id="findCancelBespeak" resultType="java.util.Map">
+		select  count(t1.id) as capTwo,sum(t1.amount) as amountSumTwo
+		 from t_capital_bespeak t1 
+              left join t_user t2 on t1.user_id=t2.id
+              left join t_finance_bespeak t3 on t3.id=t1.finance_bespeak_id
+          <where>
+			<if test="name != null and name != ''">
+				and t3.name like concat('%',#{name},'%')
+			</if>
+			<if test="mobile != null and mobile != ''">
+				and t2.mobile like concat('%',#{mobile},'%')
+			</if>
+			<if test="realName != null and realName != ''">
+				and t2.realName like concat('%',#{realName},'%')
+			</if>
+			<if test="beginBespeakTime != null and beginBespeakTime != '' ">
+                AND t1.invest_time &gt;= #{beginBespeakTime}
+            </if>
+            <if test="endBespeakTime != null and endBespeakTime != '' ">
+                AND t1.invest_time &lt;= #{endBespeakTime}
+            </if>
+             and  t1.status='2'
+		</where>  
+    </select>
+</mapper>

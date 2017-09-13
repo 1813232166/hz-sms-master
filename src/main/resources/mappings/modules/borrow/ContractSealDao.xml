@@ -1,0 +1,850 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.borrow.dao.ContractSealDao">
+    
+	<sql id="contractSealColumns">
+		a.contract_type AS "contractType",
+		a.id AS "id",
+		a.user_id AS "userId",
+		a.reference_id AS "referenceId",
+		a.file_name AS "fileName",
+		a.keywords AS "keywords",
+		a.idnum AS "idNum",
+		a.imgtext AS "imgText",
+		a.companytype AS "companyType",
+		a.sealtype AS "sealType",
+		a.status AS "status",
+		a.sealinfo AS "sealInfo",
+		a.pdf_path AS "pdfPath",
+		a.sealed_pdf_path AS "sealedPdfPath",
+		a.create_time AS "createTime",
+		a.update_time AS "updateTime",
+		a.sealed_count AS "sealedCount"
+	</sql>
+	
+	<sql id="contractSealJoins">
+	</sql>
+    
+	<select id="get" resultType="ContractSeal">
+		SELECT 
+			<include refid="contractSealColumns"/>
+		FROM t_contract_seal a
+		<include refid="contractSealJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ContractSeal">
+		SELECT 
+			<include refid="contractSealColumns"/>
+		FROM t_contract_seal a
+		<include refid="contractSealJoins"/>
+		<where>
+			
+			<if test="contractType != null and contractType != ''">
+				AND a.contract_type = #{contractType}
+			</if>
+			<if test="fileName != null and fileName != ''">
+				AND a.file_name = #{fileName}
+			</if>
+			<if test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+				AND a.create_time BETWEEN #{beginCreateTime} AND #{endCreateTime}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ContractSeal">
+		SELECT 
+			<include refid="contractSealColumns"/>
+		FROM t_contract_seal a
+		<include refid="contractSealJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_contract_seal(
+			contract_type,
+			id,
+			user_id,
+			reference_id,
+			file_name,
+			keywords,
+			idnum,
+			imgtext,
+			companytype,
+			sealtype,
+			status,
+			sealinfo,
+			pdf_path,
+			sealed_pdf_path,
+			create_time,
+			update_time,
+			sealed_count
+		) VALUES (
+			#{contractType},
+			#{id},
+			#{userId},
+			#{referenceId},
+			#{fileName},
+			#{keywords},
+			#{idNum},
+			#{imgText},
+			#{companyType},
+			#{sealType},
+			#{status},
+			#{sealInfo},
+			#{pdfPath},
+			#{sealedPdfPath},
+			#{createTime},
+			#{updateTime},
+			#{sealedCount}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_contract_seal SET 	
+			contract_type = #{contractType},
+			user_id = #{userId},
+			reference_id = #{referenceId},
+			file_name = #{fileName},
+			keywords = #{keywords},
+			idnum = #{idNum},
+			imgtext = #{imgText},
+			companytype = #{companyType},
+			sealtype = #{sealType},
+			status = #{status},
+			sealinfo = #{sealInfo},
+			pdf_path = #{pdfPath},
+			sealed_pdf_path = #{sealedPdfPath},
+			create_time = #{createTime},
+			update_time = #{updateTime},
+			sealed_count = #{sealedCount}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_contract_seal
+		WHERE id = #{id}
+	</update>
+	
+	<!--PXCJ 普享标出借协议与服务协议-->
+	<select id="findListPXCJ" resultType="ContractSeal">
+		SELECT
+	tsc.id,
+		CASE
+	WHEN tsc.contract_type = "PXCJ" THEN
+		ti.investCode
+	WHEN tsc.contract_type = "PX_JKXY" THEN
+		"PXJK"
+	WHEN tsc.contract_type = "FYZHXY" THEN
+		"FYZHXY"
+	WHEN tsc.contract_type = "PTZCXY" THEN
+		"PTZCXY"
+	WHEN tsc.contract_type = "CJJHXY" THEN
+		"CJJHXY"
+	ELSE
+		""
+	END AS contractSeal ,
+	 tb.borrowAliasNo AS borrowAliasNo,
+	 tb.borrowAlias AS borrowAlias,
+	 tb.loanNumber AS loanNumber,
+	 tuj.userName AS userName,
+	 tu.userName AS cuserName,
+	CASE
+	WHEN tsc.contract_type = "PXCJ" THEN
+		ti.investAmount
+	WHEN tsc.contract_type = "PXJK" THEN
+		tb.BORROWAMOUNT
+	WHEN tsc.contract_type = "FYZHXY" THEN
+		"FYZHXY"
+	WHEN tsc.contract_type = "PTZCXY" THEN
+		"PTZCXY"
+	WHEN tsc.contract_type = "CJJHXY" THEN
+		"CJJHXY"
+	ELSE
+		""
+	END AS investAmount ,
+	 tb.ANUALRATE AS ANUALRATE,
+	CASE
+	WHEN tsc.contract_type = "PXCJ" THEN
+		tb.DEADLINE
+	WHEN tsc.contract_type = "PXJK" THEN
+		tb.DEADLINE
+	WHEN tsc.contract_type = "FYZHXY" THEN
+		"FYZHXY"
+	WHEN tsc.contract_type = "PTZCXY" THEN
+		"PTZCXY"
+	WHEN tsc.contract_type = "CJJHXY" THEN
+		"CJJHXY"
+	ELSE
+		""
+	END AS DEADLINE ,
+	CASE
+	WHEN tsc.contract_type = "PXCJ" THEN
+		ti.interestAccrualDate
+	WHEN tsc.contract_type = "PXJK" THEN
+		tb.contractSigningTime
+	WHEN tsc.contract_type = "FYZHXY" THEN
+		now()
+	WHEN tsc.contract_type = "PTZCXY" THEN
+		now()
+	WHEN tsc.contract_type = "CJJHXY" THEN
+		now()
+	ELSE
+		NOW()
+	END AS interestAccrualDate ,
+ tsc.contract_type AS contractType
+	FROM
+	<choose>
+	<when test = "contractType == 'PXCJ'">
+		t_contract_seal tsc
+		LEFT JOIN t_invest ti ON tsc.user_id = ti.investor 
+		LEFT  JOIN t_user tu ON ti.investor = tu.id
+		LEFT JOIN t_borrow tb ON ti.borrowId = tb.BORROW_ID
+		INNER JOIN t_user tuj ON tb.USERID = tuj.id
+	</when>
+		<when test = "contractType == 'PXJK'">
+			
+		</when>
+		<otherwise>
+			t_contract_seal tsc
+		LEFT JOIN t_invest ti ON tsc.user_id = ti.investor 
+		LEFT  JOIN t_user tu ON ti.investor = tu.id
+		LEFT JOIN t_borrow tb ON ti.borrowId = tb.BORROW_ID
+		INNER JOIN t_user tuj ON tb.USERID = tuj.id
+		</otherwise>
+	</choose>
+	
+	<where>
+	
+	<if test="contractType != null and contractType != ''">
+		AND contract_type = #{contractType}
+	</if>	
+	<if test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+		AND ti.interestAccrualDate BETWEEN #{beginCreateTime} AND #{endCreateTime}
+	</if>
+	<if test="borrowName != null and borrowName != ''">
+		AND tuj.userName = #{borrowName}
+	</if>	
+	<if test="borrowAliasNo != null and borrowAliasNo != ''">
+		AND tb.borrowAliasNo = #{borrowAliasNo}
+	</if>	
+	<if test="borrowAlias != null and borrowAlias != ''">
+		AND tb.borrowAlias = #{borrowAlias}
+	</if>	
+	<if test="investName != null and investName != ''">
+		AND tu.userName = #{investName}
+	</if>
+	<if test="contractSeal != null and contractSeal != ''">
+		AND ti.investCode = #{contractSeal}
+	</if>	
+	</where>
+	ORDER BY interestAccrualDate desc
+	</select>
+	
+	
+	
+	
+	
+	
+	<!--协议列表查询  -->
+	<select id="findListPXJK" resultType="ContractSeal">
+	<!-- PX_JKXY','XYZXXY -->
+		SELECT
+		tsc.id,
+		tsc.contract_id AS contractSeal,
+		tb.borrowAliasNo AS borrowAliasNo,
+		tb.borrowAlias AS borrowAlias,
+		tb.loanNumber AS loanNumber,
+		tu.userType AS userType,
+		tu.userName AS userName,
+		'---' AS cuserName,
+		tb.BORROWAMOUNT AS investAmount,
+		tb.ANUALRATE AS ANUALRATE,
+		tb.DEADLINE AS DEADLINE,
+		tb.full_borrow_date AS interestAccrualDate,
+		tsc.contract_type AS contractType
+		
+		FROM t_contract_seal tsc
+		INNER JOIN t_borrow tb ON tb.borrow_id = tsc.reference_id
+		INNER JOIN t_user tu ON tu.id = tb.userid
+		<where>
+		1=1
+		<if test="contractType != null and contractType != ''">
+			AND contract_type = #{contractType}
+		</if>
+		<if test="contractType == null and contractType == ''">
+			AND contract_type in('PX_JKXY','XYZXXY')
+		</if>
+		<if
+			test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+			AND tb.full_borrow_date BETWEEN #{beginCreateTime} AND #{endCreateTime}
+		</if>
+		<if test="borrowName != null and borrowName != ''">
+			AND tu.userName like '%${borrowName}%'
+		</if>
+		<if test="borrowAliasNo != null and borrowAliasNo != ''">
+			AND tb.borrowAliasNo like '%${borrowAliasNo}%'
+		</if>
+		<if test="borrowAlias != null and borrowAlias != ''">
+			AND tb.borrowAlias like '%${borrowAlias}%'
+		</if>
+		<if test="investName != null and investName != ''">
+			AND 1=2
+		</if>
+		<if test="contractSeal != null and contractSeal != ''">
+			AND tsc.contract_id = #{contractSeal}
+		</if>
+		and tsc.status='3'
+		and tsc.contract_type in('PX_JKXY','XYZXXY')
+	</where>
+	<!-- HKTXH -->
+		UNION ALL
+		SELECT
+		tsc.id,
+		tsc.contract_id AS contractSeal,
+		tb.borrowAliasNo AS borrowAliasNo,
+		tb.borrowAlias AS borrowAlias,
+		tb.loanNumber AS loanNumber,
+		tu.userType AS userType,
+		tu.userName AS userName,
+		'---' AS cuserName,
+		tb.BORROWAMOUNT AS investAmount,
+		tb.ANUALRATE AS ANUALRATE,
+		tb.DEADLINE AS DEADLINE,
+		tb.full_borrow_date AS interestAccrualDate,
+		tsc.contract_type AS contractType
+		
+		FROM t_contract_seal tsc
+		INNER JOIN t_borrow tb ON tb.loanNumber = tsc.reference_id
+		INNER JOIN t_user tu ON tu.id = tb.userid
+		
+		<where>
+		1=1
+		<if test="contractType != null and contractType != ''">
+			AND contract_type = #{contractType}
+		</if>
+		<if test="contractType == null and contractType == ''">
+			AND contract_type in('HKTXH')
+		</if>
+		<if test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+			AND tb.full_borrow_date BETWEEN #{beginCreateTime} AND #{endCreateTime}
+		</if>
+		<if test="borrowName != null and borrowName != ''">
+			AND tu.userName like '%${borrowName}%'
+		</if>
+		<if test="borrowAliasNo != null and borrowAliasNo != ''">
+			AND tb.borrowAliasNo like '%${borrowAliasNo}%'
+		</if>
+		<if test="borrowAlias != null and borrowAlias != ''">
+			AND tb.borrowAlias like '%${borrowAlias}%'
+		</if>
+		<if test="investName != null and investName != ''">
+			AND 1=2
+		</if>
+		<if test="contractSeal != null and contractSeal != ''">
+			AND tsc.contract_id = #{contractSeal}
+		</if>
+		and tsc.status='3'
+		and tsc.contract_type in('HKTXH')
+	</where>
+	<!-- PX_CJZXXY -->
+		UNION ALL
+		SELECT
+		tsc.id,
+		tsc.contract_id AS contractSeal,
+		tb.borrowAliasNo AS borrowAliasNo,
+		tb.borrowAlias AS borrowAlias,
+		tb.loanNumber AS loanNumber,
+		tu.userType AS userType,
+		'---' AS userName,
+		tu.userName AS cuserName,
+		ti.investAmount AS investAmount,
+		tb.ANUALRATE AS ANUALRATE,
+		tb.DEADLINE AS DEADLINE,
+		tb.full_borrow_date AS interestAccrualDate,
+		tsc.contract_type AS contractType
+		
+		FROM t_contract_seal tsc
+		INNER JOIN t_invest ti ON tsc.reference_id = ti.id
+		INNER JOIN t_borrow tb ON tb.borrow_id = ti.borrowId
+		INNER JOIN t_user tu ON tu.id = ti.investor
+		<where>
+		1=1
+		<if test="contractType != null and contractType != ''">
+			AND contract_type = #{contractType}
+		</if>
+		<if test="contractType == null and contractType == ''">
+			AND contract_type in('PX_CJZXXY')
+		</if>
+		<if test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+			AND tb.full_borrow_date BETWEEN #{beginCreateTime} AND #{endCreateTime}
+		</if>
+		<if test="borrowName != null and borrowName != ''">
+			AND 1=2
+		</if>
+		<if test="borrowAliasNo != null and borrowAliasNo != ''">
+			AND tb.borrowAliasNo like '%${borrowAliasNo}%'
+		</if>
+		<if test="borrowAlias != null and borrowAlias != ''">
+			AND tb.borrowAlias like '%${borrowAlias}%'
+		</if>
+		<if test="investName != null and investName != ''">
+			AND tu.userName like '%${investName}%'
+		</if>
+		<if test="contractSeal != null and contractSeal != ''">
+			AND tsc.contract_id = #{contractSeal}
+		</if>
+		and tsc.status='3'
+		and tsc.contract_type in('PX_CJZXXY')
+	</where>
+	<!-- PTZCXY -->
+		UNION ALL
+		SELECT
+		tsc.id,
+		tsc.contract_id AS contractSeal,
+		'---' AS borrowAliasNo,
+		'---' AS borrowAlias,
+		'---' AS loanNumber,
+		tu.userType AS userType,
+		tu.userName AS userName,
+		tu.userName AS cuserName,
+		'---' AS investAmount,
+		'---' AS ANUALRATE,
+		'---' AS DEADLINE,
+		tsc.update_time AS interestAccrualDate,
+		tsc.contract_type AS contractType
+		
+		FROM t_contract_seal tsc
+		INNER JOIN t_user tu ON tsc.reference_id = tu.id
+		<where>
+		1=1
+		<if test="contractType != null and contractType != ''">
+			AND contract_type = #{contractType}
+		</if>
+		<if test="contractType == null and contractType == ''">
+			AND contract_type in('PTZCXY')
+		</if>
+		<if test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+			AND tsc.update_time BETWEEN #{beginCreateTime} AND #{endCreateTime}
+		</if>
+		<if test="borrowName != null and borrowName != ''">
+			AND tu.userName like '%${borrowName}%' and userType='2'
+		</if>
+		<if test="borrowAliasNo != null and borrowAliasNo != ''">
+			AND 1=2
+		</if>
+		<if test="borrowAlias != null and borrowAlias != ''">
+			AND 1=2
+		</if>
+		<if test="investName != null and investName != ''">
+			AND tu.userName like '%${investName}%' and userType='1'
+		</if>
+		<if test="contractSeal != null and contractSeal != ''">
+			AND tsc.contract_id = #{contractSeal}
+		</if>
+		and tsc.status='3'
+		and tsc.contract_type in('PTZCXY')
+	</where>
+	ORDER BY interestAccrualDate desc,contractSeal,contractType
+	
+		
+	
+	
+	
+	
+	
+	</select>
+	<!--contractType 无类型普享标借款协议  -->
+	<select id="findPageNoType" resultType="ContractSeal">
+		<choose>
+			<when test = "contractType == 'PX_CJXY'">
+				SELECT
+				    tcs.id as contractSeal,
+					tb.borrowAliasNo as borrowAliasNo,
+					tb.borrowAlias as borrowAlias,
+					tb.loanNumber as loanNumber,
+					tuj.userName as userName,
+					tu.userName as cuserName,
+					ti.investAmount as investAmount,
+					tb.ANUALRATE as ANUALRATE,
+					tb.DEADLINE as DEADLINE,
+					ti.interestAccrualDate as interestAccrualDate,
+					tcs.contract_type AS contractType
+				FROM
+					t_contract_seal tcs
+				LEFT JOIN t_invest ti ON tcs.user_id = ti.investor
+				LEFT JOIN t_user tu ON tu.id = ti.investor
+				LEFT JOIN t_borrow tb ON tb.BORROW_ID = ti.borrowId
+				LEFT JOIN t_user tuj ON tuj.id = tb.USERID
+				<where>
+					tcs.contract_type = "PX_CJXY"
+					<if test="contractType != null and contractType != ''">
+						AND contract_type = #{contractType}
+					</if>	
+					<if test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+						AND ti.interestAccrualDate BETWEEN #{beginCreateTime} AND #{endCreateTime}
+					</if>
+					<if test="borrowName != null and borrowName != ''">
+						AND tuj.userName = #{borrowName}
+					</if>	
+					<if test="borrowAliasNo != null and borrowAliasNo != ''">
+						AND tb.borrowAliasNo = #{borrowAliasNo}
+					</if>	
+					<if test="borrowAlias != null and borrowAlias != ''">
+						AND tb.borrowAlias = #{borrowAlias}
+					</if>	
+					<if test="investName != null and investName != ''">
+						AND tu.userName = #{investName}
+					</if>
+					<if test="contractSeal != null and contractSeal != ''">
+						AND ti.investCode = #{contractSeal}
+					</if>	
+				</where>
+					ORDER BY interestAccrualDate desc
+			</when>
+			<when test = "contractType == 'PX_JKXY'">
+				SELECT    
+					tcs.id as contractSeal,
+					tb.borrowAliasNo as borrowAliasNo,
+					tb.borrowAlias as borrowAlias,
+					tb.loanNumber as loanNumber,
+					tuj.userName as userName,
+					tu.userName as cuserName,
+					tb.BORROWAMOUNT as investAmount,
+					tb.ANUALRATE as ANUALRATE,
+					tb.DEADLINE as DEADLINE,
+					tb.contractSigningTime as interestAccrualDate,
+					tcs.contract_type AS contractType
+					from t_borrow tb 
+					LEFT JOIN t_contract_seal tcs ON tb.USERID = tcs.user_id
+					LEFT JOIN t_user tuj ON tb.USERID = tuj.id
+					LEFT JOIN t_invest ti ON tb.BORROW_ID = ti.borrowId
+					LEFT JOIN t_user tu ON tu.id = ti.investor
+					where tcs.contract_type = 'PX_JKXY'
+					<if test="contractType != null and contractType != ''">
+						AND contract_type = #{contractType}
+					</if>	
+					<if test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+						AND tb.contractSigningTime BETWEEN #{beginCreateTime} AND #{endCreateTime}
+					</if>
+					<if test="borrowName != null and borrowName != ''">
+						AND tuj.userName = #{borrowName}
+					</if>	
+					<if test="borrowAliasNo != null and borrowAliasNo != ''">
+						AND tb.borrowAliasNo = #{borrowAliasNo}
+					</if>	
+					<if test="borrowAlias != null and borrowAlias != ''">
+						AND tb.borrowAlias = #{borrowAlias}
+					</if>	
+					<if test="investName != null and investName != ''">
+						AND tu.userName = #{investName}
+					</if>
+					<if test="contractSeal != null and contractSeal != ''">
+						AND ti.investCode = #{contractSeal}
+					</if>	
+					ORDER BY interestAccrualDate desc
+									
+			</when>
+			<otherwise>
+				SELECT
+				  tcs.id as contractSeal,
+					tb.borrowAliasNo as borrowAliasNo,
+					tb.borrowAlias as borrowAlias,
+					tb.loanNumber as loanNumber,
+					tuj.userName as userName,
+					tu.userName as cuserName,
+					ti.investAmount as investAmount,
+					tb.ANUALRATE as ANUALRATE,
+					tb.DEADLINE as DEADLINE,
+					ti.interestAccrualDate as interestAccrualDate,
+					tcs.contract_type AS contractType
+				FROM
+					t_contract_seal tcs
+				LEFT JOIN t_invest ti ON tcs.user_id = ti.investor
+				LEFT JOIN t_user tu ON tu.id = ti.investor
+				LEFT JOIN t_borrow tb ON tb.BORROW_ID = ti.borrowId
+				LEFT JOIN t_user tuj ON tuj.id = tb.USERID
+				where tcs.contract_type = "PX_CJXY"
+					<if test="contractType != null and contractType != ''">
+						AND contract_type = #{contractType}
+					</if>	
+					<if test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+						AND ti.interestAccrualDate BETWEEN #{beginCreateTime} AND #{endCreateTime}
+					</if>
+					<if test="borrowName != null and borrowName != ''">
+						AND tuj.userName = #{borrowName}
+					</if>	
+					<if test="borrowAliasNo != null and borrowAliasNo != ''">
+						AND tb.borrowAliasNo = #{borrowAliasNo}
+					</if>	
+					<if test="borrowAlias != null and borrowAlias != ''">
+						AND tb.borrowAlias = #{borrowAlias}
+					</if>	
+					<if test="investName != null and investName != ''">
+						AND tu.userName = #{investName}
+					</if>
+					<if test="contractSeal != null and contractSeal != ''">
+						AND ti.investCode = #{contractSeal}
+					</if>	
+					union all
+					SELECT    
+					tcs.id as contractSeal,
+					tb.borrowAliasNo as borrowAliasNo,
+					tb.borrowAlias as borrowAlias,
+					tb.loanNumber as loanNumber,
+					tuj.userName as userName,
+					tu.userName as cuserName,
+					tb.BORROWAMOUNT as investAmount,
+					tb.ANUALRATE as ANUALRATE,
+					tb.DEADLINE as DEADLINE,
+					tb.contractSigningTime as interestAccrualDate,
+					tcs.contract_type AS contractType
+					from t_borrow tb 
+					LEFT JOIN t_contract_seal tcs ON tb.USERID = tcs.user_id
+					LEFT JOIN t_user tuj ON tb.USERID = tuj.id
+					LEFT JOIN t_invest ti ON tb.BORROW_ID = ti.borrowId
+					LEFT JOIN t_user tu ON tu.id = ti.investor
+					where tcs.contract_type = 'PX_JKXY'
+					<if test="contractType != null and contractType != ''">
+						AND contract_type = #{contractType}
+					</if>	
+					<if test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+						AND tb.contractSigningTime BETWEEN #{beginCreateTime} AND #{endCreateTime}
+					</if>
+					<if test="borrowName != null and borrowName != ''">
+						AND tuj.userName = #{borrowName}
+					</if>	
+					<if test="borrowAliasNo != null and borrowAliasNo != ''">
+						AND tb.borrowAliasNo = #{borrowAliasNo}
+					</if>	
+					<if test="borrowAlias != null and borrowAlias != ''">
+						AND tb.borrowAlias = #{borrowAlias}
+					</if>	
+					<if test="investName != null and investName != ''">
+						AND tu.userName = #{investName}
+					</if>
+					<if test="contractSeal != null and contractSeal != ''">
+						AND ti.investCode = #{contractSeal}
+					</if>	
+					ORDER BY interestAccrualDate desc
+			</otherwise>
+		</choose>
+	</select>
+	<!--contractType PXJK普享标借款协议  -->
+	<select id="selectContractSealExcel" resultType="ContractSeal">
+		SELECT
+		tsc.id,
+		tsc.contract_id AS contractSeal,
+		tb.borrowAliasNo AS borrowAliasNo,
+		tb.borrowAlias AS borrowAlias,
+		tb.loanNumber AS loanNumber,
+		tu.userName AS userName,
+		'---' AS cuserName,
+		tb.BORROWAMOUNT AS investAmount,
+		tb.ANUALRATE AS ANUALRATE,
+		tb.DEADLINE AS DEADLINE,
+		tb.full_borrow_date AS interestAccrualDate,
+		tsc.contract_type AS contractType
+		
+		FROM t_contract_seal tsc
+		LEFT JOIN t_invest ti ON tsc.reference_id = ti.id
+		LEFT JOIN t_borrow tb ON tb.borrow_id = tsc.reference_id
+		LEFT JOIN t_user tu ON tu.id = tb.userid
+		
+		<where>
+		<if test="contractType != null and contractType != ''">
+			AND contract_type = #{contractType}
+		</if>
+		<if test="contractType == null and contractType == ''">
+			AND contract_type in('PX_JKXY','XYZXXY')
+		</if>
+		<if
+			test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+			AND ti.interestAccrualDate BETWEEN #{beginCreateTime} AND #{endCreateTime}
+		</if>
+		<if test="borrowName != null and borrowName != ''">
+			AND tu.userName = #{borrowName}
+		</if>
+		<if test="borrowAliasNo != null and borrowAliasNo != ''">
+			AND tb.borrowAliasNo = #{borrowAliasNo}
+		</if>
+		<if test="borrowAlias != null and borrowAlias != ''">
+			AND tb.borrowAlias = #{borrowAlias}
+		</if>
+		<if test="investName != null and investName != ''">
+			AND tu.userName = #{investName}
+		</if>
+		<if test="contractSeal != null and contractSeal != ''">
+			AND tsc.contract_id = #{contractSeal}
+		</if>
+		and tsc.status='3'
+		and tsc.contract_type in('PX_JKXY','XYZXXY')
+	</where>
+UNION ALL
+SELECT
+tsc.id,
+tsc.contract_id AS contractSeal,
+tb.borrowAliasNo AS borrowAliasNo,
+tb.borrowAlias AS borrowAlias,
+tb.loanNumber AS loanNumber,
+tu.userName AS userName,
+'---' AS cuserName,
+tb.BORROWAMOUNT AS investAmount,
+tb.ANUALRATE AS ANUALRATE,
+tb.DEADLINE AS DEADLINE,
+tb.full_borrow_date AS interestAccrualDate,
+tsc.contract_type AS contractType
+
+FROM t_contract_seal tsc
+LEFT JOIN t_invest ti ON tsc.reference_id = ti.id
+LEFT JOIN t_borrow tb ON tb.loanNumber = tsc.reference_id
+LEFT JOIN t_user tu ON tu.id = tb.userid
+
+<where>
+		<if test="contractType != null and contractType != ''">
+			AND contract_type = #{contractType}
+		</if>
+		<if test="contractType == null and contractType == ''">
+			AND contract_type in('HKTXH')
+		</if>
+		<if
+			test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+			AND ti.interestAccrualDate BETWEEN #{beginCreateTime} AND #{endCreateTime}
+		</if>
+		<if test="borrowName != null and borrowName != ''">
+			AND tu.userName = #{borrowName}
+		</if>
+		<if test="borrowAliasNo != null and borrowAliasNo != ''">
+			AND tb.borrowAliasNo = #{borrowAliasNo}
+		</if>
+		<if test="borrowAlias != null and borrowAlias != ''">
+			AND tb.borrowAlias = #{borrowAlias}
+		</if>
+		<if test="investName != null and investName != ''">
+			AND tu.userName = #{investName}
+		</if>
+		<if test="contractSeal != null and contractSeal != ''">
+			AND tsc.contract_id = #{contractSeal}
+		</if>
+		and tsc.status='3'
+		and tsc.contract_type in('HKTXH')
+	</where>
+UNION ALL
+SELECT
+tsc.id,
+tsc.contract_id AS contractSeal,
+tb.borrowAliasNo AS borrowAliasNo,
+tb.borrowAlias AS borrowAlias,
+tb.loanNumber AS loanNumber,
+'---' AS userName,
+tu.userName AS cuserName,
+ti.investAmount AS investAmount,
+tb.ANUALRATE AS ANUALRATE,
+tb.DEADLINE AS DEADLINE,
+tb.full_borrow_date AS interestAccrualDate,
+tsc.contract_type AS contractType
+
+FROM t_contract_seal tsc
+LEFT JOIN t_invest ti ON tsc.reference_id = ti.id
+LEFT JOIN t_borrow tb ON tb.borrow_id = ti.borrowId
+LEFT JOIN t_user tu ON tu.id = tb.userid
+	<where>
+		<if test="contractType != null and contractType != ''">
+			AND contract_type = #{contractType}
+		</if>
+		<if test="contractType == null and contractType == ''">
+			AND contract_type in('PX_CJZXXY')
+		</if>
+		<if
+			test="beginCreateTime != null and endCreateTime != null and beginCreateTime != '' and endCreateTime != ''">
+			AND ti.interestAccrualDate BETWEEN #{beginCreateTime} AND #{endCreateTime}
+		</if>
+		<if test="borrowName != null and borrowName != ''">
+			AND tu.userName = #{borrowName}
+		</if>
+		<if test="borrowAliasNo != null and borrowAliasNo != ''">
+			AND tb.borrowAliasNo = #{borrowAliasNo}
+		</if>
+		<if test="borrowAlias != null and borrowAlias != ''">
+			AND tb.borrowAlias = #{borrowAlias}
+		</if>
+		<if test="investName != null and investName != ''">
+			AND tu.userName = #{investName}
+		</if>
+		<if test="contractSeal != null and contractSeal != ''">
+			AND tsc.contract_id = #{contractSeal}
+		</if>
+		and tsc.status='3'
+		and tsc.contract_type in('PX_CJZXXY')
+	</where>
+	ORDER BY interestAccrualDate desc,contractSeal,contractType
+	
+	</select>
+	
+	<select id="queryContractSealStatus" parameterType="String" resultType="int">
+	SELECT 	
+	(SELECT COUNT(*) FROM t_invest v1 WHERE v1.borrowId=#{borrowId} AND v1.flag="1")*2+2
+	=
+	(SELECT COUNT(*) AS c3 FROM t_contract_seal s1 WHERE s1.reference_id IN(SELECT v2.id FROM t_invest v2 WHERE v2.borrowId=#{borrowId} AND v2.flag="1") AND s1.STATUS="3")
+	+(SELECT COUNT(*) AS c4 FROM t_contract_seal s2 WHERE s2.reference_id=#{borrowId} AND s2.STATUS="3")
+	AS result
+	
+	</select>
+	
+	<!--放款确认后更改状态7 还款中 -->
+	<update id="updateBorrowState" parameterType="String">
+	        UPDATE t_borrow b SET b.BORROWSTATUS='11' WHERE b.BORROW_ID=#{borrowId}
+	</update>
+	
+	<!--放款确认后更改 t_borrow_billplan 中的repay_time  -->
+	<update id="updateBorrowBillTime" parameterType="String">
+	       UPDATE t_borrow_billplan tb 
+	       SET tb.repay_time=SYSDATE() 
+	       WHERE tb.apply_id = (
+				SELECT b.loanNumber 
+				FROM t_borrow b 
+				WHERE b.BORROW_ID=#{borrowId})
+	</update>
+	<!-- 取消标的  flag为1  成功 -->
+	<select id="cancelBiao" resultType="java.util.Map" parameterType="String">
+	    SELECT id,investAmount FROM t_invest WHERE flag='1' AND borrowId=#{borrowId}
+	</select>
+	
+	<!--撤标后 更改 状体为9  流标  -->
+	<update id="updateStatus" parameterType="String">
+	    UPDATE t_borrow b SET b.BORROWSTATUS='9' WHERE b.BORROW_ID=#{borrowId}
+	</update>
+	<!-- 放款成功后 更改为0  未提现  -->
+	<update id="updateBorrowMakeloan" parameterType="String">
+	    UPDATE t_borrow b SET b.make_loan='0' WHERE b.BORROW_ID=#{borrowId}
+	</update>
+	
+	<insert id="recordContract" parameterType="String">
+		INSERT INTO t_contract_seal 
+		SET 
+		reference_id=#{0},
+		contract_type=#{1},
+		STATUS="1"
+	</insert>
+	
+	<select id="isExistsRecord" parameterType="String" resultType="int">
+		SELECT count(*) FROM `t_contract_seal` WHERE reference_id=#{0} and contract_type=#{1}
+	</select>
+	
+</mapper>

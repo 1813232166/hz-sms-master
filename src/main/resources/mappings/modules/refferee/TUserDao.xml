@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.refferee.dao.TUserDao">
+    
+	<sql id="tUserColumns">
+		a.id AS "id",
+		a.depid AS "depid",
+		a.username AS "username",
+		a.realname AS "realname",
+		a.sex AS "sex",
+		a.birthday AS "birthday",
+		a.regdate AS "regdate",
+		a.mobile AS "mobile",
+		a.email AS "email",
+		a.logincount AS "logincount",
+		a.refferee AS "refferee",
+		a.lastip AS "lastip",
+		a.lastdate AS "lastdate",
+		a.headimg AS "headimg",
+		a.lockstatus AS "lockstatus",
+		a.locktime AS "locktime",
+		a.cashstatus AS "cashstatus",
+		a.loginerrorcount AS "loginerrorcount",
+		a.password AS "password",
+		a.isfuyou AS "isfuyou",
+		a.isloginlimit AS "isloginlimit",
+		a.usertype AS "usertype",
+		a.regsource AS "regsource",
+		a.reffertype AS "reffertype",
+		a.invitecode AS "invitecode",
+		a.customerid AS "customerid",
+		a.investcount AS "investcount",
+		a.staffid AS "staffid",
+		a.departmentcode AS "departmentcode",
+		a.departmentinfo AS "departmentinfo",
+		a.smsmobile AS "smsmobile",
+		a.ACNO as "ACNO"
+	</sql>
+	
+	<sql id="tUserJoins">
+	</sql>
+    
+	<select id="get" resultType="TUser">
+		SELECT 
+			<include refid="tUserColumns"/>
+		FROM t_user a
+		<include refid="tUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TUser">
+		SELECT 
+			<include refid="tUserColumns"/>,b.realName as tRealname
+		FROM t_user a INNER JOIN t_user b on a.refferee = b.mobile
+		<include refid="tUserJoins"/>
+		<where>
+			<if test="tRealname != null and tRealname != ''">
+				AND b.realname = #{tRealname}
+			</if>
+			<if test="realname != null and realname != ''">
+				AND a.realname = #{realname}
+			</if>
+			<if test="beginRegdate != null and endRegdate != null and beginRegdate != '' and endRegdate != ''">
+				AND a.regdate BETWEEN #{beginRegdate} AND #{endRegdate}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="refferee != null and refferee != ''">
+				AND a.refferee = #{refferee}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TUser">
+		SELECT 
+			<include refid="tUserColumns"/>
+		FROM t_user a
+		<include refid="tUserJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_user(
+			id,
+			depid,
+			username,
+			realname,
+			sex,
+			birthday,
+			regdate,
+			mobile,
+			email,
+			logincount,
+			refferee,
+			lastip,
+			lastdate,
+			headimg,
+			lockstatus,
+			locktime,
+			cashstatus,
+			loginerrorcount,
+			password,
+			isfuyou,
+			isloginlimit,
+			usertype,
+			regsource,
+			reffertype,
+			invitecode,
+			customerid,
+			investcount,
+			staffid,
+			departmentcode,
+			departmentinfo,
+			smsmobile
+		) VALUES (
+			#{id},
+			#{depid},
+			#{username},
+			#{realname},
+			#{sex},
+			#{birthday},
+			#{regdate},
+			#{mobile},
+			#{email},
+			#{logincount},
+			#{refferee},
+			#{lastip},
+			#{lastdate},
+			#{headimg},
+			#{lockstatus},
+			#{locktime},
+			#{cashstatus},
+			#{loginerrorcount},
+			#{password},
+			#{isfuyou},
+			#{isloginlimit},
+			#{usertype},
+			#{regsource},
+			#{reffertype},
+			#{invitecode},
+			#{customerid},
+			#{investcount},
+			#{staffid},
+			#{departmentcode},
+			#{departmentinfo},
+			#{smsmobile}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_user SET 	
+			depid = #{depid},
+			username = #{username},
+			realname = #{realname},
+			sex = #{sex},
+			birthday = #{birthday},
+			regdate = #{regdate},
+			mobile = #{mobile},
+			email = #{email},
+			logincount = #{logincount},
+			refferee = #{refferee},
+			lastip = #{lastip},
+			lastdate = #{lastdate},
+			headimg = #{headimg},
+			lockstatus = #{lockstatus},
+			locktime = #{locktime},
+			cashstatus = #{cashstatus},
+			loginerrorcount = #{loginerrorcount},
+			password = #{password},
+			isfuyou = #{isfuyou},
+			isloginlimit = #{isloginlimit},
+			usertype = #{usertype},
+			regsource = #{regsource},
+			reffertype = #{reffertype},
+			invitecode = #{invitecode},
+			customerid = #{customerid},
+			investcount = #{investcount},
+			staffid = #{staffid},
+			departmentcode = #{departmentcode},
+			departmentinfo = #{departmentinfo},
+			smsmobile = #{smsmobile}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_user
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

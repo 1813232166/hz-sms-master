@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.rebate.dao.ExtendUserDao">
+	<insert id="insert">
+        INSERT INTO t_yx_rel_user (
+			id,
+			user_id,
+			user_mobile,
+			user_name,
+			sum_a_invite_invest_amount,
+			sum_b_invite_invest_amount,
+			sum_invest_amount,
+			sum_rebate_amount,
+			sum_complete_rebate_amount
+		)
+		VALUES
+			(
+		#{id},#{userId},#{userMobile},#{userName},0.00,0.00,0.00,0.00,0.00		
+		)
+    </insert>
+    <!-- 统计后更新 --><!-- 
+	<update id="update">
+		update t_yx_rel_user 
+		set reffer_user_count=#{refferUserCount},
+			reffer_idcard_count=#{refferIdcardCount},
+			reffer_invest_count=#{refferInvestCount},
+			reffer_level=#{refferLevel},
+			sync_flag='1',
+			update_date=#{updateDate}
+		where id=#{id} and sync_flag='0'
+	</update> -->
+	<!-- 统计时查询语句 -->	
+	<select id="queryFlag0User" resultType="ExtendUser">
+	    SELECT
+			tu.id,
+			tu.user_id as userId,
+			tu.user_mobile as userMobile,
+			tu.user_name as userName,
+			tu.sum_invest_amount as sumInvestAmount,
+			tu.sum_a_invite_invest_amount as sumAInviteInvestAmount,
+			tu.sum_b_invite_invest_amount as sumBInviteInvestAmount,
+			IF(t.staffId is null,'1','2') as refferType
+		FROM
+			t_yx_rel_user tu
+		INNER JOIN t_user t ON t.id = tu.user_id where tu.sync_flag='0' limit 1,100
+	</select>
+	<!-- 被邀请实名人数 -->
+	<!-- 
+	<select id="queryRefferAutonymCount" resultType="int">
+	    select count(1) from t_user t 
+	    where (t.refferee=#{userMobile} or t.refferee=#{staffId}) 
+			and (t.isFuYou='1')
+	</select> -->
+	<!-- 邀请人出借数量 --><!-- 
+	<select id="queryRefferInvestCount" resultType="java.lang.Integer">
+	    select count(1) from t_user t 
+	    where (t.refferee=#{userMobile} or t.refferee=#{staffId}) 
+	    and EXISTS (select tu.id from t_yx_rel_user tu where tu.user_id=t.id and tu.sum_invest_amount > 0)
+	</select> -->
+	
+	<!-- 邀请人注册数量 --><!-- 
+	<select id="queryRefferRegisterCount" resultType="java.lang.Integer">
+	    select count(1) from t_user t 
+	    where t.refferee=#{userMobile} or t.refferee=#{staffId}
+	</select> -->
+	<!-- 每次查询100条数据进行同步 -->
+	<!-- 
+	<select id="queryNoUserList" resultType="ExtendUser">
+	    SELECT
+			tu.id AS userId,
+			tu.mobile AS userMobile,
+			tu.userName AS userName
+		FROM
+			t_user tu
+		WHERE
+			NOT EXISTS (
+				SELECT
+					tyu.user_id
+				FROM
+					t_yx_rel_user tyu
+				WHERE
+					tyu.user_id = tu.id
+			)
+		LIMIT 1,100
+	</select>
+	 -->
+	<!-- 同步前，先更新数据状态为0 -->
+	<!-- 暂时注释
+	<update id="updateSyncFlagBeforeJob">
+		UPDATE t_yx_rel_user SET sync_flag = '0'
+	</update>
+	 -->
+	<!-- 更新个人出借金额，邀请金额，返佣金额 -->
+	<update id="updateRebateSumInvestAmount"  parameterType="ExtendUser">
+ 		update t_yx_rel_user 
+		 <trim prefix="set" suffixOverrides=",">
+		  <if test="sumAInviteInvestAmount!=null">sum_a_invite_invest_amount=#{sumAInviteInvestAmount},</if>
+		  <if test="sumBInviteInvestAmount!=null">sum_b_invite_invest_amount=#{sumBInviteInvestAmount},</if>
+		  <if test="sumInvestAmount!=null">sum_invest_amount=#{sumInvestAmount},</if>
+		  <if test="sumRebateAmount!=null">sum_rebate_amount=#{sumRebateAmount},</if>
+		 </trim>
+		 WHERE user_mobile=#{userMobile}
+	</update>
+	<!-- 根据手机号，或者员工码查询出一条记录 -->
+	<select id="get" resultType="ExtendUser" parameterType="ExtendUser">
+	    SELECT
+			tu.id,
+			t.id AS userId,
+			t.userName AS userName,
+			t.mobile AS userMobile,
+			t.refferee,
+		    t.staffId,
+		  IF (t.staffId IS NULL, '1', '2') AS refferType,
+		  IFNULL(tu.sum_rebate_amount,0) as sumRebateAmount,
+		  IFNULL(tu.sum_a_invite_invest_amount,0) as sumAInviteInvestAmount,
+			IFNULL(tu.sum_b_invite_invest_amount,0) as sumBInviteInvestAmount,
+			IFNULL(tu.sum_complete_rebate_amount,0) as sumCompleteRebateAmount,
+			IFNULL(tu.sum_invest_amount,0) as sumInvestAmount
+		FROM
+			t_user t
+		LEFT JOIN t_yx_rel_user tu ON t.id = tu.user_id 
+		
+		<where>
+		    <if test="userMobile != null and userMobile != '' ">
+		        and t.mobile=#{userMobile}
+		    </if>
+		    <if test="staffId != null and staffId != ''">
+		        and t.staffId=#{staffId}
+		    </if>
+	    </where>
+	</select>
+	<!-- 统计人员的信息 -->
+	<select id="findInviteUserList" resultType="ExtendUser" parameterType="ExtendUser">
+	    SELECT 
+		    u.mobile as userMobile,
+			u.realName  as userName,
+		    u.staffId as staffId ,
+			ifnull(yu.sum_rebate_amount,0) as sumRebateAmount,
+		    ifnull(yu.sum_complete_rebate_amount,0) as sumCompleteRebateAmount,
+			ifnull(yu.sum_a_invite_invest_amount,0) as sumAInviteInvestAmount,
+		    ifnull(yu.sum_b_invite_invest_amount,0) as sumBInviteInvestAmount,
+		    ifnull(yu.sum_invest_amount,0) as sumInvestAmount,
+		(
+			SELECT
+				count(1)
+			FROM
+				t_user u1
+			WHERE
+				u1.refferee = u.mobile
+			OR u1.refferee = u.staffId
+		) AS refferUserCount,
+		(
+			SELECT
+				count(1)
+			FROM
+				t_user u2
+			WHERE
+				(
+					u2.refferee = u.mobile
+					OR u2.refferee = u.staffId
+				)
+			AND (
+				u2.isFuYou = '1'
+				OR u2.isFuYouFlag = '1'
+			)
+		) AS refferIdcardCount,
+		(
+			SELECT
+				count(1)
+			FROM
+				t_user u3
+			INNER JOIN t_yx_rel_user yu1 ON u3.id = yu1.user_id
+			WHERE
+				yu1.sum_invest_amount > 0
+			AND (
+				u3.refferee = u.mobile
+				OR u3.refferee = u.staffId
+			)
+		) as refferInvestCount
+		FROM
+			t_user u
+		LEFT JOIN t_yx_rel_user yu ON u.id = yu.user_id
+		<where>
+		    <if test="userMobile != null and userMobile != '' ">
+		        and u.mobile like "%${userMobile}%"
+		    </if>
+		    <if test="userName != null and userName != ''">
+		        and u.realName like "%${userName}%"
+		    </if>
+		    <!-- 1:推荐人，2：理财师 -->
+	        <if test='staffId == "1"'>
+	            
+	           and (u.staffId is null or u.staffId = '')
+	        </if>
+	        <if test='staffId == "2"'>
+	           and u.staffId is not null and u.staffId != ''
+	        </if>
+	        <!-- 1：普通，2：银牌，3：金牌  如果选择了等级，一定先选择类型-->
+	        <if test='refferLevel == "1"'>
+				<!-- 1:推荐人，2：理财师 -->
+				<if test='staffId == "1"'>
+					<if test="rakebackConfigMap.sliveramount1 != null">
+						and
+						ifnull(yu.sum_invest_amount,0)+ifnull(yu.sum_a_invite_invest_amount,0) 
+							              	     <![CDATA[<]]>
+						#{rakebackConfigMap.sliveramount1}
+					</if>
+				</if>
+				<if test='staffId == "2"'>
+					<if test="rakebackConfigMap.sliveramount2 != null">
+						and
+						ifnull(yu.sum_invest_amount,0)+ifnull(yu.sum_a_invite_invest_amount,0)+ifnull(yu.sum_b_invite_invest_amount,0) 
+							              	 <![CDATA[<]]>
+						#{rakebackConfigMap.sliveramount2}
+					</if>
+				</if>
+			</if>
+	            <if test='refferLevel == "2"'>
+	              	<!-- 1:推荐人，2：理财师 -->
+	                <if test='staffId == "1"'>
+	                    <if test="rakebackConfigMap.sliveramount1 != null">
+	                        and ifnull(yu.sum_invest_amount,0)+ifnull(yu.sum_a_invite_invest_amount,0) >= #{rakebackConfigMap.sliveramount1}
+	                    </if>
+	                    <if test="rakebackConfigMap.goldamount1 != null">
+	                        and ifnull(yu.sum_invest_amount,0)+ifnull(yu.sum_a_invite_invest_amount,0)
+				              	    <![CDATA[<]]> #{rakebackConfigMap.goldamount1}
+	                    </if>
+	                </if>
+	                <if test='staffId == "2"'>
+	                    <if test="rakebackConfigMap.sliveramount2 != null">
+	                        and ifnull(yu.sum_invest_amount,0)+ifnull(yu.sum_a_invite_invest_amount,0)+ifnull(yu.sum_b_invite_invest_amount,0) >= #{rakebackConfigMap.sliveramount2}
+	                    </if>
+	                    <if test="rakebackConfigMap.goldamount2 != null">
+	                        and ifnull(yu.sum_invest_amount,0)+ifnull(yu.sum_a_invite_invest_amount,0)+ifnull(yu.sum_b_invite_invest_amount,0) 
+	                        <![CDATA[<]]> #{rakebackConfigMap.goldamount2}
+	                    </if>
+	                </if>
+	            </if>
+	            <if test='refferLevel == "3"'>
+	              	<!-- 1:推荐人，2：理财师 -->
+	                <if test='staffId == "1" and rakebackConfigMap.goldamount1 != null'>
+				        and ifnull(yu.sum_invest_amount,0)+ifnull(yu.sum_a_invite_invest_amount,0) >= #{rakebackConfigMap.goldamount1}
+	                </if>
+	                <if test='staffId == "2" and rakebackConfigMap.goldamount2 != null '>
+				        and ifnull(yu.sum_invest_amount,0)+ifnull(yu.sum_a_invite_invest_amount,0)+ifnull(yu.sum_b_invite_invest_amount,0) >= #{rakebackConfigMap.goldamount2}
+	                </if>
+	            </if>
+	    </where>
+		order by yu.sum_rebate_amount desc,u.regDate desc 
+		<if test='exportFlag == "1"'>
+		    limit 20000
+		</if>
+		
+	</select>
+</mapper>

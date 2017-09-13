@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.TradeMoneyDao">
+    <!--充值  -->
+    <select id="findRechangeList"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.RechargeVo">
+        SELECT
+             concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4)) AS 'userMobile',
+            tfd.create_date AS 'beginTime',
+            tfd.amount AS 'amount',
+            tfd.request_no AS 'tradeNo',
+            tfd.commission AS 'fee',
+            '' AS 'feesBearer'
+        FROM
+            t_fd_payment AS tfd,t_user AS tu
+            <where>
+                tfd.user_Id = tu.id AND tfd.type in (1,2,3,4)  AND tfd.`status`='S'
+                <if test="null !=userMobile  and userMobile != ''">
+                    AND tu.mobile like '%${userMobile}%'
+                </if>
+                <if test="null !=tradeNo  and tradeNo != ''">
+                    AND tfd.request_no like '%${tradeNo}%'
+                </if>
+                <if test="null !=beginTime  and beginTime != ''">
+                      AND tfd.create_date >= #{beginTime}
+                </if>
+                <if test="null !=overTime and overTime != ''">
+                      AND  #{overTime} >= tfd.create_date
+                </if>
+            </where>
+            ORDER BY tfd.create_date DESC
+    </select>
+
+    <!--提现   根据交易类型 type  判断是充值还是体现 -->
+    <select id="findWithdrawList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.WithdrawVo">
+        SELECT
+         concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4))  AS 'userMobile',
+            tfd.create_date AS 'beginTime',
+            tfd.amount AS 'amount',
+            tfd.commission AS 'fee',
+            '' AS 'feesBearer',
+            tfd.request_no AS 'tradeNo'
+        FROM
+            t_fd_payment AS tfd,t_user AS tu
+            <where>
+                tu.id = tfd.user_id AND tfd.type =5  AND tfd.`status`='S'
+                <if test="null !=userMobile  and userMobile != ''">
+                    AND tu.mobile like '%${userMobile}%'
+                </if>
+                <if test="null !=beginTime  and beginTime != ''">
+                     AND tfd.create_date >= #{beginTime}
+                </if>
+                <if test="null !=overTime  and overTime !=''">
+                     AND  #{overTime} >= tfd.create_date
+                </if>
+                <if test="null !=tradeNo  and tradeNo != ''">
+                    AND tfd.request_no like '%${tradeNo}%'
+                </if>
+            </where>
+            ORDER BY tfd.create_date DESC
+
+    </select>
+    <!--投标列表  tu.mobile 为出借人手机号  t.mobile 为借款人手机号-->
+    <select id="findTenderList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.TenderVo">
+    SELECT  concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4))
+       AS 'userMobile',
+      tfd.create_date AS 'tenderTime',
+      tfd.update_date AS 'tenderEndTime',
+      tfd.amount AS 'tenderAmot',
+      tfd.project_no AS 'loanNumber',
+      tfd.request_no AS 'tradeNo'
+    FROM
+    t_fd_payment AS tfd,t_user AS tu
+        <where>  
+                tu.id = tfd.user_id AND tfd.type='6' AND tfd.`status`='S'
+                <if test="null !=userMobile  and userMobile != ''">
+                    AND tu.userName LIKE trim('%${userMobile}%')
+                </if>
+                <if test="null !=beginTime  and beginTime != ''">
+                      AND tfd.create_date &gt;= #{beginTime}
+                </if>
+                <if test="null!= overTime and overTime !=''">
+                      AND tfd.create_date &lt;= #{overTime}  
+                </if>
+                <if test="null !=tradeNo  and tradeNo != ''">
+                    AND tfd.request_no LIKE TRIM('%${tradeNo}%')
+                </if>
+                
+            </where>
+            ORDER BY tfd.create_date DESC
+    </select>
+    <!-- 交易类型[1:网银充值,5:提现,6:出借,7:还款,8:放款,9:代偿【垫付】,10:还代偿款,12:流标,13:收益明细提交,14:回款] -->
+    <sql id="sqlTransactionList">
+        SELECT
+              concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4)) AS userMobile,
+            tfd.`create_date` AS transactionTime,
+            tfd.`amount` AS transactionAmot,
+            tb.`loanNumber` AS loanNumber,
+            IFNULL(tfd.`repayment_time`,'') AS repaymentPeriod,
+            tb.`DEADLINE` AS totalPeriod,
+            tfd.`type` AS repayType,
+            tfd.`request_no` AS tradeNo
+        FROM t_fd_payment tfd
+        LEFT JOIN t_borrow tb ON tfd.`project_no` = tb.`borrowCode`
+        ,t_user  tu
+        WHERE
+			tu.id = tfd.user_id AND tfd.`status` = 'S'
+        <if test="null !=userMobile  and userMobile != ''">
+            AND tu.mobile like '%${userMobile}%'
+        </if>
+        <if test="null !=loanNumber  and loanNumber != ''">
+            AND tb.`loanNumber` like '%${loanNumber}%'
+        </if>
+        <if test="null !=tradeNo  and tradeNo != ''">
+            AND tfd.`request_no` like '%${tradeNo}%'
+        </if>
+        <if test="null !=beginTime  and beginTime != ''">
+              AND tfd.create_date >= #{beginTime}
+        </if>
+        <if test="null !=overTime  and overTime != ''">
+              AND #{overTime} >=  tfd.create_date
+        </if>
+    </sql>
+
+    <!-- 放款 -->
+    <sql id="whereLoanType">
+        AND tfd.type = '8'
+    </sql>
+    <!-- 还款[正常还款,逾期还款] -->
+    <sql id="whereRepayType">
+        <if test="null !=repayType  and repayType != ''">
+            <choose>
+                <when test="repayType == '1'.toString()" >   <!-- 正常还款 -->
+                    AND tfd.type = '7'
+                </when>
+                <when test="repayType == '2'.toString()" >   <!-- 逾期还款 -->
+                    AND tfd.type = '10'
+                </when>
+                <otherwise>
+                    AND tfd.type in ('7','10')
+                </otherwise>
+            </choose>
+        </if>
+        <if test="null ==repayType or repayType == ''.toString()">
+            AND tfd.type in ('7','10')
+        </if>
+    </sql>
+    <!-- 回款 -->
+    <sql id="wherePaymentType">
+        AND tfd.type = '14'
+    </sql>
+    <!-- 放款 -->
+    <select id="findLoanList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+        <include refid="sqlTransactionList" />
+        <include refid="whereLoanType" />
+        ORDER BY tfd.create_date DESC
+    </select>
+    <select id="exportLoan" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+        <include refid="sqlTransactionList" />
+        <include refid="whereLoanType" />
+        ORDER BY tfd.create_date DESC LIMIT 20000
+    </select>
+    <!-- 还款[正常还款,逾期还款] -->
+    <select id="findRepayList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+        <include refid="sqlTransactionList" />
+        <include refid="whereRepayType" />
+        ORDER BY tfd.create_date DESC
+    </select>
+    <select id="exportRepay" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+        <include refid="sqlTransactionList" />
+        <include refid="whereRepayType" />
+        ORDER BY tfd.create_date DESC LIMIT 20000
+    </select>
+    <!-- 回款 -->
+    <select id="findPaymentList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+        <include refid="sqlTransactionList" />
+        <include refid="wherePaymentType" />
+        ORDER BY tfd.create_date DESC
+    </select>
+    <select id="exportPayment" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+        <include refid="sqlTransactionList" />
+        <include refid="wherePaymentType" />
+        ORDER BY tfd.create_date DESC LIMIT 20000
+    </select>
+
+    <!-- <select id="findRepayList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.RefundVo">
+            SELECT
+            CONCAT_WS('****' ,SUBSTR(tu.mobile,1,3),SUBSTR(tu.mobile,8,11)) AS 'userMobile',
+            tbp.repay_time AS 'repayTime',
+            CASE WHEN  tbp.late_payment_time IS NULL THEN tbp.repay_time ELSE
+            tbp.late_payment_time END as 'repayEndTime',
+            tbp.monthly_payment_origin AS 'repayAmot',
+            t.loanNumber AS 'loanNumber',
+            tbp.id AS 'tradeNo'
+        FROM
+            t_borrow AS t
+        LEFT JOIN t_user AS tu ON t.USERID = tu.id
+        LEFT JOIN t_borrow_billplan AS tbp ON t.loanNumber=tbp.apply_id
+        <where>
+                <if test="null !=userMobile  and userMobile != ''">
+                    AND tu.mobile like '%${userMobile}%'
+                </if>
+                <if test="null !=beginTime  and beginTime != ''">
+                      AND tbp.repay_time >= #{beginTime}
+                </if>
+                <if test="null !=overTime  and overTime != ''">
+                      AND #{overTime} >=  tbp.repay_time
+                </if>
+                <if test="null !=tradeNo  and tradeNo != ''">
+                    AND tbp.id like '%${tradeNo}%'
+                </if>
+                <if test="null !=finBeginTime  and finBeginTime != ''">
+                      AND tbp.late_payment_time >=#{finBeginTime}
+                </if>
+                <if test="null !=finEndTime  and finEndTime != ''">
+                      AND #{finEndTime} >=  tbp.late_payment_time
+                </if>
+                <if test="null !=finBeginTime  and finBeginTime != ''">
+                      AND tbp.repay_time >=#{finBeginTime}
+                </if>
+                <if test="null !=finEndTime  and finEndTime != ''">
+                      AND #{finEndTime} >=  tbp.repay_time
+                </if>
+            </where>
+            ORDER BY tbp.repay_time DESC,tbp.late_payment_time DESC
+    </select> -->
+
+    <!-- 导出充值列表 -->
+    <select id="exportRecharge"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.RechargeVo">
+        SELECT
+              concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4)) AS 'userMobile',
+            tfd.transaction_time AS 'beginTime',
+            tfd.amount AS 'amount',
+            tfd.request_no AS 'tradeNo',
+            tfd.commission AS 'fee',
+            '' AS 'feesBearer'
+        FROM
+            t_fd_payment AS tfd
+                LEFT JOIN t_user AS tu ON tfd.user_Id = tu.id
+            <where>
+            tfd.type in (1,2,3,4)  AND tfd.`status`='s'
+                <if test="null !=userMobile  and userMobile != ''">
+                    AND tu.mobile like '%${userMobile}%'
+                </if>
+                <if test="null !=tradeNo  and tradeNo != ''">
+                    AND tfd.request_no like '%${tradeNo}%'
+                </if>
+                <if test="null !=beginTime  and beginTime != ''">
+                      AND tfd.transaction_time >= #{beginTime}
+                </if>
+                <if test="null !=overTime  and overTime != ''">
+                      AND #{overTime} >= tfd.transaction_time
+                </if>
+            </where>
+            ORDER BY tfd.transaction_time DESC LIMIT 20000
+    </select>
+
+</mapper>

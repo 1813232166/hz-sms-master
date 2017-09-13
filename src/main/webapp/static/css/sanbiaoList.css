@@ -1,0 +1,262 @@
+.NewListConfig{width: 100%;; overflow: hidden}
+.NewListConfig .left{ width: 45%; float:left;text-align: left;}
+.NewListConfig .right{width: 55%; float:right;text-align: left;}
+.NewListConfig p{ line-height: 32px; margin-bottom: 10px;margin-left: 30px;}
+.NewListConfig .left input,.NewListConfig .right input,.NewListConfig .left select, .NewListConfig .right select{width: 140px;
+    height: 32px;
+    border: 1px solid #dcdcdc;
+
+    padding-left: 10px;}
+.main_info td{text-align: center;}
+.NewListConfig .left select, .NewListConfig .right select{width: 150px;
+    height: 32px;
+    border: 1px solid #dcdcdc;
+
+  }
+.NewListConfig p .data{
+    background: url(../images/date.png) no-repeat scroll center right 2px #fff;
+    margin-right: 0;}
+.NewListConfig p em{ margin: 0 8px}
+.NewListConfig .batton{width: 100%; height: 40px; overflow: hidden; clear: both; text-align: center; padding-top: 30px;}
+.NewListConfig .batton a{ line-height: 32px; margin: 0 auto; display: inline-block; background: #90c31f;
+    color: #fff}
+.NewListConfig .batton a:hover{ background:#f39700}
+.NewListConfig .left .right { display: inline-block;text-align: left}
+.NewListConfig .right .left { display: inline-block; width: 20%;}
+.NewListConfig1{width: 100%}
+.NewListConfig1 .left{ margin-bottom: 20px; padding-bottom: 20px; width: 100%; overflow: hidden; position: relative}
+.NewListConfig1 .left p{ line-height: 32px; display: inline-block; width: 33%; margin-right: 8px; text-align: right; float: left}
+.NewListConfig1 .left p b{ color: red}
+.NewListConfig1 .left textarea{ width: 400px; height:200px; border: 1px solid #dcdcdc;}
+.NewListConfig1 .NewListConfig1Text{width: 140px;
+    height: 32px;
+    border: 1px solid #dcdcdc;
+
+    padding-left: 10px;}
+.NewListConfig1 .left select{width: 80px;
+    height: 32px;
+    border: 1px solid #dcdcdc;
+    margin: 0 8px;
+
+}
+.NewListConfig1 .leftRadio label{ margin-right: 8px; margin-left: 5px}
+.NewListConfig1 .left .data{
+    background: url(../images/date.png) no-repeat scroll center right 2px #fff;
+    margin-right: 0;}
+.NewListConfig1 .left .hot{ position: absolute; left:47%; color: #999; bottom: 0}
+
+/*閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓锟�-閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓锟�*/
+.dashedBox{ padding:20px 30px; border:1px dashed #f39800; font-size:16px; color:#898989; line-height:20px; margin:20px auto;}
+.dashedBox span{ color:#f39700;}
+.tabBOX{ border:1px solid #dcdcdc;}
+.tabsList{ width:100%; height:60px; border-bottom:1px solid #dcdcdc; overflow:hidden;}
+.tabsList ul {border-bottom:1px solid #fff;}
+.tabsList ul li{ width:140px; height:60px; float:left; line-height:60px; text-align:center; font-size:18px;border-right:1px solid #dcdcdc;border-bottom:1px solid #dcdcdc; cursor:pointer;}
+.tabsList ul li.active{ color:#90c31f; border-bottom:1px solid #fff; border-top:2px solid #90c31f; margin-top:-1px; height:59px; line-height:59px;}
+.tabscontbox{ padding:42px 30px 52px 30px; overflow:hidden;}
+.sc-1 p{ width:auto; float:left; line-height:32px;}
+.sc-1 input{ float:left;height:32px; border:1px solid #dcdcdc; background:#fff; color:#bbbbbb;  padding-left:10px; margin-right:10px; width:140px;}
+.Mtable3{ border:1px solid #dcdcdc; margin-top:15px;border-top:none;}
+.Mtable3 table{ width:100%;}
+.Mtable3 table tr th{ height:56px; line-height:56px; text-align:center; font-size:16px; text-align:center; background:#eeeeee; border-right:1px solid #fff;}
+.Mtable3 table tr td{ height:50px; line-height:50px; text-align:center; font-size:14px; border-bottom:1px dashed #dcdcdc; border-right:1px solid #dcdcdc;}
+.Mtable3 table tr td a{ color:#1593ca;}
+.Mtable3 table tr td a:hover{ text-decoration:underline;}
+.fxSum{margin-bottom:20px; padding-left:30px; overflow:hidden;}
+.fxSum p{ width:auto; float:left; margin-right:30px;  font-size:16px;  line-height:35px; }
+.fxSum p span{ font-size:22px; color:#f39800;}
+.closebtn{ width:18px; height:18px; background:url(../images/canlebtn.png) no-repeat; float:right; margin:-12px -30px 0 0; display:block;}
+.NewListConfig3{width: 100%}
+.NewListConfig3 .left{ width: 48%; text-align: right}
+.NewListConfig3 .left .centers{ width:100%; overflow:hidden}
+.NewListConfig3 .right{width: 48%; margin-left: 4%}
+.NewListConfig3 .twoRight{width: 400px; text-align: left}
+.NewListConfig3 .twoLeft{ line-height: 40px; width: 100px}
+.NewListConfig3 .twoRight a img{width: 100px; height: 100px; margin: 10px;}
+.NewListConfig3 .right .twoLeft{ width: 100px; text-align: right; clear: both}
+.NewListConfig4{width: 100%}
+.NewListConfig4 .cc{width: 100%}
+.NewListConfig4 .cc .left{ width: 11%; text-align: right}
+.NewListConfig4 .cc .right{ width: 75%; margin-left: 8%; margin-bottom: 10px}
+.NewListConfig4 .cc .left{ line-height: 32px;}
+.NewListConfig4 .NewListConfig4Text{width: 140px; height: 32px; border: 1px solid #dcdcdc;  padding-left: 10px; float: left}
+.NewListConfig4 .NewListConfig4File{ width: 70px; height: 32px; margin: 5px 8px; float: left}
+.NewListConfig4 .cc .right a{ display: inline-block; width: 32px; height: 32px;  text-align: center; line-height: 23px; margin-right: 8px; font-size: 26px; border:1px solid #dcdcdc; float: left}
+.NewListConfig4 .cc .right img{ width: 32px; height: 32px; float: left; display: none}
+.NewListConfig4 .cc .right .rightCC{ margin-bottom: 10px; width: 100%; overflow: hidden}
+.NewListConfig4Button{ width: 100%; height: 72px; text-align: center; overflow: hidden; margin: 40px 0 40px; padding-top: 30px}
+.NewListConfig4Button a{ display: inline-block; background: #109cda; color: #fff; margin-right: 10px; width: 140px; height: 32px; line-height: 32px; text-align: center; font-size: 16px; cursor: pointer;}
+.NewListConfigLeft .right .left{ width: 29%!important;}
+.NewListConfig4CC .cc{ line-height: 32px}
+#nowBlock{ display: none}
+/*閿熼摪鍔犺鎷烽敓鏂ゆ嫹*/
+.infor_bottom{
+    width: 952px;
+    padding: 0 28px 56px 18px;
+}
+.infor_bottom h3{
+    height: 24px;
+    line-height: 24px;
+    font-size: 18px;
+    padding-left: 24px;
+    margin-top: 20px;
+}
+
+.infor_operation{
+    width: 952px;
+    height: 30px;
+    margin-top: 40px;
+    line-height: 30px;
+}
+.infor_operation input{
+    cursor: pointer;
+}
+.infor_operation .selector_file{
+    margin-left: 30px;
+}
+.infor_operation .infor_idcard{
+    display: inline-block;
+    width: 140px;
+    text-align: right;
+}
+.infor_operation .message_sub{
+    width: 100px;
+    height: 30px;
+    font-size: 16px;
+    background: #109cda;
+    text-align: center;
+    line-height: 30px;
+    color: #ffffff;
+    font-family: "寰敓鏂ゆ嫹閿熻剼鐚存嫹", "Microsoft YaHei";
+    cursor: pointer;
+    margin-left: 20px;
+}
+.message_sub{
+    width: 100px;
+    height: 30px;
+    font-size: 16px;
+    background: #109cda;
+    text-align: center;
+    line-height: 30px;
+    color: #ffffff;
+    font-family: "寰敓鏂ゆ嫹閿熻剼鐚存嫹", "Microsoft YaHei";
+    cursor: pointer;
+    margin-left: 20px;
+}
+.infor_bottom .id_card{
+    margin-left: 140px;
+}
+.infor_bottom .id_card ul li{
+    width: 198px;
+    height: 118px;
+    float: left;
+    margin-left: 18px;
+    border: 1px solid #dddddd;
+    position: relative;
+}
+.infor_bottom .id_card li a{
+    display: inline-block;
+    width: 198px;
+    height: 118px;
+}
+.infor_bottom .id_card li a img{
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+}
+.hzFooter{
+    height: 50px;
+    width: 100%;
+    background: #cccccc;
+    text-align: center;
+    line-height: 50px;
+}
+.hzFooter span{
+    margin-left: 20px;
+}
+/*閿熸枻鎷烽敓鎻枻鎷烽敓鏂ゆ嫹*/
+.infor_bottom .infor_pic{
+    width: 952px;
+    height: 120px;
+    margin-top: 60px;
+}
+.infor_bottom p{
+    width: 142px;
+    height: 120px;
+    line-height: 120px;
+    text-align: right;
+    float: left;
+}
+.infor_pic{
+    width: 810px;
+    height: 120px;
+    position: relative;
+}
+.infor_pic .id_card{
+    width: 654px;
+    height: 120px;
+    position: relative;
+    overflow: hidden;
+    margin-top: -40px;
+}
+.slick {
+    width: 9999px;
+    height: 120px;
+    float: left;
+    position: absolute;
+}
+.infor_pic .slick_right {
+    width: 48px;
+    height: 120px;
+    background: url("../images/detail_left_19.png") no-repeat 20px center;
+    position: absolute;
+    left: 77px;
+    top: 50%;
+    margin-top: -60px;
+    top: 0px\9;
+}
+.infor_pic .slick_left{
+    width: 48px;
+    height: 120px;
+    background: url("../images/detail_right_22.png") no-repeat 20px center;
+    position: absolute;
+    right: 77px;
+    top: 50%;
+    margin-top: -60px;
+    top: 0px\9;
+}
+.slick input.del_element{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    line-height: 20px;
+    color: #da2016;
+    font-family: "瀵邦喛钂嬮梿鍛寸拨", "Microsoft YaHei";
+}
+.sb-bd-p{
+	width:33% !important; 
+	float:left; 
+	line-height:34px; 
+	padding-bottom:0px !important;
+	font-size:16px;
+}
+.sb-bd-p span{
+	color:red;
+}
+.sb-bd-p2{
+	width:100%; 
+	float:left; 
+	line-height:34px; 
+	padding-bottom:0px !important;
+	font-size:20px;
+}
+.sb-bd-p2 p{
+	width:13% !important;
+	font-size:20px;
+}
+.overHide{
+	overflow:hidden;
+}

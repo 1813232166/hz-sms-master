@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.creditormanagement.dao.CreditorDao">
+   <sql id="tBorrowRepayBillplanColumns">
+		a.investid AS "investid",
+		a.billnum AS "billnum",
+		a.capiyear AS "capiyear",
+		a.capimonth AS "capimonth",
+		a.sdate AS "sdate",
+		a.stcapi AS "stcapi",
+		a.sinte AS "sinte",
+		a.bal AS "bal",
+		a.rdate AS "rdate",
+		a.rtcapi AS "rtcapi",
+		a.rinte AS "rinte",
+		a.overflag AS "overflag",
+		a.payoffflag AS "payoffflag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+ <select id="findList" resultType="com.hzdjr.hzwd.modules.creditormanagement.entity.CreditorVo" parameterType="map">
+			SELECT        
+			               t1.id,
+			               t4.id AS "tinvestId",
+			               t1.asset_code AS "assetCode",
+			               t2.borrowtitle,
+			               t5.realname AS "investRealname" ,
+			               t4.investamount,
+			               t3.realname  AS "borrowRealname",
+			               t4.capital_rate AS "capitalRate",
+			               t2.deadline,
+			               t2.surplus_deadlline AS "surplusDeadlline",
+			               t2.pay_method AS "payMethod",
+			               t2.lendingtime,
+			               t2.borrowstatus,
+			               t2.create_time as "createTime",
+			               t2.loannumber,amount
+			FROM  t_asset t1 
+			 LEFT JOIN t_borrow t2 ON t1.borrow_id=t2.borrow_id
+			 LEFT JOIN t_user t3  ON t2.userid=t3.id
+			 LEFT JOIN t_invest t4 ON t4.borrowid=t2.borrow_id
+			 LEFT JOIN t_user t5 ON t5.id=t4.investor
+		<where>
+			 <!-- 还款方式 -->
+			<if test="payMethod!=null and payMethod!=''">
+				and t2.pay_method =#{payMethod}
+			</if>
+			<!-- 状态 -->
+			<if test="borrowstatus!=null and borrowstatus!=''">
+				and t2.borrowstatus =#{borrowstatus}
+			</if>
+			<!-- 创建时间 -->
+			<if test="createTimeBeginTimes != null and createTimeBeginTimes != '' ">
+                AND   t2.create_time &gt;= #{createTimeBeginTimes}
+            </if>
+            <if test="createTimeEndTimes != null and createTimeEndTimes != '' ">
+                AND   t2.create_time  &lt;= #{createTimeEndTimes}
+            </if>
+			<!-- 完成时间-->
+			<if test="lendingtimeBeginTimes != null and lendingtimeBeginTimes != '' ">
+                AND t2.lendingtime &gt;= #{lendingtimeBeginTimes}
+            </if>
+            <if test="lendingtimeEndTimes != null and lendingtimeEndTimes != '' ">
+                AND t2.lendingtime &lt;= #{lendingtimeEndTimes}
+            </if>
+			<!-- 出让人-->
+			<if test="borrowRealname!=null and borrowRealname!=''">
+				and t3.realname like concat('%',#{borrowRealname},'%')
+			</if>
+			<!-- 债权编号-->
+			<if test="assetCode!=null and assetCode!=''">
+				and t1.asset_code like concat('%',#{assetCode},'%')
+			</if>
+			<!-- 借款编号-->
+			<if test="loannumber!=null and loannumber!='' ">
+			    and t2.loannumber like concat('%',#{loannumber},'%')
+			</if>
+			 and t1.asset_type='1' 
+		</where>
+		ORDER BY assetCode DESC
+   </select>
+    <!-- 债权数量 -->
+    <select id="getCreditorNum" resultType="java.util.HashMap" parameterType="map">
+			SELECT        
+			               count(t1.id) as "creditorNum"
+			 FROM  t_asset t1 
+			 LEFT JOIN t_borrow t2 ON t1.borrow_id=t2.borrow_id
+			 LEFT JOIN t_user t3  ON t2.userid=t3.id
+			 LEFT JOIN t_invest t4 ON t4.borrowid=t2.borrow_id
+			 LEFT JOIN t_user t5 ON t5.id=t4.investor
+			  where  t1.asset_type='1' 
+    </select>
+    <!-- 债权价值总额 -->
+    <select id="getCreditorValueSum" resultType="java.util.HashMap" parameterType="map">
+			SELECT        
+			        sum(amount) as "sumAmount"
+			 FROM  t_asset t1 
+			 LEFT JOIN t_borrow t2 ON t1.borrow_id=t2.borrow_id
+			 LEFT JOIN t_user t3  ON t2.userid=t3.id
+			 LEFT JOIN t_invest t4 ON t4.borrowid=t2.borrow_id
+			 LEFT JOIN t_user t5 ON t5.id=t4.investor
+			  where  t1.asset_type='1' 
+    </select>
+    <!-- 债权列表详情-->
+    <select id="getCreditorDeails" resultType="CreditorVo" >
+			SELECT        
+			               t1.id,
+			               t1.asset_code AS "assetCode",
+			               t2.borrowtitle,
+			               t5.realname AS "investRealname" ,
+			               t4.investamount,
+			               t3.realname  AS "borrowRealname",
+			               t4.capital_rate AS "capitalRate",
+			               t2.deadline,
+			               t2.surplus_deadlline AS "surplusDeadlline",
+			               t2.pay_method AS "payMethod",
+			               t2.lendingtime,
+			               t2.borrowstatus,
+			               t2.create_time as "createTime",
+			               t2.loannumber,
+			               amount,
+			               ud.cityCode,
+			               ud.idcard,
+			               ud.mothIncome*12 AS "yearIncome",
+			               t2.age,
+			               ud.sex,
+			               t2.usageOfLoan,
+			               t2.mintendersum,
+			               t2.borrow_id as "borrowId"
+			FROM  t_asset t1 
+			 LEFT JOIN t_borrow t2 ON t1.borrow_id=t2.borrow_id
+			 LEFT JOIN t_user t3  ON t2.userid=t3.id
+			 left join t_user_detail  ud on ud.userId=t3.id
+			 LEFT JOIN t_invest t4 ON t4.borrowid=t2.borrow_id
+			 LEFT JOIN t_user t5 ON t5.id=t4.investor
+			 where t1.id=#{0} and t4.id=#{1}
+    </select>
+    <!-- 转让记录 -->
+     <select id="queryTransferByBorrowId" resultType="com.hzdjr.hzwd.modules.creditormanagement.entity.CreditorVo" parameterType="map">
+	    SELECT t2.realname AS "investRealname",
+	           t3.investAmount,
+	           investTime,
+	           t3.id AS "investId" 
+	           FROM t_borrow   t1 
+		     LEFT JOIN t_user t2 ON t1.userid=t2.id
+		     LEFT JOIN t_invest t3 ON t3.borrowId=t1.borrow_id
+		     where t1.BORROW_ID=#{borrowId}
+   </select>
+   <!-- 回款计划 -->
+   	<select id="queryRepayBillplanByInvestId" resultType="TBorrowRepayBillplan">
+		SELECT 
+			<include refid="tBorrowRepayBillplanColumns"/>
+		FROM t_borrow_repay_billplan a
+		WHERE a.investId = #{investid}
+	</select>
+</mapper>

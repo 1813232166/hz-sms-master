@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzdjr.hzwd.modules.finance.dao.TFinanceBespeakDao">
+    
+	<sql id="tFinanceBespeakColumns">
+		a.id AS "id",
+		a.product_id AS "productId",
+		a.status AS "status",
+		a.name AS "name",
+		a.finance_code AS "financeCode",
+		a.collect_amount AS "collectAmount",
+		a.collected_amounts AS "collectedAmounts",
+		a.already_collected_amount AS "alreadyCollectedAmount",
+		a.nper AS "nper",
+		a.lending_method AS "lendingMethod",
+		a.rate AS "rate",
+		a.interest_date_type AS "interestDateType",
+		a.min_tender_sum AS "minTenderSum",
+		a.incremental_amount AS "incrementalAmount",
+		a.max_tender_sum AS "maxTenderSum",
+		a.start_time_of_collection AS "startTimeOfCollection",
+		a.end_time_of_collection AS "endTimeOfCollection",
+		a.poundage AS "poundage",
+		a.exit_mode AS "exitMode",
+		a.guarantee_mode AS "guaranteeMode",
+		a.detail AS "detail",
+		a.create_time AS "createTime",
+		a.lending_agreement_code AS "lendingAgreementCode",
+		a.lending_agreement AS "lendingAgreement",
+		a.poundage_more AS "poundageMore",
+		a.enable_time AS "enableTime"
+	</sql>
+	
+	<sql id="tFinanceBespeakJoins">
+	</sql>
+    
+	<select id="get" resultType="TFinanceBespeak">
+		SELECT 
+			<include refid="tFinanceBespeakColumns"/>
+		FROM t_finance_bespeak a
+		<include refid="tFinanceBespeakJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TFinanceBespeak">
+		SELECT 
+			<include refid="tFinanceBespeakColumns"/>
+		FROM t_finance_bespeak a
+		<include refid="tFinanceBespeakJoins"/>
+		<where>
+			
+			<if test="name != null and name != ''">
+                AND a.name = #{name}
+			</if>
+			<if test="status != null and status != ''">
+                AND a.status = #{status}
+			</if>
+			<if test="beginCreateTime != null and beginCreateTime != '' ">
+                AND a.create_time &gt;= #{beginCreateTime}
+            </if>
+            <if test="endCreateTime != null and endCreateTime != '' ">
+                AND a.create_time &lt;= #{endCreateTime}
+            </if>
+            <if test="status == null or status == ''">
+			  AND a.status != '6'
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="bespeakAudit" parameterType="map">
+		INSERT INTO t_finance_examine_log 
+			(id,user_id,finance_id,creat_time,cause,examine_status) 
+		VALUES 
+			(#{id},#{user_id},#{tFinanceBespeakId},#{creat_time},#{cause},#{examine_status});
+	</insert>
+	<update id="updateTFinanceBespeakStatus" parameterType="java.util.Map">
+	   update t_finance_bespeak set status=#{status} where id=#{tFinanceBespeakId}
+	</update>
+	<select id="findAllList" resultType="TFinanceBespeak">
+		SELECT 
+			<include refid="tFinanceBespeakColumns"/>
+		FROM t_finance_bespeak a
+		<include refid="tFinanceBespeakJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<select id="bespeakDetailById" parameterType="String" resultType="TFinanceBespeak">
+	SELECT   
+	  t1.*,t2.*,t3.creat_time as "auditCreatTime",ROUND(t1.already_collected_amount*100/t1.collect_amount,2) as scale,
+	  t3.cause as "cause" 
+	 FROM  t_finance_bespeak t1
+	 LEFT JOIN t_finance_product t2 ON t1.id=t2.id
+	 LEFT JOIN t_finance_examine_log t3 ON t1.id=t3.finance_id
+	 where t1.id=#{id}
+	</select>
+	<insert id="insert">
+		INSERT INTO t_finance_bespeak(
+			id,
+			product_id,
+			status,
+			name,
+			finance_code,
+			collect_amount,
+			collected_amounts,
+			already_collected_amount,
+			nper,
+			lending_method,
+			rate,
+			interest_date_type,
+			min_tender_sum,
+			incremental_amount,
+			max_tender_sum,
+			start_time_of_collection,
+			end_time_of_collection,
+			poundage,
+			exit_mode,
+			guarantee_mode,
+			detail,
+			create_time,
+			lending_agreement_code,
+			lending_agreement,
+			poundage_more,
+			enable_time
+		) VALUES (
+			#{id},
+			#{productId},
+			#{status},
+			#{name},
+			#{financeCode},
+			#{collectAmount},
+			#{collectedAmounts},
+			#{alreadyCollectedAmount},
+			#{nper},
+			#{lendingMethod},
+			#{rate},
+			#{interestDateType},
+			#{minTenderSum},
+			#{incrementalAmount},
+			#{maxTenderSum},
+			#{startTimeOfCollection},
+			#{endTimeOfCollection},
+			#{poundage},
+			#{exitMode},
+			#{guaranteeMode},
+			#{detail},
+			#{createTime},
+			#{lendingAgreementCode},
+			#{lendingAgreement},
+			#{poundageMore},
+			#{enableTime}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_finance_bespeak SET 	
+			product_id = #{productId},
+			status = #{status},
+			name = #{name},
+			finance_code = #{financeCode},
+			collect_amount = #{collectAmount},
+			collected_amounts = #{collectedAmounts},
+			already_collected_amount = #{alreadyCollectedAmount},
+			nper = #{nper},
+			lending_method = #{lendingMethod},
+			rate = #{rate},
+			interest_date_type = #{interestDateType},
+			min_tender_sum = #{minTenderSum},
+			incremental_amount = #{incrementalAmount},
+			max_tender_sum = #{maxTenderSum},
+			start_time_of_collection = #{startTimeOfCollection},
+			end_time_of_collection = #{endTimeOfCollection},
+			poundage = #{poundage},
+			exit_mode = #{exitMode},
+			guarantee_mode = #{guaranteeMode},
+			detail = #{detail},
+			create_time = #{createTime},
+			lending_agreement_code = #{lendingAgreementCode},
+			lending_agreement = #{lendingAgreement},
+			poundage_more = #{poundageMore},
+			enable_time = #{enableTime}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM t_finance_bespeak
+		WHERE id = #{id}
+	</update>
+	
+</mapper>
