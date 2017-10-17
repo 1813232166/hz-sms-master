@@ -9,8 +9,8 @@
  */
 package ${packageName}.${moduleName}.dao<#if subModuleName != "">.${subModuleName}</#if>;
 
-import com.hzdjr.hzwd.common.persistence.TreeDao;
-import com.hzdjr.hzwd.common.persistence.annotation.MyBatisDao;
+import com.hzwealth.sms.common.persistence.TreeDao;
+import com.hzwealth.sms.common.persistence.annotation.MyBatisDao;
 import ${packageName}.${moduleName}.entity<#if subModuleName != "">.${subModuleName}</#if>.${ClassName};
 
 /**

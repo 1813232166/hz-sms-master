@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.repaymentmanage.dao.RePaymentDao">
+<mapper namespace="com.hzwealth.sms.modules.repaymentmanage.dao.RePaymentDao">
    <!-- 还款列表(满标放款)    t_user  t_borrower t_invest t_borrow_billplan -->
-   <select id="findList" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.PuBiao">
+   <select id="findList" resultType="com.hzwealth.sms.modules.repaymentmanage.entity.PuBiao">
     SELECT v.*, tu.realName AS 'name',CONCAT(SUBSTR(tu.mobile, 1, 3),"****",SUBSTR(tu.mobile ,- 4)) AS 'mobile'
     FROM  (SELECT
             t1.BORROW_ID AS 'borrowId',
@@ -53,7 +53,7 @@
         ORDER BY v.repaymentDate DESC 
    </select>
    <!-- 导出还款列表 -->
-    <select id="getPuBiaoList" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.PuBiao" parameterType="map">
+    <select id="getPuBiaoList" resultType="com.hzwealth.sms.modules.repaymentmanage.entity.PuBiao" parameterType="map">
      SELECT v.*, tu.realName AS 'name',CONCAT(SUBSTR(tu.mobile, 1, 3),"****",SUBSTR(tu.mobile ,- 4)) AS 'mobile'
     FROM (SELECT
             t1.BORROW_ID AS 'borrowId',
@@ -106,12 +106,12 @@
             LIMIT 0,#{endLimit}
          </if>  
    </select>
-   <select id="findBorrowBillplans" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrowBillplan">
+   <select id="findBorrowBillplans" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrowBillplan">
         SELECT tbb.apply_id,tbb.period,tbb.is_advances AS "isAdvances",tbb.is_offset AS "isOffset",tbb.is_overdue AS "isOverdue"
         FROM t_borrow_billplan tbb WHERE  tbb.is_overdue='1' AND tbb.apply_id=#{loanNumber};
    </select>
    
-   <select id="getPuBiaoListById" parameterType="String" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.PuBiao">
+   <select id="getPuBiaoListById" parameterType="String" resultType="com.hzwealth.sms.modules.repaymentmanage.entity.PuBiao">
    		SELECT
 		  tb.borrowCode borrowCode,
 		  tb.RISK_WARNING riskWarning,

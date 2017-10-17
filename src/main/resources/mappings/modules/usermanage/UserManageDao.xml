@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.usermanage.dao.UserManageDao">
-   <select id="getUserInfo" resultType="com.hzdjr.hzwd.modules.usermanage.entity.TUser" parameterType="map">
+<mapper namespace="com.hzwealth.sms.modules.usermanage.dao.UserManageDao">
+   <select id="getUserInfo" resultType="com.hzwealth.sms.modules.usermanage.entity.TUser" parameterType="map">
 	 SELECT
 		t1.id AS id,
 		t1.mobile AS phone,

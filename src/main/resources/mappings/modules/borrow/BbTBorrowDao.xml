@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.borrow.dao.BbTBorrowDao">
+<mapper namespace="com.hzwealth.sms.modules.borrow.dao.BbTBorrowDao">
     
 	<sql id="tBorrowColumns">
 		a.status AS "status",
@@ -388,7 +388,7 @@
 		WHERE id = #{id}
 	</update>
 	
-	<select id="findBorrowById" parameterType="java.util.Map" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+	<select id="findBorrowById" parameterType="java.util.Map" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
 		SELECT 	<include refid="tBorrowColumns"></include> FROM t_borrow a WHERE  a.BORROW_ID=#{borrowId}
 	</select>
 	<!-- 查询已投金额 -->

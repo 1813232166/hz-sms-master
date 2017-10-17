@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.TFdAccountLogDao">
+<mapper namespace="com.hzwealth.sms.modules.financialadmis.dao.TFdAccountLogDao">
     
 	<sql id="tFdAccountLogColumns">
 	    SELECT  concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4)) AS 'mobile',
@@ -29,7 +29,7 @@
 		WHERE a.id = #{id} 
 	</select>
 	<!-- 查询个人账户资金-->
-	<select id="findList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.TFdAccountLog">
+	<select id="findList" resultType="com.hzwealth.sms.modules.financialadmis.entity.TFdAccountLog">
 	SELECT        concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4)) AS "realMobile",
           tu.mobile AS 'mobile',
           a.create_date AS 'createtime',a.request_no AS 'tradeNo',a.type AS 'biztype',
@@ -147,7 +147,7 @@
 		WHERE id = #{id}
 	</update>
 	
-	<select id="findexportList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.TFdAccountLogVo">
+	<select id="findexportList" resultType="com.hzwealth.sms.modules.financialadmis.entity.TFdAccountLogVo">
 		SELECT        concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4))  AS "realMobile",
           tu.mobile AS 'mobile',
           a.create_date AS 'createtime',a.request_no AS 'tradeNo',a.type AS 'biztype',

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.borrow.dao.TBorrowDao">
+<mapper namespace="com.hzwealth.sms.modules.borrow.dao.TBorrowDao">
     
 	<sql id="tBorrowColumns">
 		a.status AS "status",
@@ -658,17 +658,17 @@
 		WHERE id = #{id}
 	</update>
 	<!-- 通过borrowId查询相应得出借记录 -->
-	<select id="getInvRecByBid" parameterType="com.hzdjr.hzwd.modules.invest.entity.Invest" resultType="com.hzdjr.hzwd.modules.invest.entity.Invest">
+	<select id="getInvRecByBid" parameterType="com.hzwealth.sms.modules.invest.entity.Invest" resultType="com.hzwealth.sms.modules.invest.entity.Invest">
 		SELECT ti.investCode,tu.realName,ti.investAmount,ti.investTime
 		FROM t_invest ti LEFT JOIN t_user tu ON ti.investor=tu.id
 		 WHERE investType='2' AND ti.flag=1  AND ti.borrowId=#{borrowid}
 	</select>
 	<!-- 匹配债权 -->
-	<select id="getLoanRecByBid" parameterType="java.lang.String" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+	<select id="getLoanRecByBid" parameterType="java.lang.String" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
 		
 	</select>
 	<!--每一期还款的明细-->
-	<select id="queryPaymentDetails" parameterType="com.hzdjr.hzwd.modules.borrow.entity.RepayPlanVo" resultType="com.hzdjr.hzwd.modules.borrow.entity.RepayPlanVo">
+	<select id="queryPaymentDetails" parameterType="com.hzwealth.sms.modules.borrow.entity.RepayPlanVo" resultType="com.hzwealth.sms.modules.borrow.entity.RepayPlanVo">
 		SELECT CONCAT_WS('',str_to_date(tib.sDate,'%Y-%m-%d')) AS sDate,tib.stcapi AS stcapi,tib.sinte AS sinte,(tib.stcapi+tib.sinte) AS amounts,concat(substring(u.realName,1,1),'**') AS realName
 		FROM t_invest i LEFT JOIN t_user u ON u.id=i.investor
 		LEFT JOIN t_borrow_repay_billplan tib ON i.id=tib.investId
@@ -764,7 +764,7 @@
 	
 	
 	<!-- 通过标的编号查询借款  -->
-	<select id="getLoanByBorrowCode" parameterType="java.util.List" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+	<select id="getLoanByBorrowCode" parameterType="java.util.List" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
 		SELECT <include refid="tBorrowColumns"/>
 		 FROM t_borrow a WHERE BORROWSTATUS='20' and borrowCode IN(
 		<foreach collection="list" item="item" index="index" separator="," > 
@@ -774,7 +774,7 @@
 	</select>
 	
 		<!-- 通过标的编号查询借款  -->
-	<select id="getLoanByBorrowCodeNew" parameterType="java.util.List" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+	<select id="getLoanByBorrowCodeNew" parameterType="java.util.List" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
 		SELECT <include refid="tBorrowColumns"/>
 		 FROM t_borrow a WHERE BORROWSTATUS='3' and borrowCode IN(
 		<foreach collection="list" item="item" index="index" separator="," > 
@@ -784,12 +784,12 @@
 	</select>
 	
 		<!-- 通过标的编号查询借款  -->
-	<select id="getBorrowByCode" parameterType="String" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+	<select id="getBorrowByCode" parameterType="String" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
 		SELECT <include refid="tBorrowColumns"/>
 		 FROM t_borrow a WHERE a.borrowCode=#{borrowCode}
 	</select>
 	
-	<select id="getBorrowById" parameterType="String" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+	<select id="getBorrowById" parameterType="String" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
 		SELECT <include refid="tBorrowColumns"/>
 		 FROM t_borrow a WHERE a.borrow_Id=#{borrowId}
 	</select>
@@ -861,7 +861,7 @@
 	(#{id},#{auditor},#{auditDate},#{yuanyin},#{auditType},#{borrowId});
 	</insert>
 	
-	<select id = "findExcelList" parameterType="map" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+	<select id = "findExcelList" parameterType="map" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
 		select a.borrowAliasNo as borrowaliasno,a.borrowAlias as borrowalias,a.loannumber as loannumber , tu.realName as userName, a.BORROWAMOUNT as borrowAmount , a.ANUALRATE as anualrate,a.DEADLINE as deadline,a.pay_method as payMethod, a.create_time AS "createTime" , a.OPENBORROWDATE as openborrowdate,a.BORROWSTATUS as borrowstatus,a.bz_info as bzInfo
 		from t_borrow a left join t_user tu on a.USERID = tu.id
 		<where>

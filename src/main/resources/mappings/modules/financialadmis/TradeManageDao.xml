@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.TradeManageDao">
+<mapper namespace="com.hzwealth.sms.modules.financialadmis.dao.TradeManageDao">
 	<sql id="sqlTransactionList">
 		SELECT
 			tfd.request_no AS 'tradeNo',
@@ -56,13 +56,13 @@
 			</where>
 	</sql>
     <!--交易  -->
-	<select id="findTransactionList"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.TransactionVo">
+	<select id="findTransactionList"  resultType="com.hzwealth.sms.modules.financialadmis.entity.TransactionVo">
 		<include refid="sqlTransactionList" />
 		ORDER BY tfd.create_date DESC
 	</select>
 
 	<!-- 导出交易列表 -->
-	<select id="exportTransaction"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.TransactionVo">
+	<select id="exportTransaction"  resultType="com.hzwealth.sms.modules.financialadmis.entity.TransactionVo">
 		<include refid="sqlTransactionList" />
 		ORDER BY tfd.create_date DESC LIMIT 20000
 	</select>

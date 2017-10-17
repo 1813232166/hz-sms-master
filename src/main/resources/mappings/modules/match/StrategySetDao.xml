@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.match.dao.StrategySetDao">
+<mapper namespace="com.hzwealth.sms.modules.match.dao.StrategySetDao">
   <sql id="Base_Column_List" >
     id, type, filed, value, weight, description, status, update_time, borrow_type
   </sql>
 
-  <select id="getWeightListByAsset" resultType="com.hzdjr.hzwd.modules.match.entity.TWeight"  >
+  <select id="getWeightListByAsset" resultType="com.hzwealth.sms.modules.match.entity.TWeight"  >
     select 
     <include refid="Base_Column_List" />
     from t_weight 
     where type = 'ASSET'
   </select>
   
-    <select id="getWeightListByCapital" resultType="com.hzdjr.hzwd.modules.match.entity.TWeight"  >
+    <select id="getWeightListByCapital" resultType="com.hzwealth.sms.modules.match.entity.TWeight"  >
     select 
     <include refid="Base_Column_List" />
     from t_weight
     where type = 'CAPITAL'
   </select>
   
-  <select id="gettMatchInstallList" resultType="com.hzdjr.hzwd.modules.match.entity.TMatchInstall"  >
+  <select id="gettMatchInstallList" resultType="com.hzwealth.sms.modules.match.entity.TMatchInstall"  >
     select 
        id, type, asset_nper, capital_nper, whether_to_open, detail, update_time
     from t_match_install
   </select>
-  <select id="gettWeightLogList" resultType="com.hzdjr.hzwd.modules.match.entity.TWeightLog"  >
+  <select id="gettWeightLogList" resultType="com.hzwealth.sms.modules.match.entity.TWeightLog"  >
     select 
        id, type, create_time, name, account_number, filed, amount, value, weight, borrow_type
     from t_weight_log
   </select>
-  <select id="getMatchInstallLogList" resultType="com.hzdjr.hzwd.modules.match.entity.TMatchInstallLog"  >
+  <select id="getMatchInstallLogList" resultType="com.hzwealth.sms.modules.match.entity.TMatchInstallLog"  >
     select 
        id, type, create_time, name, account_number, asset_nper, capital_nper, match_type
     from t_match_install_log
@@ -45,13 +45,13 @@
 	</update>	
 	
 	
-	 <select id="findTWeightByid" resultType="com.hzdjr.hzwd.modules.match.entity.TWeight">
+	 <select id="findTWeightByid" resultType="com.hzwealth.sms.modules.match.entity.TWeight">
 	    select 
 	    <include refid="Base_Column_List" />
 	    from t_weight 
 	    where id=#{id}
   	</select>	
-	<select id="findTMatchInstallByid" resultType="com.hzdjr.hzwd.modules.match.entity.TMatchInstall">
+	<select id="findTMatchInstallByid" resultType="com.hzwealth.sms.modules.match.entity.TMatchInstall">
 	    select 
 	         id, type, asset_nper, capital_nper, whether_to_open, detail, update_time
 	    from t_match_install 

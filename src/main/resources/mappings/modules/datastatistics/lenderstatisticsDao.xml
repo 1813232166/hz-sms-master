@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.datastatistics.dao.LenderStatisticsDao">
+<mapper namespace="com.hzwealth.sms.modules.datastatistics.dao.LenderStatisticsDao">
 
 	<select id="findTotalInvest" resultType="Long">
 		SELECT IFNULL(COUNT(*),'0') FROM `t_invest` t WHERE t.flag='1';
@@ -59,7 +59,7 @@
 		#{l.totalOverdue},#{l.sumOverdueCapitalAmount},#{from},#{to})
 	</insert>
 	
-	<select id="findLenderStatisticsRecord" resultType="com.hzdjr.hzwd.modules.datastatistics.entity.LenderStatistics">
+	<select id="findLenderStatisticsRecord" resultType="com.hzwealth.sms.modules.datastatistics.entity.LenderStatistics">
 		SELECT * FROM `t_statistics_lender` l
 		WHERE DATE_FORMAT(l.`to`,'%Y%m%d')=DATE_FORMAT(NOW(),'%Y%m%d')
 		LIMIT 1

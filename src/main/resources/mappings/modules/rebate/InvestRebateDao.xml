@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.rebate.dao.InvestRebateDao">
+<mapper namespace="com.hzwealth.sms.modules.rebate.dao.InvestRebateDao">
    <!-- 没有统计返佣综合 -->
 	<!-- 每月的应返金额 -->
 	<select id="queryRebateAmount" resultType="BigDecimal">

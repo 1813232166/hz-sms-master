@@ -41,12 +41,12 @@
 	
 	<!-- 类型别名 -->
 	<typeAliases>
-		<typeAlias alias="Page" type="com.hzdjr.hzwd.common.persistence.Page" /><!--分页  -->
+		<typeAlias alias="Page" type="com.hzwealth.sms.common.persistence.Page" /><!--分页  -->
 	</typeAliases>
 	
 	<!-- 插件配置 -->
 	<plugins>
-		<plugin interceptor="com.hzdjr.hzwd.common.persistence.interceptor.PaginationInterceptor" />
+		<plugin interceptor="com.hzwealth.sms.common.persistence.interceptor.PaginationInterceptor" />
     </plugins>
 	
 </configuration>

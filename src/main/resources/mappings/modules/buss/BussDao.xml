@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.buss.dao.BussDao">
+<mapper namespace="com.hzwealth.sms.modules.buss.dao.BussDao">
     
 	<select id="findByOne" resultType="String">
 		select status from t_bussiness_setting where type = 1

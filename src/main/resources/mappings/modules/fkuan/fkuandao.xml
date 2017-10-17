@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.fk.dao.FkuanDAO">
+<mapper namespace="com.hzwealth.sms.modules.fk.dao.FkuanDAO">
     
      <!-- 查询已放款列表   即状态为7 还款中;修改后 11 还款中;12 已还清-->
-    <select id="hasFkuanList" resultType="com.hzdjr.hzwd.modules.fk.entity.Fkuan" parameterType="java.util.Map">
+    <select id="hasFkuanList" resultType="com.hzwealth.sms.modules.fk.entity.Fkuan" parameterType="java.util.Map">
        SELECT
         tb.BORROW_ID AS 'borrowerId',
 		tb.borrowAliasNo AS 'biaoid',
@@ -80,7 +80,7 @@
 	    ORDER BY tb.lendingTime DESC
     </select>
     <!-- 查询未放款列表   即状态为11 满标；修改后 10 已满标-->
-    <select id="noFkuanList" resultType="com.hzdjr.hzwd.modules.fk.entity.Fkuan" parameterType="java.util.Map">
+    <select id="noFkuanList" resultType="com.hzwealth.sms.modules.fk.entity.Fkuan" parameterType="java.util.Map">
        SELECT
         tb.BORROW_ID AS 'borrowerId',
 		tb.borrowAliasNo AS 'biaoid',
@@ -159,7 +159,7 @@
     </select>
     
      <!-- 查询拒绝放款列表 -->
-    <select id="queryRefuseFkuanList" resultType="com.hzdjr.hzwd.modules.fk.entity.Fkuan">
+    <select id="queryRefuseFkuanList" resultType="com.hzwealth.sms.modules.fk.entity.Fkuan">
         SELECT
     	tb.BORROW_ID AS 'borrowerId',
 		tb.borrowAliasNo AS 'biaoid',
@@ -202,7 +202,7 @@
     </select>
     
       <!-- 异常放款列表 -->
-    <select id="errorFkuanList" resultType="com.hzdjr.hzwd.modules.fk.entity.Fkuan">
+    <select id="errorFkuanList" resultType="com.hzwealth.sms.modules.fk.entity.Fkuan">
         SELECT
     tb.BORROW_ID AS 'borrowerId',
 		tb.borrowAliasNo AS 'biaoid',
@@ -292,7 +292,7 @@
     
     
     
-    <select id="getBorrowTimeAndAnount" parameterType="String" resultType="com.hzdjr.hzwd.modules.fk.entity.Borrow1">
+    <select id="getBorrowTimeAndAnount" parameterType="String" resultType="com.hzwealth.sms.modules.fk.entity.Borrow1">
     	SELECT
 			b.BORROW_ID borrowId,
 			b.DEADLINE deadline,

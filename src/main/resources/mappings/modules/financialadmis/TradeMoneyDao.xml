@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.TradeMoneyDao">
+<mapper namespace="com.hzwealth.sms.modules.financialadmis.dao.TradeMoneyDao">
     <!--充值  -->
-    <select id="findRechangeList"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.RechargeVo">
+    <select id="findRechangeList"  resultType="com.hzwealth.sms.modules.financialadmis.entity.RechargeVo">
         SELECT
              concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4)) AS 'userMobile',
             tfd.create_date AS 'beginTime',
@@ -31,7 +31,7 @@
     </select>
 
     <!--提现   根据交易类型 type  判断是充值还是体现 -->
-    <select id="findWithdrawList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.WithdrawVo">
+    <select id="findWithdrawList" resultType="com.hzwealth.sms.modules.financialadmis.entity.WithdrawVo">
         SELECT
          concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4))  AS 'userMobile',
             tfd.create_date AS 'beginTime',
@@ -60,7 +60,7 @@
 
     </select>
     <!--投标列表  tu.mobile 为出借人手机号  t.mobile 为借款人手机号-->
-    <select id="findTenderList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.TenderVo">
+    <select id="findTenderList" resultType="com.hzwealth.sms.modules.financialadmis.entity.TenderVo">
     SELECT  concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4))
        AS 'userMobile',
       tfd.create_date AS 'tenderTime',
@@ -149,40 +149,40 @@
         AND tfd.type = '14'
     </sql>
     <!-- 放款 -->
-    <select id="findLoanList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+    <select id="findLoanList" resultType="com.hzwealth.sms.modules.financialadmis.entity.CapitalVo">
         <include refid="sqlTransactionList" />
         <include refid="whereLoanType" />
         ORDER BY tfd.create_date DESC
     </select>
-    <select id="exportLoan" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+    <select id="exportLoan" resultType="com.hzwealth.sms.modules.financialadmis.entity.CapitalVo">
         <include refid="sqlTransactionList" />
         <include refid="whereLoanType" />
         ORDER BY tfd.create_date DESC LIMIT 20000
     </select>
     <!-- 还款[正常还款,逾期还款] -->
-    <select id="findRepayList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+    <select id="findRepayList" resultType="com.hzwealth.sms.modules.financialadmis.entity.CapitalVo">
         <include refid="sqlTransactionList" />
         <include refid="whereRepayType" />
         ORDER BY tfd.create_date DESC
     </select>
-    <select id="exportRepay" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+    <select id="exportRepay" resultType="com.hzwealth.sms.modules.financialadmis.entity.CapitalVo">
         <include refid="sqlTransactionList" />
         <include refid="whereRepayType" />
         ORDER BY tfd.create_date DESC LIMIT 20000
     </select>
     <!-- 回款 -->
-    <select id="findPaymentList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+    <select id="findPaymentList" resultType="com.hzwealth.sms.modules.financialadmis.entity.CapitalVo">
         <include refid="sqlTransactionList" />
         <include refid="wherePaymentType" />
         ORDER BY tfd.create_date DESC
     </select>
-    <select id="exportPayment" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.CapitalVo">
+    <select id="exportPayment" resultType="com.hzwealth.sms.modules.financialadmis.entity.CapitalVo">
         <include refid="sqlTransactionList" />
         <include refid="wherePaymentType" />
         ORDER BY tfd.create_date DESC LIMIT 20000
     </select>
 
-    <!-- <select id="findRepayList" resultType="com.hzdjr.hzwd.modules.financialadmis.entity.RefundVo">
+    <!-- <select id="findRepayList" resultType="com.hzwealth.sms.modules.financialadmis.entity.RefundVo">
             SELECT
             CONCAT_WS('****' ,SUBSTR(tu.mobile,1,3),SUBSTR(tu.mobile,8,11)) AS 'userMobile',
             tbp.repay_time AS 'repayTime',
@@ -225,7 +225,7 @@
     </select> -->
 
     <!-- 导出充值列表 -->
-    <select id="exportRecharge"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.RechargeVo">
+    <select id="exportRecharge"  resultType="com.hzwealth.sms.modules.financialadmis.entity.RechargeVo">
         SELECT
               concat(substring(tu.mobile,1,3),'****',substring(tu.mobile,8,4)) AS 'userMobile',
             tfd.transaction_time AS 'beginTime',

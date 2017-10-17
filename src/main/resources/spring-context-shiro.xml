@@ -53,7 +53,7 @@
 	</bean>
 	
 	<!-- 自定义会话管理配置 -->
-	<bean id="sessionManager" class="com.hzdjr.hzwd.common.security.shiro.session.SessionManager"> 
+	<bean id="sessionManager" class="com.hzwealth.sms.common.security.shiro.session.SessionManager"> 
 		<property name="sessionDAO" ref="sessionDAO"/>
 		
 		<!-- 会话超时时间，单位：毫秒  -->
@@ -72,14 +72,14 @@
 	    <constructor-arg name="name" value="hzwd.session.id"/>
 	</bean>
 
-	<bean id="sessionDAO" class="com.hzdjr.hzwd.common.security.shiro.session.CacheSessionDAO">
+	<bean id="sessionDAO" class="com.hzwealth.sms.common.security.shiro.session.CacheSessionDAO">
 		<property name="sessionIdGenerator" ref="idGen" />
 		<property name="activeSessionsCacheName" value="activeSessionsCache" />
 		<property name="cacheManager" ref="shiroCacheManager" />
 	</bean>
 	
 	<!-- 定义授权缓存管理器 -->
-<!-- 	<bean id="shiroCacheManager" class="com.hzdjr.hzwd.common.security.shiro.cache.SessionCacheManager" /> -->
+<!-- 	<bean id="shiroCacheManager" class="com.hzwealth.sms.common.security.shiro.cache.SessionCacheManager" /> -->
 	<bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
 		<property name="cacheManager" ref="cacheManager"/>
 	</bean>

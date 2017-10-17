@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.hzdjr.hzwd.common.config.Global;
-import com.hzdjr.hzwd.common.persistence.Page;
-import com.hzdjr.hzwd.common.web.BaseController;
-import com.hzdjr.hzwd.common.utils.StringUtils;
+import com.hzwealth.sms.common.config.Global;
+import com.hzwealth.sms.common.persistence.Page;
+import com.hzwealth.sms.common.web.BaseController;
+import com.hzwealth.sms.common.utils.StringUtils;
 import ${packageName}.${moduleName}.entity<#if subModuleName != "">.${subModuleName}</#if>.${ClassName};
 import ${packageName}.${moduleName}.service<#if subModuleName != "">.${subModuleName}</#if>.${ClassName}Service;
 

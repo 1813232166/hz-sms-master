@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.match.dao.MatchInstallLogDao">
+<mapper namespace="com.hzwealth.sms.modules.match.dao.MatchInstallLogDao">
   <sql id="operationLog" >
     id, 
     type,
@@ -12,7 +12,7 @@
     match_type as matchType,
     status as status
   </sql>
-	<select id="findList" resultType="com.hzdjr.hzwd.modules.match.entity.OperationLog">
+	<select id="findList" resultType="com.hzwealth.sms.modules.match.entity.OperationLog">
 		SELECT 
 			<include refid="operationLog"/>
 		FROM t_match_install_log a
@@ -25,7 +25,7 @@
 	 </select>
 
 
-		<insert id="createMatchInstallLog" parameterType="com.hzdjr.hzwd.modules.match.entity.OperationLog">
+		<insert id="createMatchInstallLog" parameterType="com.hzwealth.sms.modules.match.entity.OperationLog">
 		INSERT INTO t_match_install_log(
 			id,
 			type,

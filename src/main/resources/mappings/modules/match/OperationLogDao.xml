@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.match.dao.OperationLogDao">
+<mapper namespace="com.hzwealth.sms.modules.match.dao.OperationLogDao">
   <sql id="operationLog" >
     id, 
     type,
@@ -14,7 +14,7 @@
     borrow_type as borrowType,
     detail as detail
   </sql>
-	<select id="findList" resultType="com.hzdjr.hzwd.modules.match.entity.OperationLog">
+	<select id="findList" resultType="com.hzwealth.sms.modules.match.entity.OperationLog">
 		SELECT 
 			<include refid="operationLog"/>
 		FROM t_weight_log a
@@ -26,7 +26,7 @@
 		ORDER BY a.create_time DESC
 	 </select>
 
-		<insert id="createWeightLog" parameterType="com.hzdjr.hzwd.modules.match.entity.OperationLog">
+		<insert id="createWeightLog" parameterType="com.hzwealth.sms.modules.match.entity.OperationLog">
 		INSERT INTO t_weight_log(
 			id,
 			type,

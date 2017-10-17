@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.moneystatistics.dao.RechargeStatisticsDao">
-	<select id="findRechargeStatisticsList" resultType="com.hzdjr.hzwd.modules.moneystatistics.entity.RechargeStatistics">
+<mapper namespace="com.hzwealth.sms.modules.moneystatistics.dao.RechargeStatisticsDao">
+	<select id="findRechargeStatisticsList" resultType="com.hzwealth.sms.modules.moneystatistics.entity.RechargeStatistics">
 		SELECT
 			 fu.date_fu rechargeTime,
 			 fu.sum_fu totalAmount,

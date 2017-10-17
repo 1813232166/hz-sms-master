@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.borrow.dao.LoanFundDao">
+<mapper namespace="com.hzwealth.sms.modules.borrow.dao.LoanFundDao">
     
 	<sql id="tBorrowColumns">
 		a.status AS "status",
@@ -357,7 +357,7 @@
 		</foreach>
 		
 	</insert>
-	<insert id="saveBillPlan"  parameterType="com.hzdjr.hzwd.modules.borrow.entity.TBorrowBillplan">
+	<insert id="saveBillPlan"  parameterType="com.hzwealth.sms.modules.borrow.entity.TBorrowBillplan">
 		INSERT INTO t_borrow_billplan(apply_id, period, monthly_payment_origin,monthly_payment_actual,manage_fee,fails_charge_origin,fails_charge_actual,
 			late_charge_origin,late_charge_actual,repay_status,repay_time,plan_repay_amount,month_capital,month_interest,contract_id,noallotamount,remains_principal,
 			prepayment_amount,prepayment_FailsCharge,roll_out_id,is_overdue,late_payment_time,parking_fee
@@ -373,13 +373,13 @@
 		WHERE apply_id = #{applyId}
 	</select>
 	<!-- 通过借款编号查询还款计划  -->
-	<select id="queryBilPlanByBorrowId" parameterType="java.util.Map" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrowBillplan">
+	<select id="queryBilPlanByBorrowId" parameterType="java.util.Map" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrowBillplan">
 		SELECT *
 		FROM t_borrow_billplan 
 		WHERE apply_id = #{applyId}
 	</select>
 	<!-- 通过ID获取借款数据 -->
-	<select id="findTBorrowById" parameterType="java.util.Map" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+	<select id="findTBorrowById" parameterType="java.util.Map" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
 		SELECT * FROM t_borrow WHERE
 		borrow_id = #{borrowId}
 	</select>
@@ -403,7 +403,7 @@
     <update id="updateIsFinish" parameterType="java.lang.String">
     	UPDATE t_borrow SET is_finish = 1 WHERE BORROW_ID = #{bid}
     </update>	
-	<select id="getBorrowPic" parameterType="java.lang.String" resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowPicVo">
+	<select id="getBorrowPic" parameterType="java.lang.String" resultType="com.hzwealth.sms.modules.borrow.entity.BorrowPicVo">
 		SELECT id,picdesc,bid,pictype,picurl,createtime FROM t_borrow_apply WHERE bid=#{borrowId}
 	</select>
 	

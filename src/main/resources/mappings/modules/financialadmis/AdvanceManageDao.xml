@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.AdvanceManageDao">
+<mapper namespace="com.hzwealth.sms.modules.financialadmis.dao.AdvanceManageDao">
 	<sql id="sqlAdvanceList">
 		SELECT
 			tfd.create_date AS 'advanceTime',
@@ -29,13 +29,13 @@
 			</where>
 	</sql>
     <!--垫付  -->
-	<select id="findAdvanceList"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.AdvanceVo">
+	<select id="findAdvanceList"  resultType="com.hzwealth.sms.modules.financialadmis.entity.AdvanceVo">
 		<include refid="sqlAdvanceList" />
 		ORDER BY tfd.create_date DESC
 	</select>
 
 	<!-- 导出垫付列表 -->
-	<select id="exportAdvance"  resultType="com.hzdjr.hzwd.modules.financialadmis.entity.AdvanceVo">
+	<select id="exportAdvance"  resultType="com.hzwealth.sms.modules.financialadmis.entity.AdvanceVo">
 		<include refid="sqlAdvanceList" />
 		ORDER BY tfd.create_date DESC LIMIT 20000
 	</select>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.repaymentmanage.dao.RePaymentDao">
+<mapper namespace="com.hzwealth.sms.modules.repaymentmanage.dao.RePaymentDao">
    
    <!--出借计划  - 还款列表  -->
-   <select id="findLendList" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.LendPlan">
+   <select id="findLendList" resultType="com.hzwealth.sms.modules.repaymentmanage.entity.LendPlan">
      select 
 		t1.id,
 		t1.product_name,
@@ -30,7 +30,7 @@
    </select>
    
    <!-- 还款详情页面 -->
-   <select id="toLendDetail" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.LendPlan" parameterType="String">
+   <select id="toLendDetail" resultType="com.hzwealth.sms.modules.repaymentmanage.entity.LendPlan" parameterType="String">
      SELECT
 		t1.id ,
 		t1.name,
@@ -54,7 +54,7 @@
    </select>
    
    <!--查询   t_invest_billplan   获取还款金额  还款期数  还款日期-->
-   <select id="queryInvestBillPlan" resultType="com.hzdjr.hzwd.modules.repaymentmanage.entity.InvestBillPlan">
+   <select id="queryInvestBillPlan" resultType="com.hzwealth.sms.modules.repaymentmanage.entity.InvestBillPlan">
     SELECT 
     (stcapi+sinte) as count,
     max(capiMonth) as capiMonth,

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.departmentdiction.dao.DepartmentDictionDao">
+<mapper namespace="com.hzwealth.sms.modules.departmentdiction.dao.DepartmentDictionDao">
     
 	<sql id="departmentDictionColumns">
 		a.id AS "id",
@@ -24,12 +24,12 @@
 		WHERE a.id = #{id}
 	</select>
 	<!-- 省份列表 -->
-	<select id="findProvinceList" resultType="com.hzdjr.hzwd.modules.departmentdiction.entity.Province">
+	<select id="findProvinceList" resultType="com.hzwealth.sms.modules.departmentdiction.entity.Province">
 		select d.id as id,d.value as name,d.parendId as parendId from department_diction d
 		where type = 1
 	</select>
 	<!-- 城市列表 -->
-	<select id="findCity" parameterType="String" resultType="com.hzdjr.hzwd.modules.departmentdiction.entity.City">
+	<select id="findCity" parameterType="String" resultType="com.hzwealth.sms.modules.departmentdiction.entity.City">
 		select d.id as id,d.value as name,d.parendId as parendId from department_diction d
  		where type = 2 and d.parendId = #{pid}
 	</select>
@@ -83,7 +83,7 @@
 			ORDER BY  province
 	</select>
 	
-	<select id="findCityByProvince" parameterType="String" resultType="com.hzdjr.hzwd.modules.departmentdiction.entity.City">
+	<select id="findCityByProvince" parameterType="String" resultType="com.hzwealth.sms.modules.departmentdiction.entity.City">
 		SELECT d.VALUE as name,d.ID as id from department_diction d ,
 		(SELECT * FROM department_diction where VALUE = #{province}) a where a.id=d.parendId
 	</select>
@@ -108,7 +108,7 @@
 	<select id="findParendIdByCity" parameterType="String" resultType="String">
 		select id from department_diction where value=#{city}
 	</select>
-	<select id="finddeptDictionById" parameterType="String" resultType="com.hzdjr.hzwd.modules.departmentdiction.entity.DeptDiction">
+	<select id="finddeptDictionById" parameterType="String" resultType="com.hzwealth.sms.modules.departmentdiction.entity.DeptDiction">
 		SELECT d1.value as province,d2.value as city FROM
 		(select * from department_diction WHERE type = 1 ORDER BY id desc) d1,
 		(select * from department_diction WHERE type = 2) d2,

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.financialadmis.dao.PlatformDoorDao">
+<mapper namespace="com.hzwealth.sms.modules.financialadmis.dao.PlatformDoorDao">
     
 	<sql id="tBorrowColumns">
 		a.status AS "status",
@@ -261,7 +261,7 @@
     </select>
     
 	<!-- 导出服务费账户  -->
-	<select id = "exportList" parameterType="map" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+	<select id = "exportList" parameterType="map" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
 		SELECT <include refid="tBorrowColumns"></include>
         ,tu.realName as userName,tb.audit_suggest as bzInfo,CONCAT(tiv.hasDeadline,"/",tiv.deadline) AS ratio,
         CASE 1 WHEN UNIX_TIMESTAMP(a.openborrowdate)&gt;UNIX_TIMESTAMP(NOW()) THEN '21' ELSE a.BORROWSTATUS END AS borrowstatus,

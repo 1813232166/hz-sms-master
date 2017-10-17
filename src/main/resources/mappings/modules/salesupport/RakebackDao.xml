@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.salesupport.dao.RakebackDao">
-	<select id="getRakebackList" resultType="com.hzdjr.hzwd.modules.salesupport.entity.Rakeback" parameterType="map">
+<mapper namespace="com.hzwealth.sms.modules.salesupport.dao.RakebackDao">
+	<select id="getRakebackList" resultType="com.hzwealth.sms.modules.salesupport.entity.Rakeback" parameterType="map">
 	 SELECT
 		a.id AS "id",
 		a.type AS "type",
@@ -84,7 +84,7 @@ FROM
             ON u.id = yu.user_id )as re
     WHERE re.staffId!=""
 		 </select> 
-	<select id="getRakebackPerview" resultType="com.hzdjr.hzwd.modules.salesupport.entity.Rakeback">
+	<select id="getRakebackPerview" resultType="com.hzwealth.sms.modules.salesupport.entity.Rakeback">
 		SELECT 
 			a.id AS "id",
 		a.type AS "type",

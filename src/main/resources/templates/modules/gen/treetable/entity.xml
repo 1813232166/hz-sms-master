@@ -13,7 +13,7 @@ package ${packageName}.${moduleName}.entity<#if subModuleName != "">.${subModule
 import ${i};
 </#list>
 
-import com.hzdjr.hzwd.common.persistence.TreeEntity;
+import com.hzwealth.sms.common.persistence.TreeEntity;
 
 /**
  * ${functionName}Entity

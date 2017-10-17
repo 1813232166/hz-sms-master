@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.rebate.dao.InvestRecordDao">
+<mapper namespace="com.hzwealth.sms.modules.rebate.dao.InvestRecordDao">
 	<!-- 插入 -->
     <insert id="insert">
         INSERT INTO t_yx_rel_invest (
@@ -25,7 +25,7 @@
 		)
     </insert>
     <!-- 查询 -->	
-	<select id="findList" resultType="com.hzdjr.hzwd.modules.rebate.entity.InvestRecord">
+	<select id="findList" resultType="com.hzwealth.sms.modules.rebate.entity.InvestRecord">
 	    SELECT
 			t.id,
 			t.user_mobile as userMobile,

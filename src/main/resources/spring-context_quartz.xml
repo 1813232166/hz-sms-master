@@ -16,7 +16,7 @@
 		<!-- 这个属性决定当在spring配置文件里修改任务执行时间的时候,是否更新数据库,默认是不更新的,也就是说,你第一通过修改配置文件定义了时间,之后再修改是不会起任何作用的-->
 		<property name="overwriteExistingJobs" value="true" />
 		<property name="jobFactory">
-			<bean class="com.hzdjr.hzwd.modules.quartz.util.AutowiringSpringBeanJobFactory" />
+			<bean class="com.hzwealth.sms.modules.quartz.util.AutowiringSpringBeanJobFactory" />
 		</property>
 		<property name="triggers">
 			<list>
@@ -79,48 +79,48 @@
 	<!----> <bean id="letterJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
 		<property name="group" value="hzcf2_letter" />
 		<property name="durability" value="true" />
-		<property name="jobClass" value="com.hzdjr.hzwd.modules.quartz.job.LetterJob" />
+		<property name="jobClass" value="com.hzwealth.sms.modules.quartz.job.LetterJob" />
 	</bean> 
 	<!-- 定时更新标的编号-->
 	<bean id="borrowJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
 		<property name="group" value="hzcf2_letter" />
 		<property name="durability" value="true" />
-		<property name="jobClass" value="com.hzdjr.hzwd.modules.quartz.job.BorrowJob" />
+		<property name="jobClass" value="com.hzwealth.sms.modules.quartz.job.BorrowJob" />
 	</bean>
 	<!-- 放款查询-->
 	<bean id="fkQueryJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
 		<property name="group" value="hzcf2_letter" />
 		<property name="durability" value="true" />
-		<property name="jobClass" value="com.hzdjr.hzwd.modules.quartz.job.FkQueryJob" />
+		<property name="jobClass" value="com.hzwealth.sms.modules.quartz.job.FkQueryJob" />
 	</bean>
 	<!-- 流标 -->
 	<bean id="lbQueryJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
 		<property name="group" value="hzcf2_letter" />
 		<property name="durability" value="true" />
-		<property name="jobClass" value="com.hzdjr.hzwd.modules.quartz.job.LbQueryJob" />
+		<property name="jobClass" value="com.hzwealth.sms.modules.quartz.job.LbQueryJob" />
 	</bean>
 	<!-- 更新优惠券活动状态失效 -->
 	<bean id="couponActivityJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="group" value="hzcf2_letter" />
         <property name="durability" value="true" />
-        <property name="jobClass" value="com.hzdjr.hzwd.modules.quartz.job.CouponActivityJob" />
+        <property name="jobClass" value="com.hzwealth.sms.modules.quartz.job.CouponActivityJob" />
     </bean>
     <!-- 优惠券2天后失效提醒 -->
     <bean id="couponExpireNotifyJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="group" value="hzcf2_letter" />
         <property name="durability" value="true" />
-        <property name="jobClass" value="com.hzdjr.hzwd.modules.quartz.job.CouponExpireNotifyJob" />
+        <property name="jobClass" value="com.hzwealth.sms.modules.quartz.job.CouponExpireNotifyJob" />
     </bean>
 	<!-- 返佣金额计算 每1小时进行一次 -->
 	<bean id="rebateComputerJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="group" value="hzcf2_letter" />
         <property name="durability" value="true" />
-        <property name="jobClass" value="com.hzdjr.hzwd.modules.quartz.job.RebateComputerJob" />
+        <property name="jobClass" value="com.hzwealth.sms.modules.quartz.job.RebateComputerJob" />
     </bean>
     <!-- 统计每月返佣金额 每月10号0点执行 -->
 	<bean id="monthRebateJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="group" value="hzcf2_letter" />
         <property name="durability" value="true" />
-        <property name="jobClass" value="com.hzdjr.hzwd.modules.quartz.job.MonthRebateJob" />
+        <property name="jobClass" value="com.hzwealth.sms.modules.quartz.job.MonthRebateJob" />
     </bean>
 </beans> 

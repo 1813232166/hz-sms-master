@@ -19,15 +19,15 @@
 	
     <util:properties id="APP_PROP" location="classpath:hzwd.properties" local-override="true"/>
 	
-	<context:component-scan base-package="com.hzdjr.hzwd"><!-- base-package 如果多个，用“,”分隔 -->
+	<context:component-scan base-package="com.hzwealth.sms"><!-- base-package 如果多个，用“,”分隔 -->
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
 	</context:component-scan>
 	
  	<!-- MyBatis begin -->
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="typeAliasesPackage" value="com.hzdjr.hzwd"/>
-        <property name="typeAliasesSuperType" value="com.hzdjr.hzwd.common.persistence.BaseEntity"/>
+        <property name="typeAliasesPackage" value="com.hzwealth.sms"/>
+        <property name="typeAliasesSuperType" value="com.hzwealth.sms.common.persistence.BaseEntity"/>
         <property name="mapperLocations" value="classpath:/mappings/**/*.xml"/>
 		<property name="configLocation" value="classpath:/mybatis-config.xml"></property>
     </bean>
@@ -35,8 +35,8 @@
     <!-- 扫描basePackage下所有以@MyBatisDao注解的接口 -->
     <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
-        <property name="basePackage" value="com.hzdjr.hzwd"/>
-        <property name="annotationClass" value="com.hzdjr.hzwd.common.persistence.annotation.MyBatisDao"/>
+        <property name="basePackage" value="com.hzwealth.sms"/>
+        <property name="annotationClass" value="com.hzwealth.sms.common.persistence.annotation.MyBatisDao"/>
     </bean>
     
     <!-- 定义事务 -->
@@ -88,5 +88,5 @@
 		<!-- 配置监控统计拦截的filters -->
 	    <property name="filters" value="stat" /> 
 	</bean>
-	<bean id="springUtil" class="com.hzdjr.hzwd.common.utils.spring.SpringUtils" />
+	<bean id="springUtil" class="com.hzwealth.sms.common.utils.spring.SpringUtils" />
 </beans>

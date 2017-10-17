@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.datastatistics.dao.BorrowStatisticsDao">
+<mapper namespace="com.hzwealth.sms.modules.datastatistics.dao.BorrowStatisticsDao">
 
 	<select id="findSumBorrowAmount" resultType="BigDecimal">
 		SELECT IFNULL(SUM(b.`BORROWAMOUNT`),'0.0') FROM `t_borrow` b;
@@ -85,7 +85,7 @@
 		#{b.sumCollectingBorrowAmount},#{from},#{to});
 	</insert>
 	
-	<select id="findBorrowStatisticsRecord" resultType="com.hzdjr.hzwd.modules.datastatistics.entity.BorrowStatistics">
+	<select id="findBorrowStatisticsRecord" resultType="com.hzwealth.sms.modules.datastatistics.entity.BorrowStatistics">
 		SELECT * FROM `t_statistics_borrow` b 
 		WHERE DATE_FORMAT(b.`to`,'%Y%m%d')=DATE_FORMAT(NOW(),'%Y%m%d')
 		LIMIT 1

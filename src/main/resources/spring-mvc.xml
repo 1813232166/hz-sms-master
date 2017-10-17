@@ -11,7 +11,7 @@
 	<context:property-placeholder ignore-unresolvable="true" location="classpath:hzwd.properties" />
 	
 	<!-- 使用Annotation自动注册Bean,只扫描@Controller -->
-	<context:component-scan base-package="com.hzdjr.hzwd" use-default-filters="false"><!-- base-package 如果多个，用“,”分隔 -->
+	<context:component-scan base-package="com.hzwealth.sms" use-default-filters="false"><!-- base-package 如果多个，用“,”分隔 -->
 		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
 	</context:component-scan>
     
@@ -29,7 +29,7 @@
                 </property>
                 <property name="prettyPrint" value="false"/>
                 <property name="objectMapper">  
-                    <bean class="com.hzdjr.hzwd.common.mapper.JsonMapper"></bean>  
+                    <bean class="com.hzwealth.sms.common.mapper.JsonMapper"></bean>  
                 </property> 
             </bean>
             <!-- 使用XML格式输出数据 -->
@@ -41,10 +41,10 @@
 				        </property>
 				        <property name="annotatedClasses">
 				            <list>
-				                <value>com.hzdjr.hzwd.common.persistence.BaseEntity</value>
-				                <value>com.hzdjr.hzwd.common.supcan.treelist.TreeList</value>
-				                <value>com.hzdjr.hzwd.common.supcan.treelist.cols.Col</value>
-				                <value>com.hzdjr.hzwd.common.supcan.treelist.cols.Group</value>
+				                <value>com.hzwealth.sms.common.persistence.BaseEntity</value>
+				                <value>com.hzwealth.sms.common.supcan.treelist.TreeList</value>
+				                <value>com.hzwealth.sms.common.supcan.treelist.cols.Col</value>
+				                <value>com.hzwealth.sms.common.supcan.treelist.cols.Group</value>
 				            </list>
 				        </property>
 				    </bean>
@@ -89,12 +89,12 @@
 			<mvc:exclude-mapping path="${adminPath}/login"/>
 			<mvc:exclude-mapping path="${adminPath}/sys/menu/tree"/>
 			<mvc:exclude-mapping path="${adminPath}/sys/menu/treeData"/>
-			<bean class="com.hzdjr.hzwd.modules.sys.interceptor.LogInterceptor" />
+			<bean class="com.hzwealth.sms.modules.sys.interceptor.LogInterceptor" />
 		</mvc:interceptor>
 		<!-- 手机视图拦截器 -->
 		<mvc:interceptor>
 			<mvc:mapping path="/**" />
-			<bean class="com.hzdjr.hzwd.modules.sys.interceptor.MobileInterceptor" />
+			<bean class="com.hzwealth.sms.modules.sys.interceptor.MobileInterceptor" />
 		</mvc:interceptor>
 	</mvc:interceptors>
 	
@@ -121,7 +121,7 @@
 		<!--  配置Token拦截器，防止用户重复提交数据 -->
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
-			<bean class="com.hzdjr.hzwd.common.utils.token.TokenInterceptor"/>
+			<bean class="com.hzwealth.sms.common.utils.token.TokenInterceptor"/>
 		</mvc:interceptor>
 	</mvc:interceptors>  
 	

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.borrowlist.dao.AuditBorrowListDao">
+<mapper namespace="com.hzwealth.sms.modules.borrowlist.dao.AuditBorrowListDao">
     
 	<sql id="auditBorrowListColumns">
 		a.borrow_list_id AS "borrowListId",
@@ -20,7 +20,7 @@
 	<sql id="auditBorrowListJoins">
 	</sql>
     
-    <resultMap type="com.hzdjr.hzwd.modules.borrowlist.entity.AuditBorrowList" id="auditBorrowListMap">
+    <resultMap type="com.hzwealth.sms.modules.borrowlist.entity.AuditBorrowList" id="auditBorrowListMap">
 	     <id property="borrowListId" column="borrowListId"/>
 	     <result property="borrowListTitle" column="borrowListTitle"/>
 	     <result property="borrowListCode" column="borrowListCode"/>

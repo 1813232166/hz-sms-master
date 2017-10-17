@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.invest.dao.InvestDao">
+<mapper namespace="com.hzwealth.sms.modules.invest.dao.InvestDao">
     
 	<sql id="investColumns">
 		a.id AS "id",
@@ -51,7 +51,7 @@
 		WHERE a.id = #{id}
 	</select>
 	
-	<select id="findBorrowById" parameterType="String" resultType="com.hzdjr.hzwd.modules.borrow.entity.Borrow">
+	<select id="findBorrowById" parameterType="String" resultType="com.hzwealth.sms.modules.borrow.entity.Borrow">
 		SELECT * FROM t_borrow WHERE borrow_Id = #{borrowid}
 	</select>
 	
@@ -59,7 +59,7 @@
 		UPDATE t_invest SET flag=3 WHERE bizId=#{bizId} and flag=1
 	</update>
 	
-	<select id="findInvestById" parameterType="String" resultType="com.hzdjr.hzwd.modules.invest.entity.Invest">
+	<select id="findInvestById" parameterType="String" resultType="com.hzwealth.sms.modules.invest.entity.Invest">
 		SELECT bizid,investAmount,investor FROM t_invest WHERE borrowId = #{borrowId} and flag=1
 	</select>
 	

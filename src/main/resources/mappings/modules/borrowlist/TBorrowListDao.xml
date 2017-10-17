@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.borrowlist.dao.TBorrowListDao">
+<mapper namespace="com.hzwealth.sms.modules.borrowlist.dao.TBorrowListDao">
     
 	<sql id="tBorrowListColumns">
 		a.borrow_list_id AS "borrowListId",
@@ -25,7 +25,7 @@
 	</sql>
 	<sql id="tBorrowListJoins">
 	</sql>
-	<resultMap type="com.hzdjr.hzwd.modules.borrowlist.entity.TBorrowList" id="tBorrowListMap">
+	<resultMap type="com.hzwealth.sms.modules.borrowlist.entity.TBorrowList" id="tBorrowListMap">
 	     <id property="borrowListId" column="borrowListId"/>
 	     <result property="borrowListTitle" column="borrowListTitle"/>
 	     <result property="borrowListCode" column="borrowListCode"/>
@@ -43,7 +43,7 @@
 	     <result property="raiseDay" column="raiseDay"/>
 	     <result property="minTenderSum" column="minTenderSum"/>
          <!-- ofType指定集合中的对象类型 -->
-        <collection property="tBorrow" ofType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+        <collection property="tBorrow" ofType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
             <id property="borrowId" column="BORROW_ID"/>
             <result property="type" column="type"/>
             <result property="borrowstatus" column="BORROWSTATUS"/>
@@ -164,7 +164,7 @@
         
 	</update>
 	<!-- 查询单个标的的还款计划 -->
-	<select id="findTBorrowBillplans" parameterType="java.util.Set"  resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrowBillplan">
+	<select id="findTBorrowBillplans" parameterType="java.util.Set"  resultType="com.hzwealth.sms.modules.borrow.entity.TBorrowBillplan">
 	   SELECT apply_id,period,is_advances AS "isAdvances",is_offset AS "isOffset",is_overdue AS "isOverdue" 
 	   FROM t_borrow_billplan WHERE  is_overdue='1'
 	       AND apply_id  IN 
@@ -282,7 +282,7 @@
   </sql>
   
   <!-- 债权匹配  -->
-  <select id="getTBorrow" parameterType="String" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+  <select id="getTBorrow" parameterType="String" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
     SELECT <include refid="tBorrowColumns"/> FROM t_borrow_list tbl 
     LEFT JOIN t_borrow tb ON tbl.borrow_list_id = tb.borrow_list_id 
     LEFT JOIN t_user tu ON tu.id = tb.USERID
@@ -290,7 +290,7 @@
   </select>
 
   <!-- 通过borrowId查询相应得出借记录 -->
-  <select id="getInvRecByBid" parameterType="String" resultType="com.hzdjr.hzwd.modules.invest.entity.Invest">
+  <select id="getInvRecByBid" parameterType="String" resultType="com.hzwealth.sms.modules.invest.entity.Invest">
     SELECT ti.investCode,tu.realName,ti.investAmount,ti.investTime
     FROM t_borrow_list tbl 
     LEFT JOIN t_borrow tb ON tbl.borrow_list_id = tb.borrow_list_id
@@ -460,7 +460,7 @@
 	</sql>
 	
 	<!-- 通过标的编号查询借款  -->
-	<select id="findLoanByBorrowsCodes" parameterType="java.util.Map" resultType="com.hzdjr.hzwd.modules.borrow.entity.Borrow">
+	<select id="findLoanByBorrowsCodes" parameterType="java.util.Map" resultType="com.hzwealth.sms.modules.borrow.entity.Borrow">
 		SELECT 
 			<include refid="borrowColumns"/>
 		FROM t_borrow a 
@@ -523,7 +523,7 @@
 		</foreach>
 	</update>
 	
-	<insert id="releaseBorrowList" parameterType="com.hzdjr.hzwd.modules.borrowlist.entity.TBorrowList" >
+	<insert id="releaseBorrowList" parameterType="com.hzwealth.sms.modules.borrowlist.entity.TBorrowList" >
 		INSERT INTO t_borrow_list (
 			borrow_list_id,
 			borrow_list_code,

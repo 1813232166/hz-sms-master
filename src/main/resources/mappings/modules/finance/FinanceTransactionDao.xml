@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.finance.dao.FinanceTransactionDao">
+<mapper namespace="com.hzwealth.sms.modules.finance.dao.FinanceTransactionDao">
     
 	<sql id="capitalColumns">
 		a.id AS "id",
@@ -344,7 +344,7 @@
 	</sql>
 	
 	<!-- 查询出借交易单投资列表 -->
-	<select id="findFinanceInvests" parameterType="map" resultType="com.hzdjr.hzwd.modules.finance.entity.FinanceInvest" >
+	<select id="findFinanceInvests" parameterType="map" resultType="com.hzwealth.sms.modules.finance.entity.FinanceInvest" >
 		SELECT * FROM (
 			<include refid="financeInvestSql"/>
 		WHERE tc.id = #{capitalId} 
@@ -357,7 +357,7 @@
 	</select>
 	
 	<!-- 查询预期回款 -->
-	<select id="findExpectedRepayBillplans" parameterType="map" resultType="com.hzdjr.hzwd.modules.repaybillplan.entity.TBorrowRepayBillplan" >
+	<select id="findExpectedRepayBillplans" parameterType="map" resultType="com.hzwealth.sms.modules.repaybillplan.entity.TBorrowRepayBillplan" >
 		SELECT 
 		  tidb.`billNum` AS 'billNum',
 		  tidb.`stcapi` AS 'stcapi',

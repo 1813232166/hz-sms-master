@@ -24,9 +24,9 @@ if (Servlets.isAjaxRequest(request)) {
 else {
 %>
 <%@page import="org.slf4j.Logger,org.slf4j.LoggerFactory"%>
-<%@page import="com.hzdjr.hzwd.common.web.Servlets"%>
-<%@page import="com.hzdjr.hzwd.common.utils.Exceptions"%>
-<%@page import="com.hzdjr.hzwd.common.utils.StringUtils"%>
+<%@page import="com.hzwealth.sms.common.web.Servlets"%>
+<%@page import="com.hzwealth.sms.common.utils.Exceptions"%>
+<%@page import="com.hzwealth.sms.common.utils.StringUtils"%>
 <%@page contentType="text/html;charset=UTF-8" isErrorPage="true"%>
 <%@include file="/WEB-INF/views/include/taglib.jsp"%>
 <!DOCTYPE html>

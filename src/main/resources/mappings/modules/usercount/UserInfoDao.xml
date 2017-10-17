@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.usercount.dao.UserInfoDao">
+<mapper namespace="com.hzwealth.sms.modules.usercount.dao.UserInfoDao">
     
-	<select id="getUserInfo" parameterType="map" resultType="com.hzdjr.hzwd.modules.usercount.entity.UserInfo">
+	<select id="getUserInfo" parameterType="map" resultType="com.hzwealth.sms.modules.usercount.entity.UserInfo">
 		SELECT
 			 tuf.date1 times,
 			 tuf.num1 currentreg,
@@ -108,7 +108,7 @@
 	 		</if>
 		</where>
 	</select>
-	<select id="getWithdraw" parameterType="map" resultType="com.hzdjr.hzwd.modules.usercount.entity.Withdraw">
+	<select id="getWithdraw" parameterType="map" resultType="com.hzwealth.sms.modules.usercount.entity.Withdraw">
 		SELECT
 			 fu.date_fu times,
 			 fu.sum_fu withdrawamount,

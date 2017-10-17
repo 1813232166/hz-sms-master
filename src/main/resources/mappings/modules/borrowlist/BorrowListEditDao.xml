@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.borrowlist.dao.BorrowListEditDao">
+<mapper namespace="com.hzwealth.sms.modules.borrowlist.dao.BorrowListEditDao">
     
 	<sql id="tBorrowColumns">
 		a.status AS "status",
@@ -152,12 +152,12 @@
 	
 	
 	<!-- 通过标的编号查询散标集合  -->
-	<select id="getBorrowListId" parameterType="java.lang.String" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+	<select id="getBorrowListId" parameterType="java.lang.String" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
 		select b.*,u.realName as userName from t_borrow b,t_user u
 		 WHERE  b.USERID = u.id and b.borrow_list_id = #{borrowListId}
 	</select>
 	
-	<select id="getBorrowListCode" parameterType="java.lang.String" resultType="com.hzdjr.hzwd.modules.borrowlist.entity.TBorrowList">
+	<select id="getBorrowListCode" parameterType="java.lang.String" resultType="com.hzwealth.sms.modules.borrowlist.entity.TBorrowList">
 		select * from t_borrow_list
 		 WHERE borrow_list_code = #{borrowListCode}
 	</select>
@@ -189,7 +189,7 @@
 	</update>
 	
 	<!-- 通过标的id查询借款  -->
-	<select id="getByBorrowId" parameterType="java.util.List" resultType="com.hzdjr.hzwd.modules.borrow.entity.TBorrow">
+	<select id="getByBorrowId" parameterType="java.util.List" resultType="com.hzwealth.sms.modules.borrow.entity.TBorrow">
 		SELECT <include refid="tBorrowColumns"/>
 		 FROM t_borrow a WHERE  BORROW_ID IN(
 		<foreach collection="list" item="item" index="index" separator="," > 

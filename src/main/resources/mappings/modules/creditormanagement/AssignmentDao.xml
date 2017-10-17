@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.creditormanagement.dao.AssignmentDao">
+<mapper namespace="com.hzwealth.sms.modules.creditormanagement.dao.AssignmentDao">
     <sql id="tBorrowRepayBillplanColumns">
 		a.investid AS "investid",
 		a.billnum AS "billnum",
@@ -22,7 +22,7 @@
 		a.remarks AS "remarks",
 		a.del_flag AS "delFlag"
 	</sql>
- <select id="findList" resultType="com.hzdjr.hzwd.modules.creditormanagement.entity.AssignmentVo" parameterType="map">
+ <select id="findList" resultType="com.hzwealth.sms.modules.creditormanagement.entity.AssignmentVo" parameterType="map">
 			SELECT         
 			               t1.id,
 			               t4.id AS "tinvestId",
@@ -150,7 +150,7 @@
 			 where t1.id=#{0} and t4.id=#{1}
     </select>
         <!-- 转让记录 -->
-     <select id="queryTransferByBorrowId" resultType="com.hzdjr.hzwd.modules.creditormanagement.entity.AssignmentVo" parameterType="map">
+     <select id="queryTransferByBorrowId" resultType="com.hzwealth.sms.modules.creditormanagement.entity.AssignmentVo" parameterType="map">
 	    SELECT t2.realname AS "investRealname",
 	           t3.investAmount,
 	           investTime,

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hzdjr.hzwd.modules.borrow.dao.BorrowDao">
+<mapper namespace="com.hzwealth.sms.modules.borrow.dao.BorrowDao">
     
 	<sql id="borrowColumns">
 		a.status AS "status",
@@ -508,8 +508,8 @@
 	</sql>
 	
 	<!-- 查询线下进件标的 -->
-	<select id="findBorrowApplyTrials" parameterType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyTrialQueryVo" 
-			resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyTrialVo">
+	<select id="findBorrowApplyTrials" parameterType="com.hzwealth.sms.modules.borrow.entity.BorrowApplyTrialQueryVo" 
+			resultType="com.hzwealth.sms.modules.borrow.entity.BorrowApplyTrialVo">
 		<!-- SELECT
 			tb.BORROW_ID AS 'borrowId',
 			tb.loanNumber AS 'loanNumber',
@@ -656,7 +656,7 @@
 		  ORDER BY ft.createTime DESC, ft.loanNumber
 	</select>
 	
-	<select id="countBorrowApplyTrials" parameterType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyTrialQueryVo" 
+	<select id="countBorrowApplyTrials" parameterType="com.hzwealth.sms.modules.borrow.entity.BorrowApplyTrialQueryVo" 
 		resultType="int" >
 		SELECT COUNT(1) FROM (
 			<include refid="findBorrowApplyTrialsSql" />
@@ -677,7 +677,7 @@
 	</select>
 	
 	<select id="getBorrowDetailByBorrowId" parameterType="java.util.Map" 
-		resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowApplyDeatil" >
+		resultType="com.hzwealth.sms.modules.borrow.entity.BorrowApplyDeatil" >
 		SELECT
 			tb.BORROW_ID AS 'borrowId',
 			tb.type AS 'type',
@@ -776,7 +776,7 @@
 		</where>
 	</select>
 	
-	<select id="findBorrowPicList" parameterType="java.util.Map" resultType="com.hzdjr.hzwd.modules.borrow.entity.BorrowPicVo">
+	<select id="findBorrowPicList" parameterType="java.util.Map" resultType="com.hzwealth.sms.modules.borrow.entity.BorrowPicVo">
 		SELECT
 			tba.id AS 'id',
 			tba.picdesc AS 'picdesc',

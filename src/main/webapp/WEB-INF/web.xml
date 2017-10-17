@@ -17,7 +17,7 @@
 		<param-value>60000</param-value>
 	</context-param>
 	<listener>
-		<listener-class>com.hzdjr.hzwd.modules.sys.listener.WebContextListener
+		<listener-class>com.hzwealth.sms.modules.sys.listener.WebContextListener
 		</listener-class>
 	</listener>
 	<listener>
@@ -100,7 +100,7 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>CKFinderConnectorServlet</servlet-name>
-		<servlet-class>com.hzdjr.hzwd.common.web.CKFinderConnectorServlet
+		<servlet-class>com.hzwealth.sms.common.web.CKFinderConnectorServlet
 		</servlet-class>
 		<init-param>
 			<param-name>XMLConfig</param-name>
@@ -112,7 +112,7 @@
 		</init-param>
 		<init-param>
 			<param-name>configuration</param-name>
-			<param-value>com.hzdjr.hzwd.common.web.CKFinderConfig</param-value>
+			<param-value>com.hzwealth.sms.common.web.CKFinderConfig</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
@@ -140,7 +140,7 @@
 	</filter-mapping>
 	<servlet>
 		<servlet-name>UserfilesDownloadServlet</servlet-name>
-		<servlet-class>com.hzdjr.hzwd.common.servlet.UserfilesDownloadServlet
+		<servlet-class>com.hzwealth.sms.common.servlet.UserfilesDownloadServlet
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -149,7 +149,7 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>ValidateCodeServlet</servlet-name>
-		<servlet-class>com.hzdjr.hzwd.common.servlet.ValidateCodeServlet
+		<servlet-class>com.hzwealth.sms.common.servlet.ValidateCodeServlet
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
