@@ -76,7 +76,7 @@ import com.hzwealth.sms.modules.match.dao.AssetDao;
 public class BorrowApplyController extends BaseController {
 
 	protected Logger logger = LoggerFactory.getLogger(BorrowApplyController.class);
-	private static final PropertiesLoader property = new PropertiesLoader("hzwd.properties");
+	private static final PropertiesLoader property = new PropertiesLoader("sms.properties");
 	//上传路径
 	private static final String  FilePath = property.getProperty("uploadimg_baseurl"); 
 	//访问路径

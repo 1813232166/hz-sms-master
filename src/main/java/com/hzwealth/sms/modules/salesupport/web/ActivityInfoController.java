@@ -72,7 +72,7 @@ public class ActivityInfoController extends BaseController {
     @Autowired
     private CouponService couponService;
     //读取配置文件
-	private static final PropertiesLoader property = new PropertiesLoader("hzwd.properties");
+	private static final PropertiesLoader property = new PropertiesLoader("sms.properties");
 	@ModelAttribute
 	public ActivityInfo get(@RequestParam(required=false) String id) {
 		ActivityInfo entity = null;

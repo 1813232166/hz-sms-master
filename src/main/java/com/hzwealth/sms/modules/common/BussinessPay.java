@@ -14,7 +14,7 @@ import com.hzwealth.sms.common.utils.PropertiesLoader;
  */
 public class BussinessPay {
 	
-	private static PropertiesLoader loader = new PropertiesLoader("hzwd.properties");
+	private static PropertiesLoader loader = new PropertiesLoader("sms.properties");
 	
 	public static String reqUrlBorrowCreate ;
 	

@@ -13,7 +13,7 @@ import com.hzwealth.sms.common.utils.PropertiesLoader;
 
 public class BalancePay {
 	
-      	private static PropertiesLoader loader = new PropertiesLoader("hzwd.properties");
+      	private static PropertiesLoader loader = new PropertiesLoader("sms.properties");
 	
 		private static String reqUrlBalance ;
 		

@@ -56,7 +56,7 @@ import com.hzwealth.sms.modules.sys.utils.UserUtils;
 @Transactional(readOnly = false)
 public class BorrowApplyService extends CrudService<BorrowApplyDao, BorrowApply> {
 
-	private static final PropertiesLoader property = new PropertiesLoader("hzwd.properties");
+	private static final PropertiesLoader property = new PropertiesLoader("sms.properties");
 	//上传路径
 	private static final String onlineFilePath = property.getProperty("uploadimg_baseurl"); 
 	// 后台进件ftp本地路径

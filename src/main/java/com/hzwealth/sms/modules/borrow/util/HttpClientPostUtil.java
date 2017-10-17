@@ -16,7 +16,7 @@ import com.hzwealth.sms.common.utils.PropertiesLoader;
  *
  */
 public class HttpClientPostUtil {
-	private static final PropertiesLoader prop = new PropertiesLoader("hzwd.properties");
+	private static final PropertiesLoader prop = new PropertiesLoader("sms.properties");
 	
     public String getDataToUrl(String data,String methodType) throws IOException{
     	String url = prop.getProperty("lend.http.server.url");;  

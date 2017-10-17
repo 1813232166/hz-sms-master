@@ -42,7 +42,7 @@ public class RakebackController extends BaseController {
 	private RakebackService rakebackService;
 	
 	
-	private static final PropertiesLoader property = new PropertiesLoader("hzwd.properties");
+	private static final PropertiesLoader property = new PropertiesLoader("sms.properties");
 	@RequestMapping(value = "preAdd")
 	public String form(Rakeback rakeback, Model model) {
 		Map<String, Object> paramMap = new HashMap<String, Object>();

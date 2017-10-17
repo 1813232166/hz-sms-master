@@ -41,7 +41,7 @@ import com.hzwealth.sms.modules.borrow.service.LoanFundService;
 @Controller
 @RequestMapping(value="${adminPath}/borrow/loanFund")
 public class LoanFundController extends BaseController{
-	private static final PropertiesLoader property = new PropertiesLoader("hzwd.properties");
+	private static final PropertiesLoader property = new PropertiesLoader("sms.properties");
   @Autowired
   private LoanFundService loanFundService;
   /**

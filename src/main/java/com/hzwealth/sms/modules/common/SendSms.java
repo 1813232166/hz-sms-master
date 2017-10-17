@@ -17,7 +17,7 @@ import com.hzwealth.sms.modules.quartz.job.FkQueryJob;
  */
 public class SendSms {
 	private final static Logger logger = LoggerFactory.getLogger(SendSms.class);
-	private static PropertiesLoader loader = new PropertiesLoader("hzwd.properties");
+	private static PropertiesLoader loader = new PropertiesLoader("sms.properties");
 	
 	public static String addr ;
 	

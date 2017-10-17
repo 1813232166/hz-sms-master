@@ -17,7 +17,7 @@ import com.hzwealth.sms.modules.salesupport.entity.TYxCouponLog;
 
 public class JDBCUtil {
 
-    private static final PropertiesLoader property = new PropertiesLoader("hzwd.properties");
+    private static final PropertiesLoader property = new PropertiesLoader("sms.properties");
     public static final String type = property.getProperty("jdbc.type");  
     public static final String driver = property.getProperty("jdbc.driver");  
     public static final String url = property.getProperty("jdbc.url");  

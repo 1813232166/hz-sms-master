@@ -40,7 +40,7 @@ public class ArticleController extends BaseController {
 	@Autowired
 	private ArticleService articleService;
 	
-	private static final PropertiesLoader property = new PropertiesLoader("hzwd.properties");
+	private static final PropertiesLoader property = new PropertiesLoader("sms.properties");
 	
 	/**
 	 * 图片访问的基本路径

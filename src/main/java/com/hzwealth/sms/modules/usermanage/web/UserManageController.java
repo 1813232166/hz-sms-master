@@ -260,7 +260,7 @@ public class UserManageController extends BaseController{
 	public String redisList(String mobile,Model model) {
 	List<HashMap<String,String>> objectList = new ArrayList<HashMap<String,String>>();
 		if(mobile!=null&&!"".equals(mobile)){
-			PropertiesLoader loader = new PropertiesLoader("hzwd.properties");
+			PropertiesLoader loader = new PropertiesLoader("sms.properties");
 			String host =	loader.getProperty("redis.host");
 			int port =	Integer.parseInt(loader.getProperty("redis.port"));
 			String password =	loader.getProperty("redis.password");

@@ -53,7 +53,7 @@ public class AppBannerController extends BaseController {
 	
 	@Autowired
 	private AppBannerService appBannerService;
-	private static final PropertiesLoader property = new PropertiesLoader("hzwd.properties");
+	private static final PropertiesLoader property = new PropertiesLoader("sms.properties");
 	@ModelAttribute
 	public AppBanner get(@RequestParam(required=false) String id) {
 		AppBanner entity = null;
@@ -154,7 +154,7 @@ public class AppBannerController extends BaseController {
 		
 		String name = file.getOriginalFilename();
 		
-		String realPath=property.getProperty("uploadimg_baseurl");//文件上传路径，从hzwd.properties配置文件中获取
+		String realPath=property.getProperty("uploadimg_baseurl");//文件上传路径，从sms.properties配置文件中获取
 		
 		File f2 = new File(realPath);
 		if(!f2.exists()){
@@ -184,8 +184,8 @@ public class AppBannerController extends BaseController {
 		
 		String name = file.getOriginalFilename();
 		
-		String realPath=property.getProperty("uploadimg_baseurl");//文件上传路径，从hzwd.properties配置文件中获取
-		String baseurl_img=property.getProperty("ip_image");//文件访问基本路径，从hzwd.properties配置文件中获取
+		String realPath=property.getProperty("uploadimg_baseurl");//文件上传路径，从sms.properties配置文件中获取
+		String baseurl_img=property.getProperty("ip_image");//文件访问基本路径，从sms.properties配置文件中获取
 		
 		File f2 = new File(realPath);
 		if(!f2.exists()){
