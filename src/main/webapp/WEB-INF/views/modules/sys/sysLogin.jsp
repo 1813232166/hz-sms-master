@@ -3,6 +3,7 @@
 <%@ include file="/WEB-INF/views/include/taglib.jsp"%>
 <html>
 <head>
+	<link rel="shortcut icon" href="${ctxStatic}/ico/favicon.ico" >
 	<title>${fns:getConfig('productName')} 登录</title>
 	<meta name="decorator" content="blank"/>
 	<style type="text/css">
@@ -60,7 +61,7 @@
 	<!--[if lte IE 6]><br/><div class='alert alert-block' style="text-align:left;padding-bottom:10px;"><a class="close" data-dismiss="alert">x</a><h4>温馨提示：</h4><p>你使用的浏览器版本过低。为了获得更好的浏览体验，我们强烈建议您 <a href="http://browsehappy.com" target="_blank">升级</a> 到最新版本的IE浏览器，或者使用较新版本的 Chrome、Firefox、Safari 等。</p></div><![endif]-->
 	<div class="headers">
     <div class="hzLogo container clearfix">
-            <a href="#"><div class="left lL">汇中网</div></a>
+            <a href="#"><div class="left lL">新短信平台</div></a>
             <span class="slogan lL"></span>
         </div>
 
@@ -84,7 +85,7 @@
 	</div>
 	</div>
 	<div class="footer">
-		<!-- Copyright -->汇中网 &copy; 2016-2017
+		<!-- Copyright -->${fns:getConfig('productName')} &copy; 2017-${fns:getConfig('copyrightYear')}
 	</div>
 	<script src="${ctxStatic}/flash/zoom.min.js" type="text/javascript"></script>
 </body>

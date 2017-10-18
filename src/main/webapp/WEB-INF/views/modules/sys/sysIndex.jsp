@@ -2,6 +2,7 @@
 <%@ include file="/WEB-INF/views/include/taglib.jsp"%>
 <html>
 <head>
+	<link rel="shortcut icon" href="${ctxStatic}/ico/favicon.ico" >
 	<title>${fns:getConfig('productName')}</title>
 	<meta name="decorator" content="blank"/><c:set var="tabmode" value="${empty cookie.tabmode.value ? '1' : cookie.tabmode.value}"/>
     <c:if test="${tabmode eq '1'}"><link rel="Stylesheet" href="${ctxStatic}/jerichotab/css/jquery.jerichotab.css" />
@@ -185,7 +186,7 @@
 				</div>
 			</div>
 		    <div id="footer" class="row-fluid">
-	            <!-- Copyright --> 汇中网&copy; 2016-${fns:getConfig('copyrightYear')} ${fns:getConfig('productName')} -  ${fns:getConfig('version')}
+	            <!-- Copyright --> ${fns:getConfig('productName')}&copy; 2017-${fns:getConfig('copyrightYear')}
 			</div>
 		</div>
 	</div>
